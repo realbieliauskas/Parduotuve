@@ -1,0 +1,131 @@
+﻿@page "/Checkout/{CartString}"
+@using Parduotuve.Data.Entities
+@using Parduotuve.Data.Repositories
+@using System.Text;
+@inject NavigationManager NavManager
+@inject ISkinRepository _skinRepository
+@inject IJSRuntime JS
+
+@if (CartString!="thanks")
+{
+    <h2>Checkout</h2>
+    <script>
+        window.downloadFileFromStream = async (fileName, contentStreamReference) => {
+            const arrayBuffer = await contentStreamReference.arrayBuffer();
+            const blob = new Blob([arrayBuffer]);
+            const url = URL.createObjectURL(blob);
+            const anchorElement = document.createElement('a');
+            anchorElement.href = url;
+            anchorElement.download = fileName ?? '';
+            anchorElement.click();
+            anchorElement.remove();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Price</th>
+        </tr>
+        @foreach ((int, Skin) entry in Cart)
+        {
+            <tr>
+                <td>@entry.Item2.Name</td>
+                <td>@entry.Item1</td>
+                <td>@(entry.Item2.Price * entry.Item1)</td>
+            </tr>
+        }
+    </table>
+
+    <h2>Your total price: @TotalPrice</h2>
+    <button @onclick="ConfirmPurchase">Finalize purchase</button>
+}
+else
+{
+    <h2>Thank you for your purchase!</h2>
+    <h3>You will receive a digital license for your real goods via file download</h3>
+}
+
+@code {
+    [Parameter]
+    public string CartString { get; set; } = "";
+
+    public List<(int, Skin)> Cart { get; private set; } = new List<(int, Skin)>();
+    private double? TotalPrice { get { return Cart.Select((e) => e.Item1 * e.Item2.Price).Sum(); } }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(CartString == "thanks")
+        {
+            return;
+        }
+        List<int> ids = CartString.Split('&').Select(str => int.Parse(str)).ToList();
+        List<(int, int)> idCart = new List<(int, int)>();
+
+        foreach(int id in ids)
+        {
+            int foundIndex = -1;
+            for (int x = 0; x < idCart.Count; x++)
+            {
+                if(idCart[x].Item2 == id) {
+                    foundIndex = x;
+                    break;
+                }
+            }
+            if(foundIndex > -1)
+            {
+                idCart[foundIndex] = (idCart[foundIndex].Item1+1, idCart[foundIndex].Item2);
+            }
+            else
+            {
+                idCart.Add((1, id));
+            }
+        }
+        foreach((int, int) entry in idCart)
+        {
+            Skin? skin = await _skinRepository.GetByIdAsync(entry.Item2);
+
+            if(skin == null)
+            {
+                continue;
+            }
+
+            Cart.Add((entry.Item1, skin));
+        }
+
+    }
+
+    private Stream GetFileStream()
+    {
+        string contents = "";
+
+        contents += "You are now the proud owner of the following assets:\n";
+        foreach((int, Skin) entry in Cart)
+        {
+            for(int x = 0; x < entry.Item1; x++)
+            {
+                contents += entry.Item2.Name+"\n";
+            }
+        }
+
+        byte[] contentBytes = Encoding.ASCII.GetBytes(contents);
+
+        MemoryStream memoryStream = new MemoryStream(contentBytes);
+
+        return memoryStream;
+    }
+
+    private async Task ConfirmPurchase()
+    {
+        Stream fileStream = GetFileStream();
+        string fileName = "purchased.txt";
+
+        using DotNetStreamReference streamRef = new DotNetStreamReference(stream: fileStream);
+
+        await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+
+        NavManager.NavigateTo("/Checkout/thanks");
+    }
+}
