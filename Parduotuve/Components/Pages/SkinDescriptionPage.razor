@@ -1,0 +1,34 @@
+﻿@using Parduotuve.Data.Repositories
+@using Parduotuve.Data.Entities
+@using System.Diagnostics
+@inject ISkinRepository _skinRepository
+@page "/Description"
+
+<h3>@skin.Name description</h3>
+<!-- for some reason the image flashes onscreen for a second and then dissapears-->
+<img src=@skin.CinematicSplashUrl alt=@skin.Name style="width:@imageWidth;height:@imageHeight" />
+<p>Some text more</p>
+
+<!-- should show her chromas-->
+<!-- should show skin RP cost-->
+<!-- should show chroma RP cost-->
+<!-- should show release date-->
+<!-- should show her quote-->
+
+@code {
+    private const int imageWidth = 1000;
+    private const int imageHeight = 590;
+    private Skin skin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetSkinObj();
+    }
+
+    public async Task GetSkinObj()
+    {
+        TextWriterTraceListener writer = new TextWriterTraceListener(System.Console.Out);
+        skin = await _skinRepository.GetByIdAsync(1);
+        Debug.WriteLine(skin.Name);
+    }
+}

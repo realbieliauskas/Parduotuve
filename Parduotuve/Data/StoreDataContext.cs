@@ -29,6 +29,7 @@ namespace Parduotuve.Data
                         Name = "Spirit Blossom Ahri",
                         ChampionName = "Ahri",
                         SplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/d/de/Skin_Loading_Screen_Spirit_Blossom_Ahri.jpg",
+                        CinematicSplashUrl = "https://lol.fandom.com/wiki/Spirit_Blossom_Ahri?file=Skin_Splash_Spirit_Blossom_Ahri.jpg",
                         Price = 91.99,
                     }
                 );
