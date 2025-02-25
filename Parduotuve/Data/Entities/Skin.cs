@@ -8,5 +8,6 @@
         public string? SplashUrl { get; set; }
         public string? CinematicSplashUrl { get; set; }
         public double? Price { get; set; }
+        public string? Chromas { get; set; }
     }
 }
