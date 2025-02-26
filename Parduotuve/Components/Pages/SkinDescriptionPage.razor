@@ -2,7 +2,7 @@
 @using Parduotuve.Data.Entities
 @using System.Diagnostics
 @inject ISkinRepository _skinRepository
-@page "/Description"
+@page "/Description/{SkinID}"
 
 <head>
     <title>@skin.ChampionName</title>
@@ -51,6 +51,8 @@
 </body>
 
 @code {
+    [Parameter]
+    public string SkinID { get; set; }
     private Skin skin;
     private string[] chromaURLs;
     private string[] chromaNames;
@@ -64,7 +66,13 @@
     public async Task GetSkinObj()
     {
         TextWriterTraceListener writer = new TextWriterTraceListener(System.Console.Out);
-        skin = await _skinRepository.GetByIdAsync(1);
+        int param = -1;
+        if(!int.TryParse(SkinID,out param))
+            return;
+        Skin? toAssign = await _skinRepository.GetByIdAsync(param);
+        if (toAssign == null)
+            return;
+        skin = toAssign;
         chromaURLs = skin.ChromaURLs.Split("[]", StringSplitOptions.RemoveEmptyEntries); // link can maybe have ';' so I picked something that should not come up
         chromaNames = skin.Chromas.Split(';', StringSplitOptions.RemoveEmptyEntries);
         chromaPrices = skin.ChromaPrices.Split(';', StringSplitOptions.RemoveEmptyEntries);
