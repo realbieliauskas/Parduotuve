@@ -6,6 +6,7 @@
 @inject ISkinRepository _skinRepository
 @inject IJSRuntime JS
 
+
 @if (CartString!="thanks")
 {
     <h2>Checkout</h2>
@@ -38,6 +39,14 @@
             </tr>
         }
     </table>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            text-align: center;
+            padding: 4px;
+        }
+    </style>
 
     <h2>Your total price: @TotalPrice</h2>
     <button @onclick="ConfirmPurchase">Finalize purchase</button>
@@ -49,18 +58,31 @@ else
 }
 
 @code {
+    /// <summary>
+    /// The string represenation of the customers' cart
+    /// Items are represented by their IDs and separated with the '&' symbol
+    /// If the cart contains X amount of an item, the ID of such an item would be repeated X times
+    /// Example of a CartString: "1&1&1&2&3&5&6"
+    /// In the case that the order was completed, the CartString would be "thanks" in order to display the thank you page, instead of the checkout page
+    /// This will likely be replaced and deprecated in the future
+    /// </summary>
     [Parameter]
     public string CartString { get; set; } = "";
-
+    /// <summary>
+    /// CartString is converted into a list of tuples where the first item represents the amount, while the second item represents the item itself
+    /// </summary>
     public List<(int, Skin)> Cart { get; private set; } = new List<(int, Skin)>();
     private double? TotalPrice { get { return Cart.Select((e) => e.Item1 * e.Item2.Price).Sum(); } }
 
     protected override async Task OnInitializedAsync()
     {
+        //Do not initialize if order was completed
         if(CartString == "thanks")
         {
             return;
         }
+
+        //Conversion of CartString to Cart
         List<int> ids = CartString.Split('&').Select(str => int.Parse(str)).ToList();
         List<(int, int)> idCart = new List<(int, int)>();
 
@@ -94,9 +116,12 @@ else
 
             Cart.Add((entry.Item1, skin));
         }
-
     }
 
+    /// <summary>
+    /// Creates and returns a stream which contains details regarding the purchased goods
+    /// </summary>
+    /// <returns>A stream with a text representation with the purchased goods</returns>
     private Stream GetFileStream()
     {
         string contents = "";
@@ -116,7 +141,10 @@ else
 
         return memoryStream;
     }
-
+    /// <summary>
+    /// This method handles the event of clicking the confirm purchase button
+    /// It is responsible for performing verification and delivering the purchased items
+    /// </summary>
     private async Task ConfirmPurchase()
     {
         Stream fileStream = GetFileStream();
