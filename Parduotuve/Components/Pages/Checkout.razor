@@ -9,7 +9,7 @@
 
 @if (CartString!="thanks")
 {
-    <h2>Checkout</h2>
+    <h2>Pirkinių krepšelis</h2>
     <script>
         window.downloadFileFromStream = async (fileName, contentStreamReference) => {
             const arrayBuffer = await contentStreamReference.arrayBuffer();
@@ -26,9 +26,9 @@
 
     <table>
         <tr>
-            <th>Name</th>
-            <th>Amount</th>
-            <th>Price</th>
+            <th>Pavadinimas</th>
+            <th>Kiekis</th>
+            <th>Kaina</th>
         </tr>
         @foreach ((int, Skin) entry in Cart)
         {
@@ -48,13 +48,13 @@
         }
     </style>
 
-    <h2>Your total price: @TotalPrice</h2>
-    <button @onclick="ConfirmPurchase">Finalize purchase</button>
+    <h2>Jūsų galutinė kaina: @TotalPrice</h2>
+    <button @onclick="ConfirmPurchase">Tęsti pirkimą</button>
 }
 else
 {
-    <h2>Thank you for your purchase!</h2>
-    <h3>You will receive a digital license for your real goods via file download</h3>
+    <h2>Ačiū jums už jūsų pirkimą!</h2>
+    <h3>Jūs gausite savo tikras prekes už kurias mokėjote netrukus, atsiunčiamo failo pavidalu</h3>
 }
 
 @code {
@@ -126,7 +126,7 @@ else
     {
         string contents = "";
 
-        contents += "You are now the proud owner of the following assets:\n";
+        contents += "Jūs nuo šiol esate savininkas šiame faile toliau išvardinto turto:\n";
         foreach((int, Skin) entry in Cart)
         {
             for(int x = 0; x < entry.Item1; x++)
@@ -135,7 +135,7 @@ else
             }
         }
 
-        byte[] contentBytes = Encoding.ASCII.GetBytes(contents);
+        byte[] contentBytes = Encoding.UTF8.GetBytes(contents);
 
         MemoryStream memoryStream = new MemoryStream(contentBytes);
 
@@ -148,7 +148,7 @@ else
     private async Task ConfirmPurchase()
     {
         Stream fileStream = GetFileStream();
-        string fileName = "purchased.txt";
+        string fileName = "pirkiniai.txt";
 
         using DotNetStreamReference streamRef = new DotNetStreamReference(stream: fileStream);
 
