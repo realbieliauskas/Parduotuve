@@ -9,21 +9,17 @@
 </head>
 <body>
     <h3>@skin.Name</h3>
-
+    <br/>
     <div style="display:flex">
         <!-- Cinematic splash art-->
-        <div style="width:700px;float:left">
+        <div class="cinematicSplashArt">
             <img src=@skin.CinematicSplashUrl alt="Image of @skin.Name"
             style="max-width:100%"/>
         </div>
 
         <!-- Skin quote-->
-        <p style="width:300px;align-content:center;margin-left:20px;float:left">
-            <i>
-                The famed Spirit of Salvation, and the fox all mortals are beckoned towards when their souls arrive to the spirit realm.
-                A capricious, whimsical spirit who sees the fate of the living as a game of chase, 
-                she offers the chance for souls to find their final rest… but will not intervene if they stray from the path.
-            </i>
+        <p class="quote">
+            <i>@skin.Quote</i>
         </p>
 
         <div style="position:relative">
@@ -31,37 +27,34 @@
             <p>In-game cost: 1820 RP</p>
 
             <!-- Release date-->
-            <p style="width:700px;float:left; position:absolute;left:0;bottom:0">
+            <p class="releaseDate">
                 Released on: 2020-08-06
             </p>
         </div>
     </div>
 
-    <!-- Artist's name-->
-    <a href="https://www.iamag.co/the-art-of-jeremy-anninos/" target="_blank" title="Goes to artist's page'" style="width:700px;text-align:right; display:block ">Artist: Jeremy Anninos</a>
-
-    <br/>
-    <button class="btn btn-primary" @onclick="Test">Click me</button>
-    <p>@TestString</p>
-    <p>@TestCount</p>
     <br/>
 
-    <p>Chromas:</p>
+    <!-- Shows skin chromas and their RP costs-->
+    <h5>Chroma gallery</h5>
+    @for(int i = 0; i < chromaNames.Count();i++)
+    {
+        <div class="boxOfChromas">
+            <div class="individualChroma">
+                <img src=@chromaURLs[i] alt="@chromaNames[i]" />
+            </div>
+            <span>@chromaNames[i]</span>
+            <p style="text-align:right">@(int.TryParse(@chromaPrices[i], out int ignor) ? chromaPrices[i] + "RP" : chromaPrices[i])</p>
+        </div>
+    }
 
 </body>
-
-
-<!-- should show skin chromas-->
-<!-- should show chroma RP cost-->
-
-
-
 
 @code {
     private Skin skin;
     private string[] chromaURLs;
-    private string TestString;
-    private int TestCount;
+    private string[] chromaNames;
+    private string[] chromaPrices;
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,13 +65,8 @@
     {
         TextWriterTraceListener writer = new TextWriterTraceListener(System.Console.Out);
         skin = await _skinRepository.GetByIdAsync(1);
-        TestString = ":0";
-        chromaURLs = skin.Chromas.Split("[]", StringSplitOptions.RemoveEmptyEntries);
-    }
-
-    public void Test()
-    {
-        TestString = skin.Chromas;
-        TestCount = chromaURLs.Count();
+        chromaURLs = skin.ChromaURLs.Split("[]", StringSplitOptions.RemoveEmptyEntries); // link can maybe have ';' so I picked something that should not come up
+        chromaNames = skin.Chromas.Split(';', StringSplitOptions.RemoveEmptyEntries);
+        chromaPrices = skin.ChromaPrices.Split(';', StringSplitOptions.RemoveEmptyEntries);
     }
 }

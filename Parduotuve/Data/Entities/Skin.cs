@@ -8,6 +8,9 @@
         public string? SplashUrl { get; set; }
         public string? CinematicSplashUrl { get; set; }
         public double? Price { get; set; }
+        public string? Quote { get; set; }
         public string? Chromas { get; set; }
+        public string? ChromaURLs { get; set; }
+        public string? ChromaPrices { get; set; }
     }
 }
