@@ -5,11 +5,11 @@
 @inject NavigationManager NavManager
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=add_shopping_cart" />
 
-<div style="display:grid;grid-template-columns: 25% 25% 25% 25%; padding:10px">
+<div style="padding: 10px; text-align: center;">
     @foreach(Skin skin in Skins)
     {
-        <div @onclick="@(() => EntryClicked(false,skin.Id))" style="height:100%;width:100%;text-align:center">
-            <img src=@skin.SplashUrl style="margin-bottom:10px;margin-top:10px;height:360px;width:200px"/>
+        <div @onclick="@(() => EntryClicked(false,skin.Id))" style="border: 1px solid black;padding:10px; margin:15px;text-align:center;cursor:pointer;display:inline-block;">
+            <img src=@skin.SplashUrl style="margin:10px;height:360px;width:200px" />
             <h4>@skin.Name</h4>
             <p>@skin.ChampionName</p>
             <h3>@skin.Price €</h3>
@@ -32,13 +32,18 @@
     {
         Skins = await _skinRepository.GetAllAsync();
     }
+    /// <summary>
+    /// Event handler for clicking on a listing within the page
+    /// </summary>
+    /// <param name="cart">True if the add to cart button was clicked, false if only the listing was clicked</param>
+    /// <param name="id">The ID of the listing which was clicked</param>
     private void EntryClicked(bool cart, int id)
     {
         if(cart)
         {
             throw new NotImplementedException("Should be added to cart");
         }
-        NavManager.NavigateTo("/"+id); //should navigate to individual listing URL
+        NavManager.NavigateTo("/Description/" + id); //should navigate to individual listing URL
     }
 
 }
