@@ -1,0 +1,29 @@
+﻿.cinematicSplashArt {
+    width: 700px;
+    float: left
+}
+
+.quote {
+    width: 300px;
+    align-content: center;
+    margin-left: 20px;
+    float: left
+}
+
+.releaseDate {
+    width: 700px;
+    float: left;
+    position: absolute;
+    left: 0;
+    bottom: 0
+}
+
+.boxOfChromas {
+    float: left;
+    margin: 10px;
+}
+
+.individualChroma {
+    background-color: antiquewhite;
+    border-style: solid
+}

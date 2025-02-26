@@ -1,0 +1,80 @@
+﻿@using Parduotuve.Data.Repositories
+@using Parduotuve.Data.Entities
+@using System.Diagnostics
+@inject ISkinRepository _skinRepository
+@page "/Description/{SkinID}"
+
+<head>
+    <title>@skin.ChampionName</title>
+</head>
+<body>
+    <h3>@skin.Name</h3>
+    <br/>
+    <div style="display:flex">
+        <!-- Cinematic splash art-->
+        <div class="cinematicSplashArt">
+            <img src=@skin.CinematicSplashUrl alt="Image of @skin.Name"
+            style="max-width:100%"/>
+        </div>
+
+        <!-- Skin quote-->
+        <p class="quote">
+            <i>@skin.Quote</i>
+        </p>
+
+        <div style="position:relative">
+            <!-- Skin RP cost-->
+            <p>In-game cost: 1820 RP</p>
+
+            <!-- Release date-->
+            <p class="releaseDate">
+                Released on: 2020-08-06
+            </p>
+        </div>
+    </div>
+
+    <br/>
+
+    <!-- Shows skin chromas and their RP costs-->
+    <h5>Chroma gallery</h5>
+    @for(int i = 0; i < chromaNames.Count();i++)
+    {
+        <div class="boxOfChromas">
+            <div class="individualChroma">
+                <img src=@chromaURLs[i] alt="@chromaNames[i]" />
+            </div>
+            <span>@chromaNames[i]</span>
+            <p style="text-align:right">@(int.TryParse(@chromaPrices[i], out int ignor) ? chromaPrices[i] + "RP" : chromaPrices[i])</p>
+        </div>
+    }
+
+</body>
+
+@code {
+    [Parameter]
+    public string SkinID { get; set; }
+    private Skin skin;
+    private string[] chromaURLs;
+    private string[] chromaNames;
+    private string[] chromaPrices;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetSkinObj();
+    }
+
+    public async Task GetSkinObj()
+    {
+        TextWriterTraceListener writer = new TextWriterTraceListener(System.Console.Out);
+        int param = -1;
+        if(!int.TryParse(SkinID,out param))
+            return;
+        Skin? toAssign = await _skinRepository.GetByIdAsync(param);
+        if (toAssign == null)
+            return;
+        skin = toAssign;
+        chromaURLs = skin.ChromaURLs.Split("[]", StringSplitOptions.RemoveEmptyEntries); // link can maybe have ';' so I picked something that should not come up
+        chromaNames = skin.Chromas.Split(';', StringSplitOptions.RemoveEmptyEntries);
+        chromaPrices = skin.ChromaPrices.Split(';', StringSplitOptions.RemoveEmptyEntries);
+    }
+}
