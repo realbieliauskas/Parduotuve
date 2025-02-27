@@ -31,6 +31,17 @@ namespace Parduotuve.Data
                         SplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/d/de/Skin_Loading_Screen_Spirit_Blossom_Ahri.jpg",
                         CinematicSplashUrl = "https://lol.fandom.com/wiki/Spirit_Blossom_Ahri?file=Skin_Splash_Spirit_Blossom_Ahri.jpg",
                         Price = 91.99,
+                        Chromas = "Ahri-versary;Aquamarine;Night Blossom;Obsidian;Pearl;Rose Quartz",
+                        ChromaURLs = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/8/82/Spirit_Blossom_Ahri_Ahri-versary.png[]" +
+                        "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/f/f1/Spirit_Blossom_Ahri_Aquamarine.png[]" +
+                        "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/b/b3/Spirit_Blossom_Ahri_Night_Blossom.png[]" +
+                        "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/b/bf/Spirit_Blossom_Ahri_Obsidian.png[]" +
+                        "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/b/be/Spirit_Blossom_Ahri_Pearl.png[]" +
+                        "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/7/76/Spirit_Blossom_Ahri_Rose_Quartz.png",
+                        ChromaPrices = "290;290;Loot Exclusive;290;290;Bundle Exclusive",
+                        Quote = "The famed Spirit of Salvation, and the fox all mortals are beckoned towards when their souls arrive to the spirit realm. " +
+                        "A capricious,whimsical spirit who sees the fate of the living as a game of chase, she " +
+                        "offers the chance for souls to find their final rest… but will not intervene if they stray from the path."
                     }
                 );
             modelBuilder.Entity<User>()

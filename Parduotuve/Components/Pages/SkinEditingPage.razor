@@ -1,0 +1,23 @@
+﻿@using Parduotuve.Data.Repositories
+@using Parduotuve.Data.Entities
+@inject ISkinRepository _skinRepository
+@page "/SkinEdit/{Id:int}"
+
+
+<h3>@skin.Name</h3>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    Skin skin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetSkin();
+    }
+
+    public async Task GetSkin()
+    {
+        skin = await _skinRepository.GetByIdAsync(Id);
+    }
+}

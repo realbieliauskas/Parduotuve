@@ -1,0 +1,46 @@
+﻿@page "/AdminLogin"
+@using Parduotuve.Data.Repositories
+@using Parduotuve.Data.Entities
+@inject ISkinRepository _skinRepository
+@inject NavigationManager NavManager
+
+<EditForm Model="input" FormName="AdminLogin" OnValidSubmit="CheckSubmition">
+    <DataAnnotationsValidator/>
+
+    <label for="username">Username:</label>
+    <InputText id="username" @bind-Value="input.Username"/>
+    <br />
+    <label for="password">Password:</label>
+    <InputText id="password" @bind-Value="input.Password" />
+    <br/>
+    <input type="submit"/>
+</EditForm>
+
+<p>@text</p>
+
+@code {
+    private InputInfo input = new InputInfo();
+    private const string username = "alv";
+    private const string password = "crz";
+    string text = "";
+
+    public void CheckSubmition()
+    {
+        if (input.Password.Equals(password) && input.Username.Equals(username))
+        {
+            NavManager.NavigateTo("/AdminPanel");
+        }
+    }
+
+   protected class InputInfo
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+
+        public InputInfo()
+        {
+            Username = "";
+            Password = "";
+        }
+    }
+}
