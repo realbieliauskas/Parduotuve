@@ -1,0 +1,71 @@
+﻿@using Parduotuve.Data.Repositories
+@using Parduotuve.Data.Entities
+@inject ISkinRepository _skinRepository
+@inject NavigationManager NavigationManager;
+@page "/SkinEdit/{Id:int}/{SecretParam?}"
+
+
+@if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
+{
+    <h3>You do not have permission to view this page</h3>
+    return;
+}
+
+<h3>@skin.Name</h3>
+<EditForm Model="skin" FormName="SkinUpdateForm" OnValidSubmit="UpdateSkin">
+    <label>Name:</label>
+    <InputText @bind-Value="skin.Name"/>
+    <br/>
+    <label>SplashURL:</label>
+    <InputText @bind-Value="skin.SplashUrl" />
+    <br />
+    <label>Cinematic splash URL:</label>
+    <InputText @bind-Value="skin.CinematicSplashUrl"/>
+    <br />
+    <label>Price:</label>
+    <InputNumber @bind-Value="skin.Price" />
+    <br />
+    <label>Quote:</label>
+    <InputText @bind-Value="skin.Quote"/>
+    <br />
+    <label>Chroma names:</label>
+    <InputText @bind-Value="skin.Chromas"/>
+    <br />
+    <label>Chroma skin URLs:</label>
+    <InputText @bind-Value="skin.ChromaURLs"/>
+    <br />
+    <label>Chroma skin prices:</label>
+    <InputText @bind-Value="skin.ChromaPrices" />
+    <br/>
+    <br/>
+    <input type="submit" />
+</EditForm>
+<br/>
+<h8 style="color:red" >
+    MAKE SURE THERE ARE AS MANY CHROMA NAMES AS THERE ARE SKIN URLS AND PRICES FOR THEM. 
+    ALL THREE FIELDS SHOULD HAVE THEIR DATA SORTED IN THE SAME ORDER!
+</h8>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [Parameter]
+    public string? SecretParam { get; set; }
+    Skin skin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetSkin();
+    }
+
+    public async Task GetSkin()
+    {
+        skin = await _skinRepository.GetByIdAsync(Id);
+    }
+
+    public void UpdateSkin()
+    {
+        _skinRepository.UpdateAsync(skin);
+        NavigationManager.NavigateTo($"/AdminPanel/{SecretParam}");
+    }
+}

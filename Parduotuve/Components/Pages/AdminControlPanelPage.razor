@@ -1,0 +1,54 @@
+﻿@page "/AdminPanel/{SecretParam?}"
+@using Parduotuve.Data.Repositories
+@using Parduotuve.Data.Entities
+@inject ISkinRepository _skinRepository
+@inject NavigationManager NavManager
+
+@if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
+{
+    <h3>You do not have permission to view this page</h3>
+    return;
+}
+
+<h3>Admin Control Page</h3>
+<br/>
+<p>Click on the skin you wish to edit</p>
+<br/>
+@foreach(Skin skin in skins)
+{
+    if(skins.Contains(skin))
+    {
+        <button @onclick="() => GoToSkinEditingPage(skin)">@skin.Name</button>
+        <br/>
+        <br/>
+    }
+}
+
+
+
+@code {
+    List<Skin> skins = new List<Skin>();
+    Skin clickedSkin = new Skin();
+    [Parameter]
+    public string? SecretParam { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetSkins();
+    }
+
+    public async Task GetSkins()
+    {
+        skins = (List<Skin>)(await _skinRepository.GetAllAsync());
+    }
+
+    public void GoToSkinEditingPage(Skin skin)
+    {
+        NavManager.NavigateTo($"/SkinEdit/{skin.Id}/{SecretParam}");
+    }
+
+    public void DeleteSkin(Skin skin)
+    {
+        _skinRepository.DeleteAsync(skin.Id);
+    }
+}
