@@ -10,9 +10,12 @@
 <br/>
 @foreach(Skin skin in skins)
 {
-    <button @onclick="() => GoToSkinEditingPage(skin)">@skin.Name</button>
-    <br/>
-    <br/>
+    if(skins.Contains(skin))
+    {
+        <button @onclick="() => GoToSkinEditingPage(skin)">@skin.Name</button>
+        <br/>
+        <br/>
+    }
 }
 
 
@@ -34,5 +37,10 @@
     public void GoToSkinEditingPage(Skin skin)
     {
         NavManager.NavigateTo("/SkinEdit/" + skin.Id);
+    }
+
+    public void DeleteSkin(Skin skin)
+    {
+        _skinRepository.DeleteAsync(skin.Id);
     }
 }
