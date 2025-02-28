@@ -13,6 +13,7 @@
     if(skins.Contains(skin))
     {
         <button @onclick="() => GoToSkinEditingPage(skin)">@skin.Name</button>
+        <button @onclick="() => DeleteSkin(skin)">DELETE</button>
         <br/>
         <br/>
     }
@@ -41,6 +42,7 @@
 
     public void DeleteSkin(Skin skin)
     {
+        skins.Remove(skin);
         _skinRepository.DeleteAsync(skin.Id);
     }
 }
