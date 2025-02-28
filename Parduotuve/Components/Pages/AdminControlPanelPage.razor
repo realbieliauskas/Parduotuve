@@ -1,8 +1,14 @@
-﻿@page "/AdminPanel"
+﻿@page "/AdminPanel/{SecretParam?}"
 @using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
 @inject ISkinRepository _skinRepository
 @inject NavigationManager NavManager
+
+@if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
+{
+    <h3>You do not have permission to view this page</h3>
+    return;
+}
 
 <h3>Admin Control Page</h3>
 <br/>
@@ -23,6 +29,8 @@
 @code {
     List<Skin> skins = new List<Skin>();
     Skin clickedSkin = new Skin();
+    [Parameter]
+    public string? SecretParam { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -36,7 +44,7 @@
 
     public void GoToSkinEditingPage(Skin skin)
     {
-        NavManager.NavigateTo("/SkinEdit/" + skin.Id);
+        NavManager.NavigateTo($"/SkinEdit/{skin.Id}/{SecretParam}");
     }
 
     public void DeleteSkin(Skin skin)

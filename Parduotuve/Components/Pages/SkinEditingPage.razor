@@ -2,8 +2,14 @@
 @using Parduotuve.Data.Entities
 @inject ISkinRepository _skinRepository
 @inject NavigationManager NavigationManager;
-@page "/SkinEdit/{Id:int}"
+@page "/SkinEdit/{Id:int}/{SecretParam?}"
 
+
+@if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
+{
+    <h3>You do not have permission to view this page</h3>
+    return;
+}
 
 <h3>@skin.Name</h3>
 <EditForm Model="skin" FormName="SkinUpdateForm" OnValidSubmit="UpdateSkin">
@@ -43,6 +49,8 @@
 @code {
     [Parameter]
     public int Id { get; set; }
+    [Parameter]
+    public string? SecretParam { get; set; }
     Skin skin;
 
     protected override async Task OnInitializedAsync()
@@ -58,6 +66,6 @@
     public void UpdateSkin()
     {
         _skinRepository.UpdateAsync(skin);
-        NavigationManager.NavigateTo("/AdminPanel");
+        NavigationManager.NavigateTo($"/AdminPanel/{SecretParam}");
     }
 }

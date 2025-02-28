@@ -22,13 +22,14 @@
     private InputInfo input = new InputInfo();
     private const string username = "alv";
     private const string password = "crz";
+    public const string Secret = "dsfoiugnfdonhgfodinhdf";
     string text = "";
 
     public void CheckSubmition()
     {
         if (input.Password.Equals(password) && input.Username.Equals(username))
         {
-            NavManager.NavigateTo("/AdminPanel");
+            NavManager.NavigateTo($"/AdminPanel/{Secret}");
         }
     }
 
