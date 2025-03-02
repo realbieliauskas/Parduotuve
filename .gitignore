@@ -364,3 +364,5 @@ FodyWeavers.xsd
 /Parduotuve/Data/Store.db
 /Parduotuve/Data/Store.sqbpro
 /Parduotuve/Data/Store.db
+/Parduotuve/Data/Store.db-shm
+/Parduotuve/Data/Store.db-wal
