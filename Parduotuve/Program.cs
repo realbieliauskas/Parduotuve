@@ -3,6 +3,7 @@ using Parduotuve.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Parduotuve.Data.Repositories;
+using Parduotuve.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +16,16 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddDbContext<StoreDataContext>();
 builder.Services.AddScoped<ISkinRepository, SkinRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
+//builder.Services.AddScoped<Shopping_Cart_Service>();
+builder.Services.AddSingleton<Shopping_Cart_Service>();
+builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); 
+});
 var app = builder.Build();
+app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
