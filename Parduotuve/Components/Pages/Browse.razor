@@ -10,12 +10,12 @@
 <div style="padding: 10px; text-align: center;">
     @foreach(Skin skin in Skins)
     {
-        <div @onclick="@(() => EntryClicked(false,skin.Id))" style="border: 1px solid black;padding:10px; margin:15px;text-align:center;cursor:pointer;display:inline-block;">
+        <div @onclick="@((e) => EntryClicked(false,skin.Id,e))" style="border: 1px solid black;padding:10px; margin:15px;text-align:center;cursor:pointer;display:inline-block;">
             <img src=@skin.SplashUrl style="margin:10px;height:360px;width:200px" />
             <h4>@skin.Name</h4>
             <p>@skin.ChampionName</p>
             <h3>@skin.Price €</h3>
-            <button @onclick="@(() => EntryClicked(true,skin.Id))">
+            <button @onclick="@((e) => EntryClicked(true,skin.Id,e))">
                 <span style="padding:10px; display:inline-flex;align-items:center;">
                     <p style="margin:0;margin-right:10px;">Į KREPŠELĮ</p>
                     <span class="material-symbols-outlined">
@@ -34,15 +34,25 @@
     {
         Skins = await _skinRepository.GetAllAsync();
     }
+
+    private double lastClickPos = -1;
     /// <summary>
     /// Event handler for clicking on a listing within the page
     /// </summary>
     /// <param name="cart">True if the add to cart button was clicked, false if only the listing was clicked</param>
     /// <param name="id">The ID of the listing which was clicked</param>
-    private void EntryClicked(bool cart, int id)
+    private void EntryClicked(bool cart, int id, MouseEventArgs e)
     {
+        double newClickPos = e.ClientX*e.ClientY;
+        if (lastClickPos == newClickPos)
+        {
+            lastClickPos = -1;
+            return;
+        }
         if(cart)
         {
+            lastClickPos = newClickPos;
+            throw new NotImplementedException("Should be added to cart");
             Add_to_Cart(id);
         }
         NavManager.NavigateTo("/Description/" + id); //should navigate to individual listing URL
