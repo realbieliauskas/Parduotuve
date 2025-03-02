@@ -67,8 +67,6 @@
     </style>
 </head>
 
-<body>
-    <form id="form1">
         <div>
             <h2>Shopping cart</h2>
             @if (ShoppingCart.IsEmpty())
@@ -110,10 +108,6 @@
                 <button id="Button" @onclick="HandleCheckout">Proceed to Checkout</button>
             }
         </div>
-    </form>
-
-</body>
-
 
 
 @code {
@@ -155,7 +149,16 @@
 
     private void HandleCheckout()
     {
-        Console.WriteLine("Proceeding to checkout...");
+        string cartString = "";
+        foreach (var item in ShoppingCart)
+        {
+            for (int x = 0; x < item.Value; x++)
+            {
+                cartString += item.Key.ToString()+"&";
+            }
+        }
+        cartString = cartString.TrimEnd('&');
+        Navigator.NavigateTo("/Checkout/" + cartString + "/");
     }
     private Skin GetSkin(int id)
     { 
