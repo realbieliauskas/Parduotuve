@@ -40,6 +40,7 @@ namespace Parduotuve.Data
                         SplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/d/de/Skin_Loading_Screen_Spirit_Blossom_Ahri.jpg",
                         CinematicSplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/e9/Skin_Splash_Spirit_Blossom_Ahri.jpg",
                         Price = 25.99,
+                        ChromaPrices = "290;290;Loot Exclusive;290;290;Bundle Exclusive",
                         Chromas = "Ahri-versary;Aquamarine;Night Blossom;Obsidian;Pearl;Rose Quartz",
                         ChromaURLs = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/8/82/Spirit_Blossom_Ahri_Ahri-versary.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/f/f1/Spirit_Blossom_Ahri_Aquamarine.png[]" +
@@ -59,13 +60,16 @@ namespace Parduotuve.Data
                         SplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/5/53/Skin_Loading_Screen_Infernal_Vel%27Koz.jpg",
                         CinematicSplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/0/04/Skin_Splash_Infernal_Vel%27Koz.jpg",
                         Price = 16.99,
+                        ChromaPrices = "290;290;Loot Exclusive;290;290;Bundle Exclusive",
                         Chromas = "Amethyst;Catseye;Emerald;Rainbow;Rose Quartz;Ruby",
                         ChromaURLs = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/40/Infernal_Vel%27Koz_Amethyst.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/e9/Infernal_Vel%27Koz_Catseye.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/9/99/Infernal_Vel%27Koz_Emerald.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/c/cf/Infernal_Vel%27Koz_Rainbow.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/0/0a/Infernal_Vel%27Koz_Rose_Quartz.png[]" +
-                            "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/48/Infernal_Vel%27Koz_Ruby.png"
+                            "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/48/Infernal_Vel%27Koz_Ruby.png",
+                        Quote = "Infernal Vel'Koz is a terrifying creature of pure elemental energy, a being of immense power and destruction. " +
+                            "He is a force of nature, a being of pure chaos and destruction, who seeks only to consume and destroy all that stands in his way."
                     },
                     new Skin
                     {
@@ -75,6 +79,7 @@ namespace Parduotuve.Data
                         SplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/8/83/Skin_Loading_Screen_Battle_Principal_Yuumi.jpg",
                         CinematicSplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/c/c0/Skin_Splash_Battle_Principal_Yuumi.jpg",
                         Price = 16.99,
+                        ChromaPrices = "290;290;Loot Exclusive;290;290;Bundle Exclusive;290;290;290",
                         Chromas = "Citrine;Formal;Granite;Obsidian;Pearl;Rose Quartz;Ruby;Sapphire;Tanzanite",
                         ChromaURLs = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/b/b8/Battle_Principal_Yuumi_Citrine.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/6/65/Battle_Principal_Yuumi_Formal.png[]" +
@@ -84,7 +89,9 @@ namespace Parduotuve.Data
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/ef/Battle_Principal_Yuumi_Rose_Quartz.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/c/c7/Battle_Principal_Yuumi_Ruby.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/5/5e/Battle_Principal_Yuumi_Sapphire.png[]" +
-                            "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/e4/Battle_Principal_Yuumi_Tanzanite.png"
+                            "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/e4/Battle_Principal_Yuumi_Tanzanite.png",
+                        Quote = "Battle Principal Yuumi is the headmistress of the prestigious Prancetown School for Magical Cats, where she teaches young yordles the arcane arts. " +
+                            "She is a stern but caring teacher, who is always willing to go the extra mile to help her students succeed."
                     },
                     new Skin
                     {
@@ -94,12 +101,15 @@ namespace Parduotuve.Data
                         SplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/0/0a/Skin_Loading_Screen_Lunar_Empress_Lux.jpg",
                         CinematicSplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/d/d2/Skin_Splash_Lunar_Empress_Lux.jpg",
                         Price = 16.99,
+                        ChromaPrices = "290;290;Loot Exclusive;290;Bundle Exclusive",
                         Chromas = "Ruby;Peridot;Rose Quartz;Amethyst;Turquoise",
                         ChromaURLs = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/d/d3/Lunar_Empress_Lux_Amethyst.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/ee/Lunar_Empress_Lux_Peridot.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/c/c6/Lunar_Empress_Lux_Rose_Quartz.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/9/9a/Lunar_Empress_Lux_Ruby.png[]" +
-                            "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/2/25/Lunar_Empress_Lux_Turquoise.png"
+                            "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/2/25/Lunar_Empress_Lux_Turquoise.png",
+                        Quote = "The Lunar Empress is a figure of myth and legend, a celestial being who descends from the heavens to protect the world from the forces of darkness. " +
+                            "She is a beacon of hope, a symbol of the power of the moon, and a guardian of the stars."
                     },
                     new Skin
                     {
@@ -109,6 +119,7 @@ namespace Parduotuve.Data
                         SplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/5/5c/Skin_Loading_Screen_Omega_Squad_Veigar.jpg",
                         CinematicSplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/ec/Skin_Splash_Omega_Squad_Veigar.jpg",
                         Price = 16.99,
+                        ChromaPrices = "290;290;Loot Exclusive",
                         Chromas = "Sapphire;Tanzanite;Catseye",
                         ChromaURLs = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/c/cb/Omega_Squad_Veigar_Catseye.png[]" +
                             "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/d/de/Omega_Squad_Veigar_Sapphire.png[]" +
