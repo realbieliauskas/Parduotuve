@@ -73,6 +73,7 @@
         if (toAssign == null)
             return;
         skin = toAssign;
+        
         chromaURLs = skin.ChromaURLs.Split("[]", StringSplitOptions.RemoveEmptyEntries); // link can maybe have ';' so I picked something that should not come up
         chromaNames = skin.Chromas.Split(';', StringSplitOptions.RemoveEmptyEntries);
         chromaPrices = skin.ChromaPrices.Split(';', StringSplitOptions.RemoveEmptyEntries);
