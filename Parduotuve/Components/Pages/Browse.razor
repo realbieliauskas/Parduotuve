@@ -44,23 +44,23 @@
     private void EntryClicked(bool cart, int id, MouseEventArgs e)
     {
         double newClickPos = e.ClientX*e.ClientY;
+        Console.WriteLine(newClickPos);
         if (lastClickPos == newClickPos)
         {
             lastClickPos = -1;
             return;
         }
+        lastClickPos = newClickPos;
         if(cart)
         {
-            lastClickPos = newClickPos;
-            throw new NotImplementedException("Should be added to cart");
             Add_to_Cart(id);
+            return;
         }
         NavManager.NavigateTo("/Description/" + id); //should navigate to individual listing URL
     }
     private void Add_to_Cart (int id)
     {
         Shopping_Cart.Add(id);
-        StateHasChanged();
     }
 
 }
