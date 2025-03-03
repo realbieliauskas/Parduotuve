@@ -1,5 +1,5 @@
-# Parduotuve
-Parduotuve is an e-shop powered by Blazor and written in C#, intended to facilitate the sale of digital goods (skins) from the video game "League of Legends" made by Riot Games. As we do not hold any rights to these skins, the skins themselves are not sold in any way - it is a mere imitation, currently, we only provide a certificate of ownership in the form of a text file, following a "purchase".
+# Summoners Wardrobe
+Summoners Wardrobe is an e-shop powered by Blazor and written in C#, intended to facilitate the sale of digital goods (skins) from the video game "League of Legends" made by Riot Games. As we do not hold any rights to these skins, the skins themselves are not sold in any way - it is a mere imitation, currently, we only provide a certificate of ownership in the form of a text file, following a "purchase".
 The project uses Interactive Server rendering in order to provide a smooth user experience, as well as a simple way to implement complex interactive components for the developers.
 In order to store data, a SQLite database is used, with the help of MS Entity Framework.
 The Bootstrap CSS library is used in order to allow the creation of consistently styled and scalable elements.
