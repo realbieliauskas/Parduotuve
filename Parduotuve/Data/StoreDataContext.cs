@@ -38,7 +38,7 @@ namespace Parduotuve.Data
                         Name = "Spirit Blossom Ahri",
                         ChampionName = "Ahri",
                         SplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/d/de/Skin_Loading_Screen_Spirit_Blossom_Ahri.jpg",
-                        CinematicSplashUrl = "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/e/e9/Skin_Splash_Spirit_Blossom_Ahri.jpg",
+                        CinematicSplashUrl = "https://motionbgs.com/media/6951/spirit-blossom-ahri.jpg",
                         Price = 25.99,
                         ChromaPrices = "290;290;Loot Exclusive;290;290;Bundle Exclusive",
                         Chromas = "Ahri-versary;Aquamarine;Night Blossom;Obsidian;Pearl;Rose Quartz",

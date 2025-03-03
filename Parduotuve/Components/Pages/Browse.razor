@@ -44,7 +44,6 @@
     private void EntryClicked(bool cart, int id, MouseEventArgs e)
     {
         double newClickPos = e.ClientX*e.ClientY;
-        Console.WriteLine(newClickPos);
         if (lastClickPos == newClickPos)
         {
             lastClickPos = -1;
