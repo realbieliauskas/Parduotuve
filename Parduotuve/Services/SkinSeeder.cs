@@ -125,7 +125,7 @@ namespace Parduotuve.Services
 
                     foreach (var chroma in chromaArray)
                     {
-                        if (chroma is JToken)
+                        if (!chroma.HasValues)
                         {
                             continue;
                         }
