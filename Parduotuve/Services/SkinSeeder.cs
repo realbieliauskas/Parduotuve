@@ -1,11 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Parduotuve.Data;
 using Parduotuve.Data.Entities;
+using System.Collections.Generic;
+using System;
 
 namespace Parduotuve.Services
 {
+    /*
+    okey, bet jei nelabai rasi ko nors ar kitiem reikes sita daryti, tai cia mano supaprastina versija kaip prideti nauja table i duombaze:
+     - data/entities padarai nauja class kuriame fields bus table columns(tai bus entity)
+     - data/repositories padarai sitam entity nauja repository ir jam interface (gali daryt lygiai ta pati kaip kituose repositories padaryta)
+     - i StoreDataContext.cs pridet public DbSet sitam entity ir i onmodelcreating pridet totable bindings(sitas optional lygtais)
+    */
     public class SkinSeeder
     {
         private readonly StoreDataContext _context;
