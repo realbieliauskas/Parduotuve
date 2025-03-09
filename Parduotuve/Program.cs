@@ -17,6 +17,7 @@ builder.Services.AddHttpClient<SkinSeeder>();
 builder.Services.AddDbContext<StoreDataContext>();
 builder.Services.AddScoped<ISkinRepository, SkinRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ChromaRepository, ChromaRepository>();
 //builder.Services.AddScoped<Shopping_Cart_Service>();
 builder.Services.AddSingleton<Shopping_Cart_Service>();
 builder.Services.AddHttpContextAccessor(); 

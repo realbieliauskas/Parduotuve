@@ -16,6 +16,12 @@ namespace Parduotuve.Data
             get;
             set;
         }
+        public DbSet<Chroma> Chromas
+        {
+            get;
+            set;
+        }
+
         public StoreDataContext(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -31,6 +37,8 @@ namespace Parduotuve.Data
 
             modelBuilder.Entity<User>()
                 .ToTable("Users");
+            modelBuilder.Entity<Chroma>()
+                .ToTable("Chromas");
 
             modelBuilder.Entity<User>()
                 .HasData(

@@ -135,6 +135,9 @@ namespace Parduotuve.Services
 
                     List<(string price, string name, string url)> chromas = new List<(string price, string name, string url)>();
 
+                    idCounter = 1;
+                    List<Chroma> realChromas = new List<Chroma>();
+
                     foreach (var chroma in chromaArray)
                     {
                         if (!chroma.HasValues)
@@ -163,7 +166,12 @@ namespace Parduotuve.Services
                         }
                         string chromaName = ((string?)chroma["name"]) ?? "Unknown";
                         string chromaUrl = ((string?)chroma["chromaPath"]) ?? "N/A";
-
+                        Chroma realChroma = new Chroma();
+                        realChroma.Id = idCounter++;
+                        realChroma.Price = price;
+                        realChroma.Name = chromaName;
+                        realChroma.URL = chromaUrl;
+                        realChromas.Add(realChroma);
                         chromas.Add((price, chromaName, chromaUrl));
                     }
 
@@ -176,6 +184,8 @@ namespace Parduotuve.Services
                         skin.Chromas += chroma.name + ";";
                         skin.ChromaPrices += chroma.price + ";";
                     }
+
+                    skin.ChromaList = realChromas;
 
                     skin.ChromaURLs = skin.ChromaURLs.TrimEnd(new char[] { '[', ']' });
                     skin.Chromas = skin.Chromas.TrimEnd(';');
