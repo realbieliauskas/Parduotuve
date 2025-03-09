@@ -15,6 +15,8 @@ namespace Parduotuve.Services
     - data/repositories padarai sitam entity nauja repository ir jam interface (gali daryt lygiai ta pati kaip kituose repositories padaryta)
     - i StoreDataContext.cs pridet public DbSet sitam entity ir i onmodelcreating pridet totable bindings (sitas optional lygtais)
     - i Program.cs prideti repository scoped services (salia kitu)
+    https://learn.microsoft.com/en-us/ef/core/modeling/
+    https://www.youtube.com/results?search_query=c%23+ms+entity+framework+
     */
     public class SkinSeeder
     {
