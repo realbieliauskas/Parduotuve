@@ -22,7 +22,6 @@ namespace Parduotuve.Services
     {
         private readonly StoreDataContext _context;
         private readonly HttpClient _httpClient;
-        private List<Chroma> realChromas = new List<Chroma>();
         public SkinSeeder(StoreDataContext context, HttpClient httpClient)
         {
             _context = context;
@@ -181,19 +180,8 @@ namespace Parduotuve.Services
                     }             
 
 
-                    foreach (var chroma in chromas)
-                    {
-                        skin.ChromaURLs += chroma.url + "[]";
-                        skin.Chromas += chroma.name + ";";
-                        skin.ChromaPrices += chroma.price + ";";
-                    }
-
-                    realChromas.AddRange(chromaList);
                     skin.ChromaList = chromaList;
 
-                    skin.ChromaURLs = skin.ChromaURLs.TrimEnd(new char[] { '[', ']' });
-                    skin.Chromas = skin.Chromas.TrimEnd(';');
-                    skin.ChromaPrices = skin.ChromaPrices.TrimEnd(';');
                     skins.Add(skin);
                 }
             }

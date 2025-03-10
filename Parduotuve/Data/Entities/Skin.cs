@@ -10,9 +10,6 @@
         public double? Price { get; set; }
         public string? Quote { get; set; }
         // navigation properties
-        public ICollection<Chroma> ChromaList { get; set; }
-        public string? Chromas { get; set; }
-        public string? ChromaURLs { get; set; }
-        public string? ChromaPrices { get; set; }
+        public ICollection<Chroma>? ChromaList { get; set; }
     }
 }
