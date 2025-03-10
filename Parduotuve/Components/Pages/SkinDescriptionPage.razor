@@ -36,8 +36,8 @@
     <br/>
 
     <!-- Shows skin chromas and their RP costs-->
-    <h5>Chroma gallery</h5>
-    @for(int i = 0; i < chromaNames.Count();i++)
+    
+    @for (int i = 0; i < chromaNames.Count(); i++)
     {
         <div class="boxOfChromas">
             <div class="individualChroma">
@@ -47,6 +47,7 @@
             <p style="text-align:right">@(int.TryParse(@chromaPrices[i], out int ignor) ? chromaPrices[i] + "RP" : chromaPrices[i])</p>
         </div>
     }
+    
 
 </body>
 
@@ -54,6 +55,7 @@
     [Parameter]
     public string SkinID { get; set; }
     private Skin skin;
+    private List<Chroma> chromas;
     private string[] chromaURLs;
     private string[] chromaNames;
     private string[] chromaPrices;
@@ -73,9 +75,24 @@
         if (toAssign == null)
             return;
         skin = toAssign;
-        
+
+       
+
         chromaURLs = skin.ChromaURLs.Split("[]", StringSplitOptions.RemoveEmptyEntries); // link can maybe have ';' so I picked something that should not come up
         chromaNames = skin.Chromas.Split(';', StringSplitOptions.RemoveEmptyEntries);
         chromaPrices = skin.ChromaPrices.Split(';', StringSplitOptions.RemoveEmptyEntries);
     }
+
+    /*
+    @for(int i = 0; i < chromaNames.Count();i++)
+        {
+            <div class="boxOfChromas">
+                <div class="individualChroma">
+                    <img src=@chromaURLs[i] alt="@chromaNames[i]" />
+                </div>
+                <span>@chromaNames[i]</span>
+                <p style="text-align:right">@(int.TryParse(@chromaPrices[i], out int ignor) ? chromaPrices[i] + "RP" : chromaPrices[i])</p>
+            </div>
+        }
+    */
 }

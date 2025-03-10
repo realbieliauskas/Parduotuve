@@ -34,7 +34,6 @@ namespace Parduotuve.Data
         {
             modelBuilder.Entity<Skin>()
                 .ToTable("Skins");
-
             modelBuilder.Entity<User>()
                 .ToTable("Users");
             modelBuilder.Entity<Chroma>()

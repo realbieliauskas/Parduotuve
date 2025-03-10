@@ -22,6 +22,7 @@ namespace Parduotuve.Services
     {
         private readonly StoreDataContext _context;
         private readonly HttpClient _httpClient;
+        private List<Chroma> realChromas = new List<Chroma>();
         public SkinSeeder(StoreDataContext context, HttpClient httpClient)
         {
             _context = context;
@@ -61,6 +62,7 @@ namespace Parduotuve.Services
 
             List<Skin> skins = new List<Skin>();
             int idCounter = 1;
+            int chromaIdCounter = 1;
 
             for (int x = 0; x < keys.Count; x++)
             {
@@ -98,8 +100,7 @@ namespace Parduotuve.Services
                 for (int y = 0; y < skinData.Count; y++)
                 {
                     Skin skin = new Skin();
-                    skin.Id = idCounter;
-                    idCounter++;
+                    skin.Id = idCounter++;
                     skin.ChampionName = (string?)parsedData["name"];
                     skin.Name = (string?)skinData[y]["name"];
 
@@ -135,8 +136,7 @@ namespace Parduotuve.Services
 
                     List<(string price, string name, string url)> chromas = new List<(string price, string name, string url)>();
 
-                    idCounter = 1;
-                    List<Chroma> realChromas = new List<Chroma>();
+                    List<Chroma> chromaList = new List<Chroma>();
 
                     foreach (var chroma in chromaArray)
                     {
@@ -167,17 +167,20 @@ namespace Parduotuve.Services
                         string chromaName = ((string?)chroma["name"]) ?? "Unknown";
                         string chromaUrl = ((string?)chroma["chromaPath"]) ?? "N/A";
                         Chroma realChroma = new Chroma();
-                        realChroma.Id = idCounter++;
+
+                        realChroma.Id = chromaIdCounter++;
                         realChroma.Price = price;
                         realChroma.Name = chromaName;
                         realChroma.URL = chromaUrl;
-                        realChromas.Add(realChroma);
-                        chromas.Add((price, chromaName, chromaUrl));
-                    }
 
-                    skin.ChromaURLs = "";
-                    skin.Chromas = "";
-                    skin.ChromaPrices = "";
+                        realChroma.Skin = skin;
+
+                        chromaList.Add(realChroma);
+
+                        chromas.Add((price, chromaName, chromaUrl));
+                    }             
+
+
                     foreach (var chroma in chromas)
                     {
                         skin.ChromaURLs += chroma.url + "[]";
@@ -185,7 +188,8 @@ namespace Parduotuve.Services
                         skin.ChromaPrices += chroma.price + ";";
                     }
 
-                    skin.ChromaList = realChromas;
+                    realChromas.AddRange(chromaList);
+                    skin.ChromaList = chromaList;
 
                     skin.ChromaURLs = skin.ChromaURLs.TrimEnd(new char[] { '[', ']' });
                     skin.Chromas = skin.Chromas.TrimEnd(';');
