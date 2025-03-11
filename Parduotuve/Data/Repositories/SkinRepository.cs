@@ -14,12 +14,16 @@ namespace Parduotuve.Data.Repositories
 
         public async Task<IEnumerable<Skin>> GetAllAsync()
         {
-            return await _context.Skins.ToListAsync();
+            return await _context.Skins
+                .Include(skin => skin.ChromaList)
+                .ToListAsync();
         }
 
         public async Task<Skin?> GetByIdAsync(int id)
         {
-            return await _context.Skins.FindAsync(id);
+            return await _context.Skins
+                .Include(skin => skin.ChromaList)
+                .FirstOrDefaultAsync(skin => skin.Id == id);
         }
 
         public async Task AddAsync(Skin skin)

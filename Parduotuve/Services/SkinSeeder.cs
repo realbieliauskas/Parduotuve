@@ -133,8 +133,6 @@ namespace Parduotuve.Services
 
                     JArray chromaArray = ((JArray?)secondarySkinData[y]["chromas"]) ?? new JArray();
 
-                    List<(string price, string name, string url)> chromas = new List<(string price, string name, string url)>();
-
                     List<Chroma> chromaList = new List<Chroma>();
 
                     foreach (var chroma in chromaArray)
@@ -175,8 +173,6 @@ namespace Parduotuve.Services
                         realChroma.Skin = skin;
 
                         chromaList.Add(realChroma);
-
-                        chromas.Add((price, chromaName, chromaUrl));
                     }             
 
 
