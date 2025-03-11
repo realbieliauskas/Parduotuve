@@ -35,7 +35,7 @@ namespace Parduotuve.Services
                 return;
             }
 
-            var skins = GetSkins();
+            var skins = await GetSkins();
 
             if (skins != null)
             {
@@ -43,9 +43,9 @@ namespace Parduotuve.Services
                 await _context.SaveChangesAsync();
             }
         }
-        private List<Skin>? GetSkins()
+        private async Task<List<Skin>?> GetSkins()
         {
-            string champions = _httpClient.GetStringAsync("https://cdn.communitydragon.org/latest/champions").Result;
+            string champions = await _httpClient.GetStringAsync("https://cdn.communitydragon.org/latest/champions");
             List<string> keys;
             List<string> secondaryKeys;
 
@@ -65,16 +65,16 @@ namespace Parduotuve.Services
 
             for (int x = 0; x < keys.Count; x++)
             {
-                string championData = _httpClient.GetStringAsync($"https://cdn.communitydragon.org/latest/champion/{keys[x]}/data").Result;
+                string championData = await _httpClient.GetStringAsync($"https://cdn.communitydragon.org/latest/champion/{keys[x]}/data");
                 string secondaryData;
 
                 try
                 {
-                    secondaryData = _httpClient.GetStringAsync($"https://cdn.merakianalytics.com/riot/lol/resources/latest/en-US/champions/{keys[x]}.json").Result;
+                    secondaryData = await _httpClient.GetStringAsync($"https://cdn.merakianalytics.com/riot/lol/resources/latest/en-US/champions/{keys[x]}.json");
                 }
                 catch
                 {
-                    secondaryData = _httpClient.GetStringAsync($"https://cdn.merakianalytics.com/riot/lol/resources/latest/en-US/champions/{string.Join(null, keys[x].Select((x, index) => index == 0 ? char.ToUpper(x) : char.ToLower(x)).ToList())}.json").Result;
+                    secondaryData = await  _httpClient.GetStringAsync($"https://cdn.merakianalytics.com/riot/lol/resources/latest/en-US/champions/{string.Join(null, keys[x].Select((x, index) => index == 0 ? char.ToUpper(x) : char.ToLower(x)).ToList())}.json");
                 }
 
 
