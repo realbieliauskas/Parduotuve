@@ -4,6 +4,34 @@
 @inject NavigationManager NavigationManager;
 @page "/SkinEdit/{Id:int}/{SecretParam?}"
 
+<style>
+
+    label {
+    display: flex;
+    background-color: plum;
+    padding-left:5px;
+    }
+
+    .fieldContainer {
+        margin-top: 15px;
+    }
+
+    .boxOfChromas {
+    float: left;
+    margin: 10px;
+    margin-left: 0px;
+    }
+
+    .individualChroma {
+    background-color: antiquewhite;
+    border-style: solid
+    }
+
+    .chromaButton{
+    background:none;
+    border:none;
+    }
+</style>
 
 @if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
 {
@@ -11,31 +39,67 @@
     return;
 }
 
- <h3>@skin.Name</h3>
- <EditForm Model = "skin" FormName="SkinUpdateForm" OnValidSubmit="UpdateSkin">
-     <label>Name:</label>
-     <InputText @bind-Value="skin.Name"/>
-     <br/>
-     <label>SplashURL:</label>
-     <InputText @bind-Value="skin.SplashUrl" />
-     <br />
-     <label>Cinematic splash URL:</label>
-     <InputText @bind-Value="skin.CinematicSplashUrl"/>
-     <br />
-     <label>Price:</label>
-     <InputNumber @bind-Value="skin.Price" />
-     <br />
-     <label>Quote:</label>
-     <InputText @bind-Value="skin.Quote"/>
-     <br />
-     <br/>
-     <input type = "submit" />
- </EditForm >
- <br />
- <h8 style="color:red" >
-     MAKE SURE THERE ARE AS MANY CHROMA NAMES AS THERE ARE SKIN URLS AND PRICES FOR THEM.
-     ALL THREE FIELDS SHOULD HAVE THEIR DATA SORTED IN THE SAME ORDER!
-</h8>
+<h3 style="margin-bottom:20px;text-align:center" >@skin.Name</h3>
+<EditForm Model = "skin" FormName="SkinUpdateForm" OnValidSubmit="UpdateSkin">
+    <div style="width:15%" class="fieldContainer">
+        <label>Name:</label> 
+        <InputText style="width:100%" @bind-Value="skin.Name" />
+    </div>
+
+    <div style="width:7%" class="fieldContainer">
+        <label>Price:</label>
+        <InputNumber style="width:100%" @bind-Value="skin.Price" />
+    </div>
+
+    <div style="width:80%" class="fieldContainer">
+        <label class="formRow">Splash URL:</label>
+        <InputTextArea style="width:100%" @bind-Value="skin.SplashUrl" />
+    </div>
+
+    <button type="button" @onclick="() => ShowHideRegularSplash()">@RegularSplashButtonText</button>
+    @if(!RegularSplashButtonText.Equals(defaultButtonState))
+    {
+        <br/>
+        <img src=@skin.SplashUrl/>
+    }
+
+    <div style="width:80%" class="fieldContainer">
+        <label>Cinematic splash URL:</label>
+        <InputTextArea style="width:100%" @bind-Value="skin.CinematicSplashUrl" />
+    </div>
+
+    <button type="button" @onclick="() => ShowHideCinematicSplash()">@CinematicSplashButtonText</button>
+    @if (!CinematicSplashButtonText.Equals(defaultButtonState))
+    {
+        <br />
+        <img src=@skin.CinematicSplashUrl />
+        // style="margin:10px;height:360px;width:200px"
+    }
+    <div style="width:50%" class="fieldContainer">
+        <label>Quote:</label>
+        <InputTextArea style="width:100%;min-height:80px" @bind-Value="skin.Quote" />
+    </div>
+
+    <input style="margin:20px;margin-left:0px" type ="submit">
+    <br/>
+    // TODO make show/hide image buttons for regular and cinematic splash URLs, make a button that goes back to the admin page because other wise will not be able to 
+    see updated Regular and Cinematic splash art imediately (will have to go back here again)
+</EditForm >
+
+<!-- Shows skin chromas -->
+@if (chromas != null)
+{
+    @for (int i = 0; i < chromas.Count(); i++)
+    {
+        <div class="boxOfChromas">
+            <div class="individualChroma">
+                <img src=@chromas[i].URL alt="@chromas[i].Name" />
+            </div>
+            <button @onclick="() => GoToChromaEditingPage(chromas[i].Id)" style="background-color:plum;width:100%" class="chromaButton">@chromas[i].Name</button>
+        </div>
+    }
+}
+
 
 @code {
     [Parameter]
@@ -43,7 +107,10 @@
     [Parameter]
     public string? SecretParam { get; set; }
     Skin skin;
-
+    private List<Chroma> chromas;
+    private const string defaultButtonState = "Show image";
+    private string RegularSplashButtonText = defaultButtonState;
+    private string CinematicSplashButtonText = defaultButtonState;
     protected override async Task OnInitializedAsync()
     {
         await GetSkin();
@@ -52,11 +119,35 @@
     public async Task GetSkin()
     {
         skin = await _skinRepository.GetByIdAsync(Id);
+
+        if(skin.ChromaList != null)
+            chromas = skin.ChromaList.ToList();
     }
 
     public void UpdateSkin()
     {
         _skinRepository.UpdateAsync(skin);
-        NavigationManager.NavigateTo($"/AdminPanel/{SecretParam}");
+       // NavigationManager.NavigateTo($"/AdminPanel/{SecretParam}");
+    }
+
+    public void GoToChromaEditingPage(int Id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ShowHideRegularSplash()
+    {
+        if (RegularSplashButtonText.Equals(defaultButtonState))
+            RegularSplashButtonText = "Hide image";
+        else
+            RegularSplashButtonText = defaultButtonState;
+    }
+
+    public void ShowHideCinematicSplash()
+    {
+        if (CinematicSplashButtonText.Equals(defaultButtonState))
+            CinematicSplashButtonText = "Hide image";
+        else
+            CinematicSplashButtonText = defaultButtonState;
     }
 }
