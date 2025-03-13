@@ -1,0 +1,190 @@
+﻿@using Parduotuve.Data.Repositories
+@using Parduotuve.Data.Entities
+@using System.ComponentModel.DataAnnotations;
+@inject ISkinRepository _skinRepository
+@inject NavigationManager NavigationManager;
+@page "/SkinEdit/{Id:int}/{SecretParam?}"
+
+@if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
+{
+    <h3>You do not have permission to view this page</h3>
+    return;
+}
+
+<h3 style="margin-bottom:20px;text-align:center" >@skin.Name</h3>
+
+<button @onclick="() => GoBackToControlPanel()" class="btn btn-light">Go to Control Panel</button>
+
+<EditForm Model = "viewModel" FormName="SkinUpdateForm" OnValidSubmit="UpdateSkin">
+    <DataAnnotationsValidator />
+
+    <div style="width:15%" class="fieldContainer">
+        <label>Name:</label> 
+        <InputText style="width:100%" @bind-Value="viewModel.Name" />
+        <ValidationMessage For="@(() => viewModel.Name)" />
+    </div>
+
+    <div style="width:7%" class="fieldContainer">
+        <label>Price:</label>
+        <InputNumber style="width:100%" @bind-Value="viewModel.Price" />
+    </div>
+    <ValidationMessage For="@(() => viewModel.Price)" />
+
+    <div style="width:80%" class="fieldContainer">
+        <label class="formRow">Splash URL:</label>
+        <InputTextArea style="width:100%" @bind-Value="viewModel.SplashUrl" />
+        <ValidationMessage For="@(() => viewModel.SplashUrl)" />
+    </div>
+
+    <button type="button" @onclick="() => ShowHideRegularSplash()">@RegularSplashButtonText</button>
+    @if(!RegularSplashButtonText.Equals(defaultButtonState))
+    {
+        <br/>
+        <img src=@viewModel.SplashUrl />
+    }
+
+    <div style="width:80%" class="fieldContainer">
+        <label>Cinematic splash URL:</label>
+        <InputTextArea style="width:100%" @bind-Value="viewModel.CinematicSplashUrl" />
+        <ValidationMessage For="@(() => viewModel.CinematicSplashUrl)" />
+    </div>
+
+    <button type="button" @onclick="() => ShowHideCinematicSplash()">@CinematicSplashButtonText</button>
+
+    @if (!CinematicSplashButtonText.Equals(defaultButtonState))
+    {
+        <br />
+        <img src=@viewModel.CinematicSplashUrl />
+        // style="margin:10px;height:360px;width:200px"
+    }
+    <div style="width:50%" class="fieldContainer">
+        <label>Quote:</label>
+        <InputTextArea style="width:100%;min-height:80px" @bind-Value="viewModel.Quote" />
+    </div>
+
+    <!-- <input style="margin:20px;margin-left:0px" type ="submit"> -->
+    <button style="margin:20px;margin-left:0px" class="btn btn-secondary">Update skin</button>
+
+    <br/>
+</EditForm >
+
+<!-- Shows skin chromas -->
+@if (chromas != null)
+{
+    @foreach(Chroma chroma in chromas)
+    {
+        <div class="boxOfChromas">
+            <div class="individualChroma">
+                <img src=@chroma.URL alt="@chroma.Name" />
+            </div>
+            <button @onclick="() => GoToChromaEditingPage(chroma.Id)" style="background-color:plum;width:100%" class="chromaButton">@chroma.Name</button>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [Parameter]
+    public string? SecretParam { get; set; }
+    Skin skin;
+    Clone viewModel;
+    private List<Chroma> chromas;
+    private const string defaultButtonState = "Show image";
+    private string RegularSplashButtonText = defaultButtonState;
+    private string CinematicSplashButtonText = defaultButtonState;
+    private bool updateSucceded = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await GetSkin();
+    }
+
+    public async Task GetSkin()
+    {
+        skin = await _skinRepository.GetByIdAsync(Id);
+        viewModel = new Clone(skin);
+        if(skin.ChromaList != null)
+            chromas = skin.ChromaList.ToList();
+    }
+
+    public async Task UpdateSkin()
+    {
+        if (ValidateUpdate())
+        {
+            viewModel.UpdateSkin(skin);
+            await _skinRepository.UpdateAsync(skin);
+            updateSucceded = true;
+        }
+        else
+        {
+            updateSucceded = false;
+        }
+    }
+
+    public void GoToChromaEditingPage(int Id)
+    {
+        NavigationManager.NavigateTo($"/ChromaEdit/{this.Id}/{Id}/{SecretParam}");
+    }
+
+    public void GoBackToControlPanel()
+    {
+        NavigationManager.NavigateTo($"/AdminPanel/{SecretParam}");
+    }
+
+    public void ShowHideRegularSplash()
+    {
+        if (RegularSplashButtonText.Equals(defaultButtonState))
+            RegularSplashButtonText = "Hide image";
+        else
+            RegularSplashButtonText = defaultButtonState;
+    }
+
+    public void ShowHideCinematicSplash()
+    {
+        if (CinematicSplashButtonText.Equals(defaultButtonState))
+            CinematicSplashButtonText = "Hide image";
+        else
+            CinematicSplashButtonText = defaultButtonState;
+    }
+
+    public bool ValidateUpdate()
+    {
+        return viewModel.Price.HasValue &&
+               !String.IsNullOrEmpty(viewModel.Name) &&
+               !String.IsNullOrEmpty(viewModel.SplashUrl) &&
+               !String.IsNullOrEmpty(viewModel.CinematicSplashUrl) &&
+               !String.IsNullOrEmpty(viewModel.Quote);
+    }
+
+    public class Clone
+    {
+        [Required(ErrorMessage = "Skin name is required")]
+        public string? Name { get; set; }
+        [Required(ErrorMessage = "The loading screen splash art URL is required")]
+        public string? SplashUrl { get; set; }
+        [Required(ErrorMessage = "The cinematic splash art URL is required")]
+        public string? CinematicSplashUrl { get; set; }
+        [Required(ErrorMessage = "Price is required")]
+        public double? Price { get; set; }
+        public string? Quote { get; set; }
+
+        public Clone(Skin skin)
+        {
+            Name = skin.Name;
+            SplashUrl = skin.SplashUrl;
+            CinematicSplashUrl = skin.CinematicSplashUrl;
+            Price = skin.Price;
+            Quote = skin.Quote;
+        }
+
+        public void UpdateSkin(Skin skin)
+        {
+            skin.Name = Name;
+            skin.SplashUrl = SplashUrl;
+            skin.CinematicSplashUrl = CinematicSplashUrl;
+            skin.Price = Price;
+            skin.Quote = Quote;
+        }
+    }
+}
