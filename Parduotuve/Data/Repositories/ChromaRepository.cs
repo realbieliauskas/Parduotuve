@@ -14,12 +14,16 @@ namespace Parduotuve.Data.Repositories
 
         public async Task<IEnumerable<Chroma>> GetAllAsync()
         {
-            return await _context.Chromas.ToListAsync();
+            return await _context.Chromas
+                .Include(chroma => chroma.Skin)
+                .ToListAsync();
         }
 
         public async Task<Chroma?> GetByIdAsync(int id)
         {
-            return await _context.Chromas.FindAsync(id);
+            return await _context.Chromas
+                .Include(chroma => chroma.Skin)
+                .FirstOrDefaultAsync(chroma => chroma.Id == id);
         }
 
         public async Task AddAsync(Chroma chroma)

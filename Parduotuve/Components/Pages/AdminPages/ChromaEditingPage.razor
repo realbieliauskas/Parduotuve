@@ -1,0 +1,99 @@
+﻿@using Parduotuve.Data.Repositories
+@using Parduotuve.Data.Entities
+@using System.ComponentModel.DataAnnotations;
+@inject IChromaRepository _chromaRepository
+@page "/ChromaEdit/{Id:int}/{SecretParam?}"
+<style>
+    label {
+    display: flex;
+    background-color: plum;
+    padding-left: 5px;
+    }
+
+    .fieldContainer {
+    margin-top: 15px;
+    }
+
+    .boxOfChromas {
+    float: left;
+    margin: 10px;
+    margin-left: 0px;
+    }
+
+    .individualChroma {
+    background-color: antiquewhite;
+    border-style: solid
+    }
+
+    .chromaButton {
+    background: none;
+    border: none;
+    }
+</style>
+
+
+@if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
+{
+    <h3>You do not have permission to view this page</h3>
+    return;
+}
+
+<h3 style="margin-bottom:20px;text-align:center">@chroma.Name @chroma.Skin.Name</h3>
+<EditForm Model="chroma" FormName="ChromaUpdateForm" OnValidSubmit="UpdateChroma">
+    <div style="width:15%" class="fieldContainer">
+        <label>Name:</label>
+        <InputText style="width:100%" @bind-Value="chroma.Name" />
+    </div>
+
+    <div style="width:15%" class="fieldContainer">
+        <label>Price:</label>
+        <InputText style="width:100%" @bind-Value="chroma.Price" />
+    </div>
+
+    <div style="width:80%" class="fieldContainer">
+        <label class="formRow">Splash URL:</label>
+        <InputTextArea style="width:100%" @bind-Value="chroma.URL" />
+    </div>
+
+    <button type="button" @onclick="() => ShowHideRegularSplash()">@RegularSplashButtonText</button>
+    @if (!RegularSplashButtonText.Equals(defaultButtonState))
+    {
+        <br />
+        <img src=@chroma.URL alt="Chroma image"/>
+    }
+    <br />
+    <button style="margin-top:15px" class="btn btn-secondary">Update chroma</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [Parameter]
+    public string? SecretParam { get; set; }
+    Chroma chroma;
+    private const string defaultButtonState = "Show image";
+    private string RegularSplashButtonText;
+    protected override async Task OnInitializedAsync()
+    {
+        await GetChroma();
+    }
+
+    protected async Task GetChroma()
+    {
+        RegularSplashButtonText = defaultButtonState;
+        chroma = await _chromaRepository.GetByIdAsync(Id);
+    }
+
+    public void UpdateChroma()
+    {
+        _chromaRepository.UpdateAsync(chroma);
+    }
+
+    public void ShowHideRegularSplash()
+    {
+        if (RegularSplashButtonText.Equals(defaultButtonState))
+            RegularSplashButtonText = "Hide image";
+        else
+            RegularSplashButtonText = defaultButtonState;
+    }
+}
