@@ -2,35 +2,8 @@
 @using Parduotuve.Data.Entities
 @using System.ComponentModel.DataAnnotations;
 @inject IChromaRepository _chromaRepository
-@page "/ChromaEdit/{Id:int}/{SecretParam?}"
-<style>
-    label {
-    display: flex;
-    background-color: plum;
-    padding-left: 5px;
-    }
-
-    .fieldContainer {
-    margin-top: 15px;
-    }
-
-    .boxOfChromas {
-    float: left;
-    margin: 10px;
-    margin-left: 0px;
-    }
-
-    .individualChroma {
-    background-color: antiquewhite;
-    border-style: solid
-    }
-
-    .chromaButton {
-    background: none;
-    border: none;
-    }
-</style>
-
+@inject NavigationManager NavigationManager
+@page "/ChromaEdit/{SkinId:int}/{Id:int}/{SecretParam?}"
 
 @if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
 {
@@ -39,30 +12,38 @@
 }
 
 <h3 style="margin-bottom:20px;text-align:center">@chroma.Name @chroma.Skin.Name</h3>
-<EditForm Model="chroma" FormName="ChromaUpdateForm" OnValidSubmit="UpdateChroma">
+
+<button @onclick="() => GoBackToSkinEditingPage()" class="btn btn-light">Go back to @chroma.Skin.Name</button>
+<button @onclick="() => GoBackToControlPanel()" class="btn btn-light">Go to Control Panel</button>
+
+<EditForm Model="viewModel" FormName="ChromaUpdateForm" OnValidSubmit="UpdateChroma">
+    <DataAnnotationsValidator />
     <div style="width:15%" class="fieldContainer">
         <label>Name:</label>
-        <InputText style="width:100%" @bind-Value="chroma.Name" />
+        <InputText style="width:100%" @bind-Value="viewModel.Name" />
+        <ValidationMessage For="@(() => viewModel.Name)" />
     </div>
 
     <div style="width:15%" class="fieldContainer">
         <label>Price:</label>
-        <InputText style="width:100%" @bind-Value="chroma.Price" />
+        <InputText style="width:100%" @bind-Value="viewModel.Price" />
+        <ValidationMessage For="@(() => viewModel.Price)" />
     </div>
 
     <div style="width:80%" class="fieldContainer">
         <label class="formRow">Splash URL:</label>
-        <InputTextArea style="width:100%" @bind-Value="chroma.URL" />
+        <InputTextArea style="width:100%" @bind-Value="viewModel.URL" />
+        <ValidationMessage For="@(() => viewModel.URL)" />
     </div>
 
     <button type="button" @onclick="() => ShowHideRegularSplash()">@RegularSplashButtonText</button>
     @if (!RegularSplashButtonText.Equals(defaultButtonState))
     {
         <br />
-        <img src=@chroma.URL alt="Chroma image"/>
+        <img src=@viewModel.URL alt="Chroma image" />
     }
     <br />
-    <button style="margin-top:15px" class="btn btn-secondary">Update chroma</button>
+    <button style="margin-top:30px" class="btn btn-secondary">Update chroma</button>
 </EditForm>
 
 @code {
@@ -70,7 +51,10 @@
     public int Id { get; set; }
     [Parameter]
     public string? SecretParam { get; set; }
+    [Parameter]
+    public int SkinId { get; set; }
     Chroma chroma;
+    Clone viewModel;
     private const string defaultButtonState = "Show image";
     private string RegularSplashButtonText;
     protected override async Task OnInitializedAsync()
@@ -82,11 +66,16 @@
     {
         RegularSplashButtonText = defaultButtonState;
         chroma = await _chromaRepository.GetByIdAsync(Id);
+        viewModel = new Clone(chroma);
     }
 
     public void UpdateChroma()
     {
-        _chromaRepository.UpdateAsync(chroma);
+        if(ValidateUpdate())
+        {
+            viewModel.UpdateChroma(chroma);
+            _chromaRepository.UpdateAsync(chroma);
+        }
     }
 
     public void ShowHideRegularSplash()
@@ -95,5 +84,46 @@
             RegularSplashButtonText = "Hide image";
         else
             RegularSplashButtonText = defaultButtonState;
+    }
+
+    public bool ValidateUpdate()
+    {
+        return !String.IsNullOrEmpty(viewModel.Name) &&
+               !String.IsNullOrEmpty(viewModel.URL) &&
+               !String.IsNullOrEmpty(viewModel.Price);
+    }
+
+    public void GoBackToSkinEditingPage()
+    {
+        NavigationManager.NavigateTo($"/SkinEdit/{SkinId}/{SecretParam}");
+    }
+
+    public void GoBackToControlPanel()
+    {
+        NavigationManager.NavigateTo($"/AdminPanel/{SecretParam}");
+    }
+
+    public class Clone
+    {
+        [Required(ErrorMessage = "Chroma name is required")]
+        public string Name { get; set; }
+        [Required(ErrorMessage = "The loading screen splash art URL is required")]
+        public string URL { get; set; }
+        [Required(ErrorMessage = "Price is required")]
+        public string Price { get; set; }
+
+        public Clone(Chroma chroma)
+        {
+            Name = chroma.Name;
+            URL = chroma.URL;
+            Price = chroma.Price;
+        }
+
+        public void UpdateChroma(Chroma chroma)
+        {
+            chroma.Name = Name;
+            chroma.URL = URL;
+            chroma.Price = Price;
+        }
     }
 }

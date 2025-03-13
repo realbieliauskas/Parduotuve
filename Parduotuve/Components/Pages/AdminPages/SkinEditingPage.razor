@@ -13,6 +13,8 @@
 
 <h3 style="margin-bottom:20px;text-align:center" >@skin.Name</h3>
 
+<button @onclick="() => GoBackToControlPanel()" class="btn btn-light">Go to Control Panel</button>
+
 <EditForm Model = "viewModel" FormName="SkinUpdateForm" OnValidSubmit="UpdateSkin">
     <DataAnnotationsValidator />
 
@@ -25,8 +27,8 @@
     <div style="width:7%" class="fieldContainer">
         <label>Price:</label>
         <InputNumber style="width:100%" @bind-Value="viewModel.Price" />
-        <ValidationMessage For="@(() => viewModel.Price)" />
     </div>
+    <ValidationMessage For="@(() => viewModel.Price)" />
 
     <div style="width:80%" class="fieldContainer">
         <label class="formRow">Splash URL:</label>
@@ -118,12 +120,16 @@
         {
             updateSucceded = false;
         }
-        // NavigationManager.NavigateTo($"/AdminPanel/{SecretParam}");
     }
 
     public void GoToChromaEditingPage(int Id)
     {
-        NavigationManager.NavigateTo($"/ChromaEdit/{Id}/{SecretParam}");
+        NavigationManager.NavigateTo($"/ChromaEdit/{this.Id}/{Id}/{SecretParam}");
+    }
+
+    public void GoBackToControlPanel()
+    {
+        NavigationManager.NavigateTo($"/AdminPanel/{SecretParam}");
     }
 
     public void ShowHideRegularSplash()
