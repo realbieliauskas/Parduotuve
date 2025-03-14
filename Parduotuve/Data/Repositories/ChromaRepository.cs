@@ -47,5 +47,10 @@ namespace Parduotuve.Data.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<Chroma> GetLast()
+        {
+            return await _context.Chromas.LastAsync();
+        }
     }
 }

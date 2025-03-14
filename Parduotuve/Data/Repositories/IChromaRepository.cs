@@ -9,5 +9,6 @@ namespace Parduotuve.Data.Repositories
         Task AddAsync(Chroma chroma);
         Task UpdateAsync(Chroma chroma);
         Task DeleteAsync(int id);
+        Task<Chroma> GetLast();
     }
 }

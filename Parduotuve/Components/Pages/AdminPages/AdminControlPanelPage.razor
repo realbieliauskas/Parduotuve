@@ -2,6 +2,7 @@
 @using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
 @inject ISkinRepository _skinRepository
+@inject IChromaRepository _chromaRepository
 @inject NavigationManager NavManager
 
 @if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
@@ -10,28 +11,119 @@
     return;
 }
 
+@if(popupIsOpen)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display:block">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Skin</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="ClosePopup"></button>
+                </div>
+                <EditForm Model="@this" OnValidSubmit="AddSkin">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <table>
+                            <tr>
+                                <td>Champion name<span style="color:red">*</span> </td>
+                                <td><input type="text" placeholder="Champion name..." @bind="newSkin.ChampionName"/></td>
+                            </tr>
+                            <tr>
+                                <td>Skin name<span style="color:red">*</span>: </td>
+                                <td><input type="text" placeholder="Skin name..." @bind="newSkin.Name" /></td>
+                            </tr>
+                            <tr>
+                                <td>Loading screen art URL<span style="color:red">*</span>: </td>
+                                <td><input type="text" placeholder="Splash art URL..." @bind="newSkin.SplashUrl" /></td>
+                            </tr>
+                            <tr>
+                                <td>Cinematic art URL<span style="color:red">*</span>: </td>
+                                <td><input type="text" placeholder="Cinematic splash art URL..." @bind="newSkin.CinematicSplashUrl" /></td>
+                            </tr>
+                            <tr>
+                                <td>Price<span style="color:red">*</span>: </td>
+                                <td><input type="number" placeholder="Price..." @bind="newSkin.Price" /></td>
+                            </tr>
+                            <tr>
+                                <td>Quote: </td>
+                                <td><input type="text" placeholder="Quote..." @bind="newSkin.Quote" /></td>
+                            </tr>
+                        </table>
+                        @if(newChromas.Count != 0)
+                        {
+                            <p><b>Chromas:</b></p>
+                            <table style="table-layout: fixed;">
+                                @for (int i = 0; i < newChromas.Count; i++)
+                                {
+                                    <tr>
+                                        <td style="width:30px"><b>@(i + 1)</b></td>
+                                        <td>@newChromas[i].Name</td>
+                                    </tr>
+                                }
+                            </table>
+                           
+                        }
+                    </div>
+                    @if (chromaBoxIsOpen)
+                    {                 
+                        <div class="modal-body">
+                            <p>New Chroma details:</p>
+                            <table>
+                                <tr>
+                                    <td>Chroma name<span style="color:red">*</span>: </td>
+                                    <td><input type="text" placeholder="Chroma name..." @bind="newChroma.Name" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Chroma price<span style="color:red">*</span>: </td>
+                                    <td><input type="text" placeholder="Chroma price..." @bind="newChroma.Price" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Splash art URL<span style="color:red">*</span>: </td>
+                                    <td><input type="text" placeholder="Splash art URL..." @bind="newChroma.URL" /></td>
+                                </tr>
+                            </table>
+                            <button style="margin-top:10px" class="btn btn-primary" @onclick="AddChroma">Add Chroma</button>
+                        </div>
+                    }
+                    <div class="modal-footer">
+                        <button style="position:absolute;left:10px" class="btn btn-info" type="button" @onclick="ToggleChromaBox">@chromaBoxButtonMessage</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="ClosePopup">Close</button>
+                        <button type="submit" class="btn btn-primary">Add skin</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
 <h3>Admin Control Page</h3>
 <br/>
-<p>Click on the skin you wish to edit</p>
+<span>Click on the skin you wish to edit or</span>
+<button class="btn btn-primary" @onclick="OpenPopup" >Add skin</button>
+<br/>
 <br/>
 @foreach(Skin skin in skins)
 {
     if(skins.Contains(skin))
     {
-        <button @onclick="() => GoToSkinEditingPage(skin)">@skin.Name</button>
-        <button @onclick="() => DeleteSkin(skin)">DELETE</button>
+        <button class="btn btn-secondary" @onclick="() => GoToSkinEditingPage(skin)">@skin.Name</button>
+        <button class="btn btn-danger" @onclick="() => DeleteSkin(skin)">DELETE</button>
         <br/>
         <br/>
     }
 }
 
-
-
 @code {
     List<Skin> skins = new List<Skin>();
     Skin clickedSkin = new Skin();
+    Skin newSkin = new Skin();
+    List<Chroma> newChromas = new List<Chroma>();
+    Chroma newChroma = new Chroma();
     [Parameter]
     public string? SecretParam { get; set; }
+    private bool popupIsOpen = false;
+    private bool chromaBoxIsOpen = false;
+    private string chromaBoxButtonMessage = "Show Chroma box";
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,5 +144,79 @@
     {
         skins.Remove(skin);
         _skinRepository.DeleteAsync(skin.Id);
+    }
+
+    public void OpenPopup()
+    {
+        popupIsOpen = true;
+    }
+
+    public void ClosePopup()
+    {
+        popupIsOpen = false;
+        newSkin = new Skin();
+        CloseChromaBox();
+    }
+
+    public void AddSkin()
+    {
+        if(CheckIfSkinIsValid())
+        {
+            int newId = skins.Last().Id + 1;
+            newSkin.Id = newId;
+            newSkin.ChromaList = newChromas;
+            _skinRepository.AddAsync(newSkin);
+            NavManager.NavigateTo(NavManager.Uri, true);
+        }
+    }
+
+    public bool CheckIfSkinIsValid()
+    {
+        return newSkin.Price.HasValue &&
+               !String.IsNullOrEmpty(newSkin.Name) &&
+               !String.IsNullOrEmpty(newSkin.SplashUrl) &&
+               !String.IsNullOrEmpty(newSkin.CinematicSplashUrl) &&
+               !String.IsNullOrEmpty(newSkin.ChampionName);
+    }
+
+    public void ToggleChromaBox()
+    {
+        if (chromaBoxIsOpen)
+        {
+            chromaBoxIsOpen = false;
+            chromaBoxButtonMessage = "Show Chroma Box";
+        }
+        else
+        {
+            chromaBoxIsOpen = true;
+            chromaBoxButtonMessage = "Hide Chroma Box";
+        }
+    }
+
+    public void CloseChromaBox()
+    {
+        chromaBoxIsOpen = false;
+        newChroma = new Chroma();
+        newChromas = new List<Chroma>();
+    }
+
+    public void AddChroma()
+    {
+        if(CheckIfChromaIsValid())
+        {
+
+            newChroma.Skin = newSkin;
+            int newId = _chromaRepository.GetLast().Id + 1;
+            newChroma.Id = newId;
+            Chroma temp = new Chroma(newChroma);
+            newChromas.Add(temp);
+        }
+    }
+
+    public bool CheckIfChromaIsValid()
+    {
+        return !String.IsNullOrEmpty(newChroma.Name) &&
+               !String.IsNullOrEmpty(newChroma.URL) &&
+               !String.IsNullOrEmpty(newChroma.Price);
     }
 }
