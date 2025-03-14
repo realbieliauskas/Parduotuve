@@ -11,5 +11,18 @@ namespace Parduotuve.Data.Entities
 
         //navigation properties
         public Skin Skin { get; set; }
+
+
+        public Chroma(Chroma chroma)
+        {
+            Name = chroma.Name;
+            URL = chroma.URL;
+            Price = chroma.Price;
+            Skin = chroma.Skin;
+        }
+
+        public Chroma()
+        {
+        }
     }
 }
