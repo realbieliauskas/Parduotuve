@@ -1,7 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Parduotuve.Components;
 using Parduotuve.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Parduotuve.Data.Repositories;
 using Parduotuve.Services;
 
@@ -20,11 +19,11 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChromaRepository, ChromaRepository>();
 //builder.Services.AddScoped<Shopping_Cart_Service>();
 builder.Services.AddSingleton<Shopping_Cart_Service>();
-builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); 
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
 var app = builder.Build();
 app.UseSession();

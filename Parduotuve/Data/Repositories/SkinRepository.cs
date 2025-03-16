@@ -47,5 +47,22 @@ namespace Parduotuve.Data.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<IEnumerable<Skin>> GetSortedSkinsAsync(string sortBy)
+        {
+            IQueryable<Skin> query = _context.Skins.Include(skin => skin.ChromaList);
+
+            query = sortBy switch
+            {
+                "ChampionName" => query.OrderBy(skin => skin.ChampionName),
+                "Price" => query.OrderBy(skin => skin.Price),
+                "Name" => query.OrderBy(skin => skin.Name),
+                _ => query
+            };
+
+            return await query.ToListAsync();
+        }
     }
+
 }
+

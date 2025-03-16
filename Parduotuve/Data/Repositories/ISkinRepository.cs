@@ -9,5 +9,7 @@ namespace Parduotuve.Data.Repositories
         Task AddAsync(Skin skin);
         Task UpdateAsync(Skin skin);
         Task DeleteAsync(int id);
+        Task<IEnumerable<Skin>> GetSortedSkinsAsync(string sortBy);
     }
+
 }
