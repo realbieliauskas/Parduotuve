@@ -7,8 +7,17 @@
 @inject Shopping_Cart_Service Shopping_Cart
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=add_shopping_cart" />
 
-<div style="padding: 10px; text-align: center;">
-    @foreach(Skin skin in Skins)
+<div class="top-bar">
+    <label for="sortOptions">Sort by:</label>
+    <select id="sortOptions" @onchange="SortSkins">
+        <option value="ChampionName">Champion Name</option>
+        <option value="Price">Price</option>
+        <option value="Name">Name</option>
+    </select>
+</div>
+
+<div style="padding: 100px; text-align: center;">
+    @foreach (Skin skin in Skins)
     {
         <div @onclick="@((e) => EntryClicked(false,skin.Id,e))" style="border: 1px solid black;padding:10px; margin:15px;text-align:center;cursor:pointer;display:inline-block;">
             <img src=@skin.SplashUrl style="margin:10px;height:360px;width:200px" />
@@ -28,11 +37,24 @@
 </div>
 
 @code {
-    private IEnumerable<Skin> Skins { get; set; }
+    private IEnumerable<Skin> Skins { get; set; } = new List<Skin>();
+    private string selectedSortOption = "ChampionName";
 
     protected override async Task OnInitializedAsync()
     {
-        Skins = await _skinRepository.GetAllAsync();
+        await LoadSkinsAsync();
+    }
+
+    private async Task SortSkins(ChangeEventArgs e)
+    {
+        selectedSortOption = e.Value?.ToString() ?? "ChampionName";
+        await LoadSkinsAsync();
+    }
+
+    private async Task LoadSkinsAsync()
+    {
+        Skins = await _skinRepository.GetSortedSkinsAsync(selectedSortOption);
+        StateHasChanged();
     }
 
     private double lastClickPos = -1;
@@ -43,7 +65,7 @@
     /// <param name="id">The ID of the listing which was clicked</param>
     private void EntryClicked(bool cart, int id, MouseEventArgs e)
     {
-        double newClickPos = e.ClientX*e.ClientY;
+        double newClickPos = e.ClientX * e.ClientY;
         Console.WriteLine(newClickPos);
         if (lastClickPos == newClickPos)
         {
@@ -51,16 +73,26 @@
             return;
         }
         lastClickPos = newClickPos;
-        if(cart)
+        if (cart)
         {
             Add_to_Cart(id);
             return;
         }
         NavManager.NavigateTo("/Description/" + id);
     }
-    private void Add_to_Cart (int id)
+
+    private void Add_to_Cart(int id)
     {
         Shopping_Cart.Add(id);
     }
-
 }
+
+<style>
+    .top-bar {
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e7e7e7;
+    }
+</style>
