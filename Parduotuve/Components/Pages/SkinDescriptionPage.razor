@@ -36,17 +36,20 @@
     <br/>
 
     <!-- Shows skin chromas and their RP costs-->
-    <h5>Chroma gallery</h5>
-    @for(int i = 0; i < chromaNames.Count();i++)
+    @if(chromas != null)
     {
-        <div class="boxOfChromas">
-            <div class="individualChroma">
-                <img src=@chromaURLs[i] alt="@chromaNames[i]" />
+        @for (int i = 0; i < chromas.Count(); i++)
+        {
+            <div class="boxOfChromas">
+                <div class="individualChroma">
+                    <img src=@chromas[i].URL alt="@chromas[i].Name" />
+                </div>
+                <span>@chromas[i].Name</span>
+                <p style="text-align:right">@(int.TryParse(@chromas[i].Price, out int ignor) ? chromas[i].Price + "RP" : chromas[i].Price)</p>
             </div>
-            <span>@chromaNames[i]</span>
-            <p style="text-align:right">@(int.TryParse(@chromaPrices[i], out int ignor) ? chromaPrices[i] + "RP" : chromaPrices[i])</p>
-        </div>
+        }
     }
+
 
 </body>
 
@@ -54,9 +57,7 @@
     [Parameter]
     public string SkinID { get; set; }
     private Skin skin;
-    private string[] chromaURLs;
-    private string[] chromaNames;
-    private string[] chromaPrices;
+    private List<Chroma> chromas;
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,9 +74,8 @@
         if (toAssign == null)
             return;
         skin = toAssign;
-        
-        chromaURLs = skin.ChromaURLs.Split("[]", StringSplitOptions.RemoveEmptyEntries); // link can maybe have ';' so I picked something that should not come up
-        chromaNames = skin.Chromas.Split(';', StringSplitOptions.RemoveEmptyEntries);
-        chromaPrices = skin.ChromaPrices.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+        if(skin.ChromaList != null)
+            chromas = skin.ChromaList.ToList();
     }
 }

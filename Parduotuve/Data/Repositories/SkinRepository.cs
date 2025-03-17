@@ -14,12 +14,16 @@ namespace Parduotuve.Data.Repositories
 
         public async Task<IEnumerable<Skin>> GetAllAsync()
         {
-            return await _context.Skins.ToListAsync();
+            return await _context.Skins
+                .Include(skin => skin.ChromaList)
+                .ToListAsync();
         }
 
         public async Task<Skin?> GetByIdAsync(int id)
         {
-            return await _context.Skins.FindAsync(id);
+            return await _context.Skins
+                .Include(skin => skin.ChromaList)
+                .FirstOrDefaultAsync(skin => skin.Id == id);
         }
 
         public async Task AddAsync(Skin skin)
@@ -43,5 +47,22 @@ namespace Parduotuve.Data.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<IEnumerable<Skin>> GetSortedSkinsAsync(string sortBy)
+        {
+            IQueryable<Skin> query = _context.Skins.Include(skin => skin.ChromaList);
+
+            query = sortBy switch
+            {
+                "ChampionName" => query.OrderBy(skin => skin.ChampionName),
+                "Price" => query.OrderBy(skin => skin.Price),
+                "Name" => query.OrderBy(skin => skin.Name),
+                _ => query
+            };
+
+            return await query.ToListAsync();
+        }
     }
+
 }
+
