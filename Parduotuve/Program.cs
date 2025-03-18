@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Parduotuve.Data.Repositories;
 using Parduotuve.Services;
+using System.Security.Principal;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,10 +20,13 @@ builder.Services.AddDbContext<StoreDataContext>();
 builder.Services.AddScoped<ISkinRepository, SkinRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChromaRepository, ChromaRepository>();
-//builder.Services.AddScoped<Shopping_Cart_Service>();
 builder.Services.AddSingleton<Shopping_Cart_Service>();
+builder.Services.AddDbContext<DBAccounts_service>();
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddDistributedMemoryCache();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddAuthorizationCore();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); 

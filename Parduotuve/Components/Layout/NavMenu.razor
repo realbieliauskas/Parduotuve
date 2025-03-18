@@ -1,28 +1,74 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using Parduotuve.Services;
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AuthenticationService AuthenticationService
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Parduotuve</a>
+        <a class="navbar-brand" href="#">Parduotuve</a>
     </div>
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="AdminLogin">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> AdminLogin
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Shopping_cart">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Shopping cart
-            </NavLink>
-        </div>
-    </nav>
-</div>
+@if (isAdmin)
+{
+    <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+        <nav class="flex-column">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="AdminPanel/dsfoiugnfdonhgfodinhdf">
+                    <span class="bi bi-person-circle" aria-hidden="true"></span> Admin
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="AdminLoginLJ">
+                    <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Login
+                </NavLink>
+            </div>
+        </nav>
+    </div>
+}
+else
+{
+    <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+        <nav class="flex-column">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="Shopping_cart">
+                    <span class="bi bi-cart" aria-hidden="true"></span> Shopping cart
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="AdminLoginLJ">
+                    <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Login
+                </NavLink>
+            </div>
+        </nav>
+    </div>
+}
 
+@code {
+    private bool isAdmin = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SetIsAdminState();
+    }
+
+    private async Task SetIsAdminState()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        isAdmin = user.IsInRole("Admin");
+        StateHasChanged();
+    }
+}
