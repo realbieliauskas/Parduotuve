@@ -96,7 +96,7 @@ namespace Parduotuve.Services
                 skinData.RemoveAt(0);
                 secondarySkinData.RemoveAt(0);
 
-                for (int y = 0; y < skinData.Count; y++)
+                for (int y = 0; y < skinData.Count && y < secondarySkinData.Count; y++)
                 {
                     Skin skin = new Skin();
                     skin.Id = idCounter++;
