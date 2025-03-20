@@ -2,6 +2,7 @@
 @using Parduotuve.Data.Entities
 @using System.ComponentModel.DataAnnotations;
 @inject ISkinRepository _skinRepository
+@inject IChromaRepository _chromaRepository
 @inject NavigationManager NavigationManager;
 @page "/SkinEdit/{Id:int}/{SecretParam?}"
 
@@ -10,6 +11,26 @@
     <h3>You do not have permission to view this page</h3>
     return;
 }
+
+
+@if (popupIsOpen)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display:block">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Are you sure you want to delete @chromaInQuestion.Name?</h5>
+                    <button @onclick="() => popupIsOpen = false" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <button @onclick="() => DeleteChroma()" style="width:100px" >Yes</button>
+                    <button @onclick="() => popupIsOpen = false" style="width:100px">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 
 <h3 style="margin-bottom:20px;text-align:center" >@skin.Name</h3>
 
@@ -77,7 +98,10 @@
             <div class="individualChroma">
                 <img src=@chroma.URL alt="@chroma.Name" />
             </div>
-            <button @onclick="() => GoToChromaEditingPage(chroma.Id)" style="background-color:plum;width:100%" class="chromaButton">@chroma.Name</button>
+            <div style="width:100%;background-color:plum">
+                <button @onclick="() => OpenChromaDeletionQuestion(chroma.Id)" style="background-color:mediumslateblue;color:red" class="chromaButton"><b>DELETE</b></button>
+                <button @onclick="() => GoToChromaEditingPage(chroma.Id)" style="text-align:right;width:70%" class="chromaButton">@chroma.Name</button>
+            </div>
         </div>
     }
 }
@@ -89,12 +113,14 @@
     public string? SecretParam { get; set; }
     Skin skin;
     Clone viewModel;
+    Chroma chromaInQuestion; // chroma that might be deleted
     private List<Chroma> chromas;
     private const string defaultButtonState = "Show image";
     private string RegularSplashButtonText = defaultButtonState;
     private string CinematicSplashButtonText = defaultButtonState;
     private bool updateSucceded = false;
-    
+    private bool popupIsOpen = false;
+
     protected override async Task OnInitializedAsync()
     {
         await GetSkin();
@@ -155,6 +181,18 @@
                !String.IsNullOrEmpty(viewModel.SplashUrl) &&
                !String.IsNullOrEmpty(viewModel.CinematicSplashUrl) &&
                !String.IsNullOrEmpty(viewModel.Quote);
+    }
+
+    public async Task OpenChromaDeletionQuestion(int id)
+    {
+        chromaInQuestion = await _chromaRepository.GetByIdAsync(id);
+        popupIsOpen = true;
+    }
+
+    public void DeleteChroma()
+    {
+        _chromaRepository.DeleteAsync(chromaInQuestion.Id);
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 
     public class Clone
