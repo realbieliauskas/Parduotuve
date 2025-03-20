@@ -1,5 +1,5 @@
 ﻿@page "/"
-@page "/{Page:int}"
+@page "/{PageParam:int}"
 @using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
 @using Parduotuve.Services
@@ -40,49 +40,24 @@
 
 <nav>
     <ul class="pagination justify-content-center">
-        @if (PageIndex == 0)
-        {
-            <li class="page-item disabled">
-                <a class="page-link" tabindex="-1">Previous</a>
-            </li>
-        }
-        else
-        {
-            <li class="page-item">
-                <a class="page-link" href="/@(PageIndex-1)" tabindex="-1">Previous</a>
-            </li>
-        }
+        <li class="page-item @(PageIndex == 0 ? "disabled" : "")">
+            <a class="page-link" href="/@(PageIndex-1)" tabindex="-1">Previous</a>
+        </li>
 
         @foreach (int indice in GetSurroundingPageIndices())
         {
-            @if (indice == PageIndex)
-            {
-                <li class="page-item active"><a class="page-link" href="/@(indice)">@(indice + 1)</a></li>
-            }
-            else
-            {
-                <li class="page-item"><a class="page-link" href="/@(indice)">@(indice + 1)</a></li>
-            }
+            <li class="@(indice == PageIndex ? "page-item active" : "page-item")"><a class="page-link" href="/@(indice)">@(indice + 1)</a></li>
         }
 
-        @if (PageIndex >= PageCount - 1)
-        {
-            <li class="page-item disabled">
-                <a class="page-link">Next</a>
-            </li>
-        }
-        else
-        {
-            <li class="page-item">
-                <a class="page-link" href="/@(PageIndex+1)" data-enhance-nav="false">Next</a>
-            </li>
-        }
+        <li class="page-item @(PageIndex >= PageCount-1 ? "disabled" : "")">
+            <a class="page-link" href="/@(PageIndex+1)" data-enhance-nav="false">Next</a>
+        </li>
     </ul>
 </nav>
 
 @code {
     [Parameter]
-    public int? Page { get; set; }
+    public int? PageParam { get; set; }
     private IEnumerable<Skin> Skins { get; set; } = new List<Skin>();
     private IEnumerable<Skin> FilteredSkins { get; set; } = new List<Skin>();
     private string selectedSortOption = "ChampionName";
@@ -100,16 +75,16 @@
     public async override Task SetParametersAsync(ParameterView parameters)
     {
         await base.SetParametersAsync(parameters);
-        Page = Page ?? 0;
-        if(Page < 0)
+        PageParam = PageParam ?? 0;
+        if(PageParam < 0)
         {
-            Page = 0;
+            PageParam = 0;
         }
-        else if(Page >= PageCount)
+        else if(PageParam >= PageCount)
         {
-            Page = PageCount - 1;
+            PageParam = PageCount - 1;
         }
-        PageIndex = (int)Page;
+        PageIndex = (int)PageParam;
     }
 
     private async Task SortSkins(ChangeEventArgs e)
