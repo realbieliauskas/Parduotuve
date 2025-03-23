@@ -13,8 +13,7 @@
 
 <h3 style="margin-bottom:20px;text-align:center">@chroma.Name @chroma.Skin.Name</h3>
 
-<button @onclick="() => GoBackToSkinEditingPage()" class="btn btn-light">Go back to @chroma.Skin.Name</button>
-<button @onclick="() => GoBackToControlPanel()" class="btn btn-light">Go to Control Panel</button>
+<button onclick="history.back();" class="btn btn-light">Go back</button>
 
 <EditForm Model="viewModel" FormName="ChromaUpdateForm" OnValidSubmit="UpdateChroma">
     <DataAnnotationsValidator />
@@ -91,16 +90,6 @@
         return !String.IsNullOrEmpty(viewModel.Name) &&
                !String.IsNullOrEmpty(viewModel.URL) &&
                !String.IsNullOrEmpty(viewModel.Price);
-    }
-
-    public void GoBackToSkinEditingPage()
-    {
-        NavigationManager.NavigateTo($"/SkinEdit/{SkinId}/{SecretParam}");
-    }
-
-    public void GoBackToControlPanel()
-    {
-        NavigationManager.NavigateTo($"/AdminPanel/{SecretParam}");
     }
 
     public class Clone
