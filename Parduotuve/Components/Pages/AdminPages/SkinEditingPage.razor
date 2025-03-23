@@ -34,7 +34,7 @@
 
 <h3 style="margin-bottom:20px;text-align:center" >@skin.Name</h3>
 
-<button @onclick="() => GoBackToControlPanel()" class="btn btn-light">Go to Control Panel</button>
+<button onclick="history.back();" class="btn btn-light">Go back</button>
 
 <EditForm Model = "viewModel" FormName="SkinUpdateForm" OnValidSubmit="UpdateSkin">
     <DataAnnotationsValidator />
@@ -151,11 +151,6 @@
     public void GoToChromaEditingPage(int Id)
     {
         NavigationManager.NavigateTo($"/ChromaEdit/{this.Id}/{Id}/{SecretParam}");
-    }
-
-    public void GoBackToControlPanel()
-    {
-        NavigationManager.NavigateTo($"/AdminPanel/{SecretParam}");
     }
 
     public void ShowHideRegularSplash()

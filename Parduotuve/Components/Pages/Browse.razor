@@ -107,11 +107,11 @@
         StateHasChanged();
     }
 
+    #region Page navigation helpers
     private IEnumerable<Skin> GetPageContents()
     {
         return FilteredSkins.Chunk(ItemsPerPage).ToArray()[PageIndex];
     }
-
     private IEnumerable<int> GetSurroundingPageIndices()
     {
         int leftCursor = PageIndex;
@@ -152,7 +152,7 @@
 
         return indices;
     }
-
+    #endregion
     private void ApplySearchFilter()
     {
         FilteredSkins = Skins.Where(skin =>

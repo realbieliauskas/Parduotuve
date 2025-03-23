@@ -102,7 +102,7 @@
 <button class="btn btn-primary" @onclick="OpenPopup" >Add skin</button>
 <br/>
 <br/>
-@foreach(Skin skin in skins)
+@foreach(Skin skin in GetPageContents())
 {
     if(skins.Contains(skin))
     {
@@ -112,6 +112,22 @@
         <br/>
     }
 }
+<nav>
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(PageIndex == 0 ? "disabled" : "")">
+            <a class="page-link" href="@(GetPageUrl(PageIndex-1))" tabindex="-1">Previous</a>
+        </li>
+
+        @foreach (int indice in GetSurroundingPageIndices())
+        {
+            <li class="@(indice == PageIndex ? "page-item active" : "page-item")"><a class="page-link" href="@(GetPageUrl(indice))">@(indice + 1)</a></li>
+        }
+
+        <li class="page-item @(PageIndex >= PageCount-1 ? "disabled" : "")">
+            <a class="page-link" href="@(GetPageUrl(PageIndex+1))" data-enhance-nav="false">Next</a>
+        </li>
+    </ul>
+</nav>
 
 @code {
     List<Skin> skins = new List<Skin>();
@@ -121,6 +137,13 @@
     Chroma newChroma = new Chroma();
     [Parameter]
     public string? SecretParam { get; set; }
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public int? Page { get; set; }
+    private static int ItemsPerPage = 10;
+    private static int BarLength = 2;
+    private int PageIndex { get; set; } = 0;
+    private int PageCount { get { return skins.Chunk(ItemsPerPage).ToArray().Length; } }
     private bool popupIsOpen = false;
     private bool chromaBoxIsOpen = false;
     private string chromaBoxButtonMessage = "Show Chroma box";
@@ -128,6 +151,21 @@
     protected override async Task OnInitializedAsync()
     {
         await GetSkins();
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        Page = Page ?? 0;
+        if (Page < 0)
+        {
+            Page = 0;
+        }
+        else if (Page >= PageCount)
+        {
+            Page = PageCount - 1;
+        }
+        PageIndex = (int)Page;
     }
 
     public async Task GetSkins()
@@ -219,4 +257,54 @@
                !String.IsNullOrEmpty(newChroma.URL) &&
                !String.IsNullOrEmpty(newChroma.Price);
     }
+    #region Page navigation helpers
+    private string GetPageUrl(int page)
+    {
+        return NavManager.GetUriWithQueryParameter("Page",page);
+    }
+    private IEnumerable<Skin> GetPageContents()
+    {
+        return skins.Chunk(ItemsPerPage).ToArray()[PageIndex];
+    }
+    private IEnumerable<int> GetSurroundingPageIndices()
+    {
+        int leftCursor = PageIndex;
+        int rightCursor = PageIndex;
+        List<int> indices = new List<int>();
+
+        indices.Add(PageIndex);
+
+        for (int x = 0; x < BarLength; x++)
+        {
+            if (leftCursor - 1 < 0 && rightCursor + 1 >= PageCount)
+            {
+                break;
+            }
+
+            if (leftCursor - 1 >= 0)
+            {
+                leftCursor -= 1;
+                indices.Insert(0, leftCursor);
+            }
+            else
+            {
+                rightCursor += 1;
+                indices.Add(rightCursor);
+            }
+
+            if (rightCursor + 1 < PageCount)
+            {
+                rightCursor += 1;
+                indices.Add(rightCursor);
+            }
+            else if (leftCursor - 1 >= 0)
+            {
+                leftCursor -= 1;
+                indices.Insert(0, leftCursor);
+            }
+        }
+
+        return indices;
+    }
+    #endregion
 }
