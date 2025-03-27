@@ -50,7 +50,7 @@ namespace Parduotuve.Data.Repositories
 
         public async Task<Chroma> GetLast()
         {
-            return await _context.Chromas.LastAsync();
+            return await _context.Chromas.OrderBy((a) => a.Id).LastAsync();
         }
     }
 }

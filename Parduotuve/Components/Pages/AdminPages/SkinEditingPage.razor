@@ -13,18 +13,18 @@
 }
 
 
-@if (popupIsOpen)
+@if (deletionPopupIsOpen)
 {
     <div class="modal" tabindex="-1" role="dialog" style="display:block">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Are you sure you want to delete @chromaInQuestion.Name?</h5>
-                    <button @onclick="() => popupIsOpen = false" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button @onclick="() => deletionPopupIsOpen = false" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <button @onclick="() => DeleteChroma()" style="width:100px" >Yes</button>
-                    <button @onclick="() => popupIsOpen = false" style="width:100px">No</button>
+                    <button @onclick="() => deletionPopupIsOpen = false" style="width:100px">No</button>
                 </div>
             </div>
         </div>
@@ -89,6 +89,47 @@
     <br/>
 </EditForm >
 
+<button @onclick="() => chromaAdditionPopupIsOpen=true" class="btn btn-info">Add chroma</button>
+<br />
+
+@if (chromaAdditionPopupIsOpen)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display:block">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Chroma</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="()=> chromaAdditionPopupIsOpen =false"></button>
+                </div>
+                <EditForm Model="@this" OnValidSubmit="AddChroma">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <table>
+                            <tr>
+                                <td>Chroma name<span style="color:red">*</span> </td>
+                                <td><input type="text" placeholder="Chroma name..." @bind="newChromaPlaceholder.Name" /></td>
+                            </tr>
+                            <tr>
+                                <td>Chroma splash art URL<span style="color:red">*</span> </td>
+                                <td><input type="text" placeholder="Chroma URL..." @bind="newChromaPlaceholder.URL" /></td>
+                            </tr>
+                            <tr>
+                                <td>Chroma price<span style="color:red">*</span> </td>
+                                <td><input type="number" placeholder="Chroma price..." @bind="newChromaPlaceholder.Price" /></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="()=> chromaAdditionPopupIsOpen =false">Close</button>
+                        <button type="submit" class="btn btn-primary">Add chroma</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+
 <!-- Shows skin chromas -->
 @if (chromas != null)
 {
@@ -114,12 +155,14 @@
     Skin skin;
     Clone viewModel;
     Chroma chromaInQuestion; // chroma that might be deleted
+    Chroma newChromaPlaceholder = new Chroma();
     private List<Chroma> chromas;
     private const string defaultButtonState = "Show image";
     private string RegularSplashButtonText = defaultButtonState;
     private string CinematicSplashButtonText = defaultButtonState;
     private bool updateSucceded = false;
-    private bool popupIsOpen = false;
+    private bool deletionPopupIsOpen = false;
+    private bool chromaAdditionPopupIsOpen = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -181,12 +224,22 @@
     public async Task OpenChromaDeletionQuestion(int id)
     {
         chromaInQuestion = await _chromaRepository.GetByIdAsync(id);
-        popupIsOpen = true;
+        deletionPopupIsOpen = true;
     }
 
     public void DeleteChroma()
     {
         _chromaRepository.DeleteAsync(chromaInQuestion.Id);
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+    }
+
+    public void AddChroma()
+    {
+        Chroma newChroma = new Chroma(newChromaPlaceholder);
+        int newId = _chromaRepository.GetLast().Result.Id + 1;
+        newChroma.Id = newId;
+        newChroma.Skin = skin;
+        _chromaRepository.AddAsync(newChroma).Wait();
         NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 
