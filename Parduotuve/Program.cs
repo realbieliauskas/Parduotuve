@@ -1,3 +1,6 @@
+using Blazorise;
+using Blazorise.Tailwind;
+using Blazorise.Icons.FontAwesome;
 using Microsoft.EntityFrameworkCore;
 using Parduotuve.Components;
 using Parduotuve.Data;
@@ -25,6 +28,10 @@ builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
+builder.Services
+    .AddBlazorise()
+    .AddTailwindProviders()
+    .AddFontAwesomeIcons();
 var app = builder.Build();
 app.UseSession();
 
