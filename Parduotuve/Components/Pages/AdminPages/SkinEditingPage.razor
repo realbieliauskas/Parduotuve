@@ -235,11 +235,11 @@
 
     public void AddChroma()
     {
-        Chroma newChroma = new Chroma(newChromaPlaceholder); // reasign variables to new instance of an object
-        int newId = _chromaRepository.GetLast().Id + 1;
+        Chroma newChroma = new Chroma(newChromaPlaceholder);
+        int newId = _chromaRepository.GetLast().Result.Id + 1;
         newChroma.Id = newId;
         newChroma.Skin = skin;
-        _chromaRepository.AddAsync(newChroma);
+        _chromaRepository.AddAsync(newChroma).Wait();
         NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 
