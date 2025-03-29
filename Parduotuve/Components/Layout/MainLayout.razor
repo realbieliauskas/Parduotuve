@@ -1,9 +1,10 @@
 ﻿@inherits LayoutComponentBase
 
-<div>
-    <main>
-        <article>
-            @Body
-        </article>
-    </main>
-</div>
+<Layout>
+    <LayoutHeader>
+        <NavMenu />
+    </LayoutHeader>
+    <LayoutContent>
+        @Body
+    </LayoutContent>
+</Layout>

@@ -1,6 +1,78 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
-    </Found>
-</Router>
+﻿<Blazorise.ThemeProvider Theme="@theme">
+    <Router AppAssembly="typeof(Program).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        </Found>
+    </Router>
+</Blazorise.ThemeProvider>
+
+@code {
+
+    private Theme theme = new Theme
+    {
+        ColorOptions = new ThemeColorOptions
+        {
+            Dark = "#010a13",
+            Info = "#00cbe5",
+            Link = "#0095a8",
+            Primary = "#1e2328",
+            Secondary = "#ccb98c",
+            Light = "#0a3342",
+        },
+        TextColorOptions = new ThemeTextColorOptions
+        {
+            Body = "#c6b690",
+            Dark = "#8d7141",
+            Info = "#00cbe5",
+            Success = "#d8b85d",
+            Light = "#f0e6d3",
+            Muted = "#414342",
+            Primary = "#cdbd94",
+            Secondary = "#c9e6d3",
+            Black50 = "#010e18",
+            White50 = "#f0e6d3",
+            Danger = "#de2f37",
+            Warning = "#de2f37",
+            White = "#f0e6cd",
+        },
+        BackgroundOptions = new ThemeBackgroundOptions
+        {
+                Body = "#010a13",
+                Dark = "#020b14",
+                Light = "#092e3d",
+                Info = "#092e3d",
+                Muted = "#5b5a56",
+                Primary = "#010e18",
+                Secondary = "#052734",
+        },
+        BarOptions = new ThemeBarOptions
+        {
+            DarkColors = new ThemeBarColorOptions
+            {
+                BackgroundColor = "#010e18",
+                Color = "#cdbd94",
+                ItemColorOptions = new ThemeBarItemColorOptions
+                {
+                    ActiveBackgroundColor = "#21292b",
+                    ActiveColor = "#cdbd94",
+                    HoverBackgroundColor = "#868478",
+                    HoverColor = "#f0e6d3",
+                },
+            },
+            LightColors = new ThemeBarColorOptions
+            {
+                BackgroundColor = "#010e18",
+                Color = "#cdbd94",
+                ItemColorOptions = new ThemeBarItemColorOptions
+                {
+                    ActiveBackgroundColor = "#21292b",
+                    ActiveColor = "#cdbd94",
+                    HoverBackgroundColor = "#868478",
+                    HoverColor = "#f0e6d3",
+                },
+            },
+        },
+            Black = "#010a13",
+    };
+}

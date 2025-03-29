@@ -26,28 +26,31 @@
             <CardBody Class="flex flex-col flex-grow">
                 <CardTitle Size="5">@skin.Name</CardTitle>
                 <CardSubtitle Size="5">@skin.Price €</CardSubtitle>
-                <Button Color="Color.Primary" Class="mt-auto mx-auto size-fit" @onclick="()=>Add_to_Cart(skin.Id)">Add to cart&nbsp<Icon Name="IconName.CartPlus" /></Button>
+                <Button Color="Color.Primary" Class="mt-auto mx-auto size-fit" @onclick="()=>Add_to_Cart(skin.Id)">Add to cart&nbsp<Icon Name="IconName.CartPlus"/></Button>
             </CardBody>
         </Card>
     }
 </Div>
-
-@* <nav>
-    <ul class="pagination justify-content-center">
-        <li class="page-item @(PageIndex == 0 ? "disabled" : "")">
-            <a class="page-link" href="/@(PageIndex-1)" tabindex="-1">Previous</a>
-        </li>
-
-        @foreach (int indice in GetSurroundingPageIndices())
-        {
-            <li class="@(indice == PageIndex ? "page-item active" : "page-item")"><a class="page-link" href="/@(indice)">@(indice + 1)</a></li>
-        }
-
-        <li class="page-item @(PageIndex >= PageCount-1 ? "disabled" : "")">
-            <a class="page-link" href="/@(PageIndex+1)" data-enhance-nav="false">Next</a>
-        </li>
-    </ul>
-</nav> *@
+<Pagination Alignment="Alignment.Center">
+    <PaginationItem Disabled="@(PageIndex == 0)">
+        <PaginationLink Clicked="@(() => NavToPage(PageIndex-1))">
+            <span aria-hidden="true">Previous</span>
+        </PaginationLink>
+    </PaginationItem>
+    @foreach(int indice in GetSurroundingPageIndices())
+    {
+        <PaginationItem Active="@(indice == PageIndex)">
+            <PaginationLink Clicked="@(() => NavToPage(indice))">
+                @(indice+1)
+            </PaginationLink>
+        </PaginationItem>
+    }
+    <PaginationItem Disabled="@(PageIndex>=PageCount-1)">
+        <PaginationLink Clicked="@(() => NavToPage(PageIndex+1))">
+            <span aria-hidden="true">Next</span>
+        </PaginationLink>
+    </PaginationItem>
+</Pagination>
 
 @code {
     [Parameter]
@@ -145,6 +148,13 @@
         }
 
         return indices;
+    }
+    private void NavToPage(int page)
+    {
+        if (page == PageIndex)
+            return;
+
+        NavManager.NavigateTo($"/{page}",false);
     }
     #endregion
     private void ApplySearchFilter()

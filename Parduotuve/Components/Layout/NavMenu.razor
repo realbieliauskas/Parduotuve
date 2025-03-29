@@ -1,28 +1,19 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Summoners Wardrobe</a>
-    </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="AdminLogin">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> AdminLogin
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Shopping_cart">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Shopping cart
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
+﻿<Bar>
+    <BarBrand>
+        Summoners Wardrobe
+    </BarBrand>
+    <BarToggler />
+    <BarMenu>
+        <BarStart>
+            <BarItem>
+                <BarLink To="/">Browse</BarLink>
+            </BarItem>
+            <BarItem>
+                <BarLink To="/AdminLogin">Admin login</BarLink>
+            </BarItem>
+            <BarItem>
+                <BarLink To="/Shopping_cart">Shopping cart</BarLink>
+            </BarItem>
+        </BarStart>
+    </BarMenu>
+</Bar>
