@@ -4,147 +4,69 @@
 @inject ISkinRepository _skinRepository
 @inject IChromaRepository _chromaRepository
 @inject NavigationManager NavigationManager;
+@inject IJSRuntime JS
 @page "/SkinEdit/{Id:int}/{SecretParam?}"
 
 @if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
 {
-    <h3>You do not have permission to view this page</h3>
+    <MudAlert Severity="Severity.Error">You do not have permission to view this page</MudAlert>
     return;
 }
+<script>
+    window.goBack = () => {
+        history.back();
+    };
+</script>
 
+<MudContainer>
+    <MudCard>
+        <MudCardContent>
+            <MudText Typo="Typo.h4" Align="Align.Center">@skin.Name</MudText>
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => JS.InvokeVoidAsync("goBack"))">Go Back</MudButton>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
 
-@if (deletionPopupIsOpen)
-{
-    <div class="modal" tabindex="-1" role="dialog" style="display:block">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Are you sure you want to delete @chromaInQuestion.Name?</h5>
-                    <button @onclick="() => deletionPopupIsOpen = false" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <button @onclick="() => DeleteChroma()" style="width:100px" >Yes</button>
-                    <button @onclick="() => deletionPopupIsOpen = false" style="width:100px">No</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+<MudForm Model="viewModel" OnValidSubmit="UpdateSkin">
+    <MudTextField Label="Name" @bind-Value="viewModel.Name" Required="true" />
+    <MudTextField Label="Price" @bind-Value="viewModel.Price" Required="true" Type="number" />
+    <MudTextField Label="Splash URL" @bind-Value="viewModel.SplashUrl" Required="true" />
+    <MudTextField Label="Cinematic Splash URL" @bind-Value="viewModel.CinematicSplashUrl" Required="true" />
+    <MudTextField Label="Quote" @bind-Value="viewModel.Quote" Multiline="true" />
+    <MudButton OnClick="UpdateSkin" Color="Color.Secondary">Update Skin</MudButton>
+</MudForm>
 
+<MudButton Color="Color.Primary" OnClick="() => chromaAdditionPopupIsOpen = true">Add Chroma</MudButton>
 
-<h3 style="margin-bottom:20px;text-align:center" >@skin.Name</h3>
+<MudDialog Visible="@chromaAdditionPopupIsOpen" cl OnClose="() => chromaAdditionPopupIsOpen = false">
+    <TitleContent>Add New Chroma</TitleContent>
+    <DialogContent>
+        <MudForm Model="newChromaPlaceholder" OnValidSubmit="AddChroma">
+            <MudTextField Label="Chroma Name" @bind-Value="newChromaPlaceholder.Name" Required="true" />
+            <MudTextField Label="Chroma Splash Art URL" @bind-Value="newChromaPlaceholder.URL" Required="true" />
+            <MudTextField Label="Chroma Price" @bind-Value="newChromaPlaceholder.Price" Required="true" Type="number" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="() => chromaAdditionPopupIsOpen = false">Close</MudButton>
+        <MudButton Color="Color.Primary" OnClick="AddChroma">Add Chroma</MudButton>
+    </DialogActions>
+</MudDialog>
 
-<button onclick="history.back();" class="btn btn-light">Go back</button>
-
-<EditForm Model = "viewModel" FormName="SkinUpdateForm" OnValidSubmit="UpdateSkin">
-    <DataAnnotationsValidator />
-
-    <div style="width:15%" class="fieldContainer">
-        <label>Name:</label> 
-        <InputText style="width:100%" @bind-Value="viewModel.Name" />
-        <ValidationMessage For="@(() => viewModel.Name)" />
-    </div>
-
-    <div style="width:7%" class="fieldContainer">
-        <label>Price:</label>
-        <InputNumber style="width:100%" @bind-Value="viewModel.Price" />
-    </div>
-    <ValidationMessage For="@(() => viewModel.Price)" />
-
-    <div style="width:80%" class="fieldContainer">
-        <label class="formRow">Splash URL:</label>
-        <InputTextArea style="width:100%" @bind-Value="viewModel.SplashUrl" />
-        <ValidationMessage For="@(() => viewModel.SplashUrl)" />
-    </div>
-
-    <button type="button" @onclick="() => ShowHideRegularSplash()">@RegularSplashButtonText</button>
-    @if(!RegularSplashButtonText.Equals(defaultButtonState))
-    {
-        <br/>
-        <img src=@viewModel.SplashUrl />
-    }
-
-    <div style="width:80%" class="fieldContainer">
-        <label>Cinematic splash URL:</label>
-        <InputTextArea style="width:100%" @bind-Value="viewModel.CinematicSplashUrl" />
-        <ValidationMessage For="@(() => viewModel.CinematicSplashUrl)" />
-    </div>
-
-    <button type="button" @onclick="() => ShowHideCinematicSplash()">@CinematicSplashButtonText</button>
-
-    @if (!CinematicSplashButtonText.Equals(defaultButtonState))
-    {
-        <br />
-        <img src=@viewModel.CinematicSplashUrl />
-        // style="margin:10px;height:360px;width:200px"
-    }
-    <div style="width:50%" class="fieldContainer">
-        <label>Quote:</label>
-        <InputTextArea style="width:100%;min-height:80px" @bind-Value="viewModel.Quote" />
-    </div>
-
-    <!-- <input style="margin:20px;margin-left:0px" type ="submit"> -->
-    <button style="margin:20px;margin-left:0px" class="btn btn-secondary">Update skin</button>
-
-    <br/>
-</EditForm >
-
-<button @onclick="() => chromaAdditionPopupIsOpen=true" class="btn btn-info">Add chroma</button>
-<br />
-
-@if (chromaAdditionPopupIsOpen)
-{
-    <div class="modal" tabindex="-1" role="dialog" style="display:block">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New Chroma</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="()=> chromaAdditionPopupIsOpen =false"></button>
-                </div>
-                <EditForm Model="@this" OnValidSubmit="AddChroma">
-                    <DataAnnotationsValidator />
-                    <div class="modal-body">
-                        <table>
-                            <tr>
-                                <td>Chroma name<span style="color:red">*</span> </td>
-                                <td><input type="text" placeholder="Chroma name..." @bind="newChromaPlaceholder.Name" /></td>
-                            </tr>
-                            <tr>
-                                <td>Chroma splash art URL<span style="color:red">*</span> </td>
-                                <td><input type="text" placeholder="Chroma URL..." @bind="newChromaPlaceholder.URL" /></td>
-                            </tr>
-                            <tr>
-                                <td>Chroma price<span style="color:red">*</span> </td>
-                                <td><input type="number" placeholder="Chroma price..." @bind="newChromaPlaceholder.Price" /></td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="()=> chromaAdditionPopupIsOpen =false">Close</button>
-                        <button type="submit" class="btn btn-primary">Add chroma</button>
-                    </div>
-                </EditForm>
-            </div>
-        </div>
-    </div>
-}
-
-
-<!-- Shows skin chromas -->
 @if (chromas != null)
 {
-    @foreach(Chroma chroma in chromas)
-    {
-        <div class="boxOfChromas">
-            <div class="individualChroma">
-                <img src=@chroma.URL alt="@chroma.Name" />
-            </div>
-            <div style="width:100%;background-color:plum">
-                <button @onclick="() => OpenChromaDeletionQuestion(chroma.Id)" style="background-color:mediumslateblue;color:red" class="chromaButton"><b>DELETE</b></button>
-                <button @onclick="() => GoToChromaEditingPage(chroma.Id)" style="text-align:right;width:70%" class="chromaButton">@chroma.Name</button>
-            </div>
-        </div>
-    }
+    <MudGrid>
+        @foreach (var chroma in chromas)
+        {
+            <MudItem>
+                <MudPaper>
+                    <MudImage Src="@chroma.URL" Alt="@chroma.Name" />
+                    <MudButton Color="Color.Error" OnClick="() => OpenChromaDeletionQuestion(chroma.Id)">Delete</MudButton>
+                    <MudButton Color="Color.Secondary" OnClick="() => GoToChromaEditingPage(chroma.Id)">@chroma.Name</MudButton>
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
 }
 
 @code {
@@ -154,14 +76,9 @@
     public string? SecretParam { get; set; }
     Skin skin;
     Clone viewModel;
-    Chroma chromaInQuestion; // chroma that might be deleted
+    Chroma chromaInQuestion;
     Chroma newChromaPlaceholder = new Chroma();
     private List<Chroma> chromas;
-    private const string defaultButtonState = "Show image";
-    private string RegularSplashButtonText = defaultButtonState;
-    private string CinematicSplashButtonText = defaultButtonState;
-    private bool updateSucceded = false;
-    private bool deletionPopupIsOpen = false;
     private bool chromaAdditionPopupIsOpen = false;
 
     protected override async Task OnInitializedAsync()
@@ -173,8 +90,7 @@
     {
         skin = await _skinRepository.GetByIdAsync(Id);
         viewModel = new Clone(skin);
-        if(skin.ChromaList != null)
-            chromas = skin.ChromaList.ToList();
+        chromas = skin.ChromaList?.ToList() ?? new List<Chroma>();
     }
 
     public async Task UpdateSkin()
@@ -183,11 +99,6 @@
         {
             viewModel.UpdateSkin(skin);
             await _skinRepository.UpdateAsync(skin);
-            updateSucceded = true;
-        }
-        else
-        {
-            updateSucceded = false;
         }
     }
 
@@ -196,49 +107,27 @@
         NavigationManager.NavigateTo($"/ChromaEdit/{this.Id}/{Id}/{SecretParam}");
     }
 
-    public void ShowHideRegularSplash()
-    {
-        if (RegularSplashButtonText.Equals(defaultButtonState))
-            RegularSplashButtonText = "Hide image";
-        else
-            RegularSplashButtonText = defaultButtonState;
-    }
-
-    public void ShowHideCinematicSplash()
-    {
-        if (CinematicSplashButtonText.Equals(defaultButtonState))
-            CinematicSplashButtonText = "Hide image";
-        else
-            CinematicSplashButtonText = defaultButtonState;
-    }
-
     public bool ValidateUpdate()
     {
         return viewModel.Price.HasValue &&
-               !String.IsNullOrEmpty(viewModel.Name) &&
-               !String.IsNullOrEmpty(viewModel.SplashUrl) &&
-               !String.IsNullOrEmpty(viewModel.CinematicSplashUrl) &&
-               !String.IsNullOrEmpty(viewModel.Quote);
+               !string.IsNullOrEmpty(viewModel.Name) &&
+               !string.IsNullOrEmpty(viewModel.SplashUrl) &&
+               !string.IsNullOrEmpty(viewModel.CinematicSplashUrl) &&
+               !string.IsNullOrEmpty(viewModel.Quote);
     }
 
     public async Task OpenChromaDeletionQuestion(int id)
     {
         chromaInQuestion = await _chromaRepository.GetByIdAsync(id);
-        deletionPopupIsOpen = true;
-    }
-
-    public void DeleteChroma()
-    {
-        _chromaRepository.DeleteAsync(chromaInQuestion.Id);
-        NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 
     public void AddChroma()
     {
-        Chroma newChroma = new Chroma(newChromaPlaceholder);
-        int newId = _chromaRepository.GetLast().Result.Id + 1;
-        newChroma.Id = newId;
-        newChroma.Skin = skin;
+        var newChroma = new Chroma(newChromaPlaceholder)
+        {
+            Id = _chromaRepository.GetLast().Result.Id + 1,
+            Skin = skin
+        };
         _chromaRepository.AddAsync(newChroma).Wait();
         NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }

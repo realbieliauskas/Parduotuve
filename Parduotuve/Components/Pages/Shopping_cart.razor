@@ -7,107 +7,49 @@
 @inject NavigationManager Navigator
 @inject ISkinRepository _skinRepository
 
-<head>
-    <style>
-        .table {
-        border-collapse: collapse;
-        margin: 0 auto;
-        }
-
-        .cell {
-        width: 15px;
-        height: 15px;
-        border: 1px solid black;
-        text-align: center;
-        }
-
-        .white {
-        background-color: white;
-        }
-
-        .black {
-        background-color: black;
-        }
-
-        body {
-        font-family: Arial, sans-serif;
-        background-color: #f5f5f5;
-        margin: 0;
-        padding: 0;
-        text-align: center;
-        }
-
-        #form1 {
-        max-width: 1000px;
-        min-block-size: 200px;
-        margin: 20px auto;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        align-content: center;
-        }
-
-        h1 {
-        text-align: center;
-        margin-bottom: 40px;
-        }
-
-        #Button {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        font-size: 14px;
-        cursor: pointer;
-        border-radius: 5px;
-        margin-bottom: 10px;
-        }
-    </style>
-</head>
-
-        <div>
-            <h2>Shopping cart</h2>
-            @if (ShoppingCart.IsEmpty())
+<MudText Typo="Typo.h4" GutterBottom>Shopping Cart</MudText>
+    
+@if (ShoppingCart.IsEmpty())
+{
+    <MudAlert Severity="Severity.Info">Your shopping cart is empty. Go to the browse page and order what you want.</MudAlert>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Navitage_to_Browse">Browse</MudButton>
+}
+else
+{
+    <MudSimpleTable>
+        <MudTHeadRow>
+            <MudTh>Name</MudTh>
+            <MudTh>Price</MudTh>
+            <MudTh>Quantity</MudTh>
+            <MudTh>Increase</MudTh>
+            <MudTh>Decrease</MudTh>
+            <MudTh>Total</MudTh>
+        </MudTHeadRow>
+        <tbody>
+            @foreach (var item in ShoppingCart)
             {
-                <p>Your shopping cart is empty, go to browse page and order, what you want</p>
+                Skin skin = GetSkin(item.Key);
+                if (skin != null)
+                {
+                    <MudTr>
+                        <MudTd>@skin.Name</MudTd>
+                        <MudTd>@skin.Price €</MudTd>
+                        <MudTd>@item.Value</MudTd>
+                        <MudTd>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="() => IncreaseQuantity(item.Key)">+</MudButton>
+                        </MudTd>
+                        <MudTd>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DecreaseQuantity(item.Key)">-</MudButton>
+                        </MudTd>
+                        <MudTd>@Total(skin.Price, item.Value) €</MudTd>
+                    </MudTr>
+                }
             }
-            else
-            {
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                            <th>Increase</th>
-                            <th>Decrease</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in ShoppingCart)
-                        {
-                            Skin skin = GetSkin(item.Key);
-                            @if (skin!=null)
-                            {
-                                <tr>
-                                    <td>@skin.Name</td>
-                                    <td>@skin.Price €</td>
-                                    <td>@item.Value</td>
-                                    <td><button @onclick="@(() => IncreaseQuantity(item.Key))">+</button></td>
-                                    <td><button @onclick="@(() => DecreaseQuantity(item.Key))">-</button></td>
-                                    <td>@Total(skin.Price, item.Value) €</td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-                <h3>Total: @Total() €</h3>
-                <button id="Button" @onclick="HandleCheckout">Proceed to Checkout</button>
-            }
-        </div>
+        </tbody>
+    </MudSimpleTable>
+    <MudText Typo="Typo.h4">Total: @Total() €</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleCheckout">Proceed to Checkout</MudButton>
+}
 
 
 @code {
