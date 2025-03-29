@@ -1,19 +1,5 @@
-﻿<Bar>
-    <BarBrand>
-        Summoners Wardrobe
-    </BarBrand>
-    <BarToggler />
-    <BarMenu>
-        <BarStart>
-            <BarItem>
-                <BarLink To="/">Browse</BarLink>
-            </BarItem>
-            <BarItem>
-                <BarLink To="/AdminLogin">Admin login</BarLink>
-            </BarItem>
-            <BarItem>
-                <BarLink To="/Shopping_cart">Shopping cart</BarLink>
-            </BarItem>
-        </BarStart>
-    </BarMenu>
-</Bar>
+﻿<MudAppBar>
+    <MudButton StartIcon="@Icons.Material.Filled.MenuBook" Color="Color.Inherit" Href="/">Browse</MudButton>
+    <MudButton StartIcon="@Icons.Material.Filled.Shield" Color="Color.Inherit" Href="/AdminLogin">Admin login</MudButton>
+    <MudButton StartIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" Href="/Shopping_cart">Shopping cart</MudButton>
+</MudAppBar>

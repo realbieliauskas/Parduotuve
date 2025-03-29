@@ -1,10 +1,15 @@
 ﻿@inherits LayoutComponentBase
 
-<Layout>
-    <LayoutHeader>
-        <NavMenu />
-    </LayoutHeader>
-    <LayoutContent>
-        @Body
-    </LayoutContent>
-</Layout>
+<MudThemeProvider IsDarkMode="true"/>
+<MudPopoverProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <NavMenu />
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.False" Class="pb-3">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
