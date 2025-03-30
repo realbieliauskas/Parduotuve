@@ -1,4 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@using Parduotuve.Services
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@implements IDisposable
 
 <div class="page">
     <div class="sidebar">
@@ -6,8 +10,45 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class="top-row px-4 d-flex justify-content-end align-items-center gap-2">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2"
+                        type="button"
+                        id="userDropdown"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                         class="bi bi-person" viewBox="0 0 16 16">
+                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1
+                        1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516
+                        10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832
+                        1.664z" />
+                    </svg>
+                    @if (!AuthService.IsLoggedIn())
+                    {
+                        <span>Esate neprisijungę</span>
+                    }
+                    else if (AuthService.IsAdmin())
+                    {
+                        <span>Sveiki, valdytojau !</span>
+                    }
+                    else
+                    {
+                        <span>Sveiki, @AuthService.CurrentUser?.Username !</span>
+                    }
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    @if (!AuthService.IsLoggedIn())
+                    {
+                        <li><button class="dropdown-item" @onclick="Login">Prisijungti</button></li>
+                    }
+                    else
+                    {
+                        <li><button class="dropdown-item" @onclick="GoToAccount">Paskyros valdymas</button></li>
+                        <li><button class="dropdown-item" @onclick="Logout">Atsijungti</button></li>
+                    }
+                </ul>
+            </div>
         </div>
 
         <article class="content px-4">
@@ -21,3 +62,42 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    private void Login()
+    {
+        Navigation.NavigateTo("/AdminLogin");
+    }
+
+    private void Logout()
+    {
+        AuthService.Logout();
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+    private void GoToAccount()
+    {
+        Navigation.NavigateTo("/Account");
+    }
+
+    protected override void OnInitialized()
+    {
+        AuthService.OnAuthStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        AuthService.OnAuthStateChanged -= StateHasChanged;
+    }
+    private bool _restored = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_restored)
+        {
+            _restored = true;
+            await AuthService.RestoreLoginAsync();
+            StateHasChanged(); 
+        }
+    }
+}

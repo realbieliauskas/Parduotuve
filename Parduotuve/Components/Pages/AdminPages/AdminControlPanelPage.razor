@@ -1,11 +1,13 @@
 ﻿@page "/AdminPanel/{SecretParam?}"
 @using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
+@using Parduotuve.Services
 @inject ISkinRepository _skinRepository
 @inject IChromaRepository _chromaRepository
 @inject NavigationManager NavManager
+@inject AuthService AuthService
 
-@if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
+@if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret) || AuthService.IsAdmin()==false)
 {
     <h3>You do not have permission to view this page</h3>
     return;
