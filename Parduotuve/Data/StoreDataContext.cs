@@ -44,7 +44,8 @@ namespace Parduotuve.Data
                     new User
                     {
                         Id = 1,
-                        Name = "guy",
+                        Username = "name",
+                        Password = "password"
                     }
                 );
         }
