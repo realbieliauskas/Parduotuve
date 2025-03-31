@@ -7,7 +7,7 @@
 @inject Shopping_Cart_Service Shopping_Cart
 @inject ISnackbar Snackbar
 
-<MudPaper Class="d-inline-flex justify-center px-3 pt-2 pb-0" Style="width:100%">
+<MudPaper Class="d-inline-flex justify-center align-content-center align-center px-3 pt-2 pb-0" Style="width:100%">
     <MudSelect Variant="Variant.Outlined" Label="Sort by" @bind-Value="selectedSortOption" TextChanged="@(() => LoadSkinsAsync())">
         <MudSelectItem Value="@("ChampionName")">
             <MudIcon Icon="@Icons.Material.Filled.Person4" /> Champion Name
@@ -19,8 +19,8 @@
             <MudIcon Icon="@Icons.Material.Filled.Label" /> Name
         </MudSelectItem>
     </MudSelect>
-    <MudSpacer/>
-    <MudCheckBox @bind-Value="isReversed" Label="Reverse sort"></MudCheckBox>
+    <MudCheckBox @bind-Value="IsReversed" Label="Reverse sort"></MudCheckBox>
+    <MudSpacer />
     <MudTextField @bind-Value="searchQuery" @oninput="LoadSkinsAsync" Label="Search by skin name"></MudTextField>
 </MudPaper>
 
@@ -61,7 +61,8 @@ else
     private IEnumerable<Skin> FilteredSkins { get; set; } = new List<Skin>();
     private string selectedSortOption { get; set; } = "ChampionName";
     private string searchQuery = string.Empty;
-    private bool isReversed {get; set;} = false;
+    private bool _isReversed = false;
+    public bool IsReversed { get { return _isReversed; } set { _isReversed = value; LoadSkinsAsync().Wait(); } }
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,7 +101,7 @@ else
             (skin.Name?.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
             (skin.ChampionName?.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false)
         );
-        if (isReversed)
+        if (IsReversed)
         {
             FilteredSkins = FilteredSkins.Reverse();
         }
