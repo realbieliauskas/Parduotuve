@@ -3,47 +3,52 @@
 @using System.ComponentModel.DataAnnotations;
 @inject IChromaRepository _chromaRepository
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 @page "/ChromaEdit/{SkinId:int}/{Id:int}/{SecretParam?}"
 
 @if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
 {
-    <h3>You do not have permission to view this page</h3>
+    <MudText Typo="Typo.h5" Color="Color.Error">You do not have permission to view this page</MudText>
     return;
 }
+<script>
+    window.goBack = () => {
+        history.back();
+    };
+</script>
 
-<h3 style="margin-bottom:20px;text-align:center">@chroma.Name @chroma.Skin.Name</h3>
-
-<button onclick="history.back();" class="btn btn-light">Go back</button>
-
-<EditForm Model="viewModel" FormName="ChromaUpdateForm" OnValidSubmit="UpdateChroma">
-    <DataAnnotationsValidator />
-    <div style="width:15%" class="fieldContainer">
-        <label>Name:</label>
-        <InputText style="width:100%" @bind-Value="viewModel.Name" />
-        <ValidationMessage For="@(() => viewModel.Name)" />
-    </div>
-
-    <div style="width:15%" class="fieldContainer">
-        <label>Price:</label>
-        <InputText style="width:100%" @bind-Value="viewModel.Price" />
-        <ValidationMessage For="@(() => viewModel.Price)" />
-    </div>
-
-    <div style="width:80%" class="fieldContainer">
-        <label class="formRow">Splash URL:</label>
-        <InputTextArea style="width:100%" @bind-Value="viewModel.URL" />
-        <ValidationMessage For="@(() => viewModel.URL)" />
-    </div>
-
-    <button type="button" @onclick="() => ShowHideRegularSplash()">@RegularSplashButtonText</button>
-    @if (!RegularSplashButtonText.Equals(defaultButtonState))
-    {
-        <br />
-        <img src=@viewModel.URL alt="Chroma image" />
-    }
-    <br />
-    <button style="margin-top:30px" class="btn btn-secondary">Update chroma</button>
-</EditForm>
+<MudContainer>
+    <MudText Typo="Typo.h4" Align="Align.Center">@chroma.Name @chroma.Skin.Name</MudText>
+    
+    <MudButton Color="Color.Default" OnClick="@(() => JS.InvokeVoidAsync("goBack"))">Go Back</MudButton>
+    
+    <EditForm Model="viewModel" OnValidSubmit="UpdateChroma">
+        <DataAnnotationsValidator />
+        <MudGrid>
+            <MudItem xs="12" sm="6" md="3">
+                <MudTextField Label="Name" Required="true" @bind-Value="viewModel.Name" />
+                <ValidationMessage For="@(() => viewModel.Name)" />
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudTextField Label="Price" Required="true" @bind-Value="viewModel.Price" />
+                <ValidationMessage For="@(() => viewModel.Price)" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField Label="Splash URL" Required="true" @bind-Value="viewModel.URL" />
+                <ValidationMessage For="@(() => viewModel.URL)" />
+            </MudItem>
+        </MudGrid>
+        
+        <MudButton Color="Color.Primary" OnClick="ShowHideRegularSplash">@RegularSplashButtonText</MudButton>
+        
+        @if (!RegularSplashButtonText.Equals(defaultButtonState))
+        {
+            <MudImage Src="@viewModel.URL" Alt="Chroma image" Style="width:100%;"/>
+        }
+        
+        <MudButton Color="Color.Secondary" OnClick="UpdateChroma" Class="mt-4">Update Chroma</MudButton>
+    </EditForm>
+</MudContainer>
 
 @code {
     [Parameter]
@@ -56,6 +61,7 @@
     Clone viewModel;
     private const string defaultButtonState = "Show image";
     private string RegularSplashButtonText;
+    
     protected override async Task OnInitializedAsync()
     {
         await GetChroma();
@@ -70,7 +76,7 @@
 
     public void UpdateChroma()
     {
-        if(ValidateUpdate())
+        if (ValidateUpdate())
         {
             viewModel.UpdateChroma(chroma);
             _chromaRepository.UpdateAsync(chroma);
@@ -79,17 +85,14 @@
 
     public void ShowHideRegularSplash()
     {
-        if (RegularSplashButtonText.Equals(defaultButtonState))
-            RegularSplashButtonText = "Hide image";
-        else
-            RegularSplashButtonText = defaultButtonState;
+        RegularSplashButtonText = RegularSplashButtonText.Equals(defaultButtonState) ? "Hide image" : defaultButtonState;
     }
 
     public bool ValidateUpdate()
     {
-        return !String.IsNullOrEmpty(viewModel.Name) &&
-               !String.IsNullOrEmpty(viewModel.URL) &&
-               !String.IsNullOrEmpty(viewModel.Price);
+        return !string.IsNullOrEmpty(viewModel.Name) &&
+               !string.IsNullOrEmpty(viewModel.URL) &&
+               !string.IsNullOrEmpty(viewModel.Price);
     }
 
     public class Clone

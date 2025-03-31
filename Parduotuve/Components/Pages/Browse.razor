@@ -1,98 +1,72 @@
 ﻿@page "/"
-@page "/{PageParam:int}"
 @using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
 @using Parduotuve.Services
 @inject ISkinRepository _skinRepository
 @inject NavigationManager NavManager
 @inject Shopping_Cart_Service Shopping_Cart
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=add_shopping_cart" />
+@inject ISnackbar Snackbar
 
-<div class="top-bar">
-    <label for="sortOptions">Sort by:</label>
-    <select id="sortOptions" @onchange="SortSkins">
-        <option value="ChampionName">Champion Name</option>
-        <option value="Price">Price</option>
-        <option value="Name">Name</option>
-    </select>
-    <input type="checkbox" id="reverseSort" @onchange="ToggleReverseSort" />
-    <label for="reverseSort">Reverse Sort</label>
-    <input type="text" placeholder="Search by skin name" @bind="searchQuery" @oninput="SearchSkins" style="margin-left: 10px;" />
-</div>
+<MudPaper Class="d-inline-flex justify-center px-3 pt-2 pb-0" Style="width:100%">
+    <MudSelect Variant="Variant.Outlined" Label="Sort by" @bind-Value="selectedSortOption" TextChanged="@(() => LoadSkinsAsync())">
+        <MudSelectItem Value="@("ChampionName")">
+            <MudIcon Icon="@Icons.Material.Filled.Person4" /> Champion Name
+        </MudSelectItem>
+        <MudSelectItem Value="@("Price")">
+            <MudIcon Icon="@Icons.Material.Filled.Euro" /> Price
+        </MudSelectItem>
+        <MudSelectItem Value="@("Name")">
+            <MudIcon Icon="@Icons.Material.Filled.Label" /> Name
+        </MudSelectItem>
+    </MudSelect>
+    <MudSpacer/>
+    <MudCheckBox @bind-Value="isReversed" Label="Reverse sort"></MudCheckBox>
+    <MudTextField @bind-Value="searchQuery" @oninput="LoadSkinsAsync" Label="Search by skin name"></MudTextField>
+</MudPaper>
 
-<div style="padding: 10px; text-align: center;">
+<MudPaper Class="justify-center d-flex flex-wrap gap-4 py-4">
     @foreach (Skin skin in GetPageContents())
     {
-        <div @onclick="@((e) => EntryClicked(false,skin.Id,e))" style="border: 1px solid black;padding:10px; margin:15px;text-align:center;cursor:pointer;display:inline-block;">
-            <img src=@skin.SplashUrl style="margin:10px;height:360px;width:200px" />
-            <h4>@skin.Name</h4>
-            <p>@skin.ChampionName</p>
-            <h3>@skin.Price €</h3>
-            <button @onclick="@((e) => EntryClicked(true,skin.Id,e))">
-                <span style="padding:10px; display:inline-flex;align-items:center;">
-                    <p style="margin:0;margin-right:10px;">TO CART</p>
-                    <span class="material-symbols-outlined">
-                        add_shopping_cart
-                    </span>
-                </span>
-            </button>
-        </div>
+        <MudCard Style="width:260px;cursor:pointer" onclick="@(()=>OpenDescription(skin.Id))">
+            <MudCardMedia Image="@skin.SplashUrl" Height="480"/>
+            <MudCardContent>
+                <MudText Typo="Typo.h5">@skin.Name</MudText>
+            </MudCardContent>
+            <MudCardActions Class="justify-center flex-column">
+                <MudText Typo="Typo.h6" Color="Color.Secondary">@skin.Price €</MudText>
+                <MudButton EndIcon="@Icons.Material.Filled.AddShoppingCart" @onclick="@(()=>AddToCart(skin.Id))">Add to cart&nbsp</MudButton>
+            </MudCardActions>
+        </MudCard>
     }
-</div>
-
-<nav>
-    <ul class="pagination justify-content-center">
-        <li class="page-item @(PageIndex == 0 ? "disabled" : "")">
-            <a class="page-link" href="/@(PageIndex-1)" tabindex="-1">Previous</a>
-        </li>
-
-        @foreach (int indice in GetSurroundingPageIndices())
-        {
-            <li class="@(indice == PageIndex ? "page-item active" : "page-item")"><a class="page-link" href="/@(indice)">@(indice + 1)</a></li>
-        }
-
-        <li class="page-item @(PageIndex >= PageCount-1 ? "disabled" : "")">
-            <a class="page-link" href="/@(PageIndex+1)" data-enhance-nav="false">Next</a>
-        </li>
-    </ul>
-</nav>
+</MudPaper>
+@if(GetPageContents().Count() > 0)
+{
+    <div class="d-flex flex-column align-center">
+        <MudPagination BoundaryCount="2" MiddleCount="5" Count="@PageCount" Selected="@Page" SelectedChanged="@((page) => NavToPage(page))" Class="mt-4" />
+    </div>
+}
+else
+{
+    <h1>No results were found.</h1>
+}
 
 @code {
+    [SupplyParameterFromQuery]
     [Parameter]
-    public int? PageParam { get; set; }
+    public int Page { get; set; }
+    private static int ItemsPerPage = 12;
+    private int PageCount { get { return FilteredSkins.Chunk(ItemsPerPage).ToArray().Length; } }
+
     private IEnumerable<Skin> Skins { get; set; } = new List<Skin>();
     private IEnumerable<Skin> FilteredSkins { get; set; } = new List<Skin>();
-    private string selectedSortOption = "ChampionName";
+    private string selectedSortOption { get; set; } = "ChampionName";
     private string searchQuery = string.Empty;
-    private static int ItemsPerPage = 10;
-    private static int BarLength = 2;
-    private int PageIndex { get; set; } = 0;
-    private int PageCount { get { return FilteredSkins.Chunk(ItemsPerPage).ToArray().Length; } }
-    private bool isReversed = false;
+    private bool isReversed {get; set;} = false;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadSkinsAsync();
-    }
-
-    public async override Task SetParametersAsync(ParameterView parameters)
-    {
-        await base.SetParametersAsync(parameters);
-        PageParam = PageParam ?? 0;
-        if(PageParam < 0)
-        {
-            PageParam = 0;
-        }
-        else if(PageParam >= PageCount)
-        {
-            PageParam = PageCount - 1;
-        }
-        PageIndex = (int)PageParam;
-    }
-
-    private async Task SortSkins(ChangeEventArgs e)
-    {
-        selectedSortOption = e.Value?.ToString() ?? "ChampionName";
+        Snackbar.Configuration.PreventDuplicates = false;
+        if(Page<=0) { Page = 1; }
         await LoadSkinsAsync();
     }
 
@@ -103,59 +77,23 @@
         StateHasChanged();
     }
 
-    private void SearchSkins(ChangeEventArgs e)
-    {
-        searchQuery = e.Value?.ToString() ?? string.Empty;
-        ApplySearchFilter();
-        StateHasChanged();
-    }
-
-    #region Page navigation helpers
     private IEnumerable<Skin> GetPageContents()
     {
-        return FilteredSkins.Chunk(ItemsPerPage).ToArray()[PageIndex];
+        int tempPage = Page;
+        if (Page <= 0)
+            tempPage = 1;
+        if (Page > PageCount)
+            tempPage = PageCount;
+        if (tempPage == 0 || FilteredSkins.Count() == 0)
+            return Array.Empty<Skin>();
+
+        return FilteredSkins.Chunk(ItemsPerPage).ToArray()[tempPage - 1];
     }
-    private IEnumerable<int> GetSurroundingPageIndices()
+    private void NavToPage(int page)
     {
-        int leftCursor = PageIndex;
-        int rightCursor = PageIndex;
-        List<int> indices = new List<int>();
-
-        indices.Add(PageIndex);
-
-        for(int x = 0; x < BarLength; x++)
-        {
-            if(leftCursor - 1 < 0 && rightCursor + 1 >= PageCount)
-            {
-                break;
-            }
-
-            if(leftCursor - 1 >= 0)
-            {
-                leftCursor -= 1;
-                indices.Insert(0, leftCursor);
-            }
-            else
-            {
-                rightCursor += 1;
-                indices.Add(rightCursor);
-            }
-
-            if(rightCursor + 1 < PageCount)
-            {
-                rightCursor += 1;
-                indices.Add(rightCursor);
-            }
-            else if(leftCursor -1 >= 0)
-            {
-                leftCursor -= 1;
-                indices.Insert(0, leftCursor);
-            }
-        }
-
-        return indices;
+        string pagedUri = NavManager.GetUriWithQueryParameter("Page", page);
+        NavManager.NavigateTo(pagedUri, false);
     }
-    #endregion
     private void ApplySearchFilter()
     {
         FilteredSkins = Skins.Where(skin =>
@@ -167,42 +105,15 @@
             FilteredSkins = FilteredSkins.Reverse();
         }
     }
-    private async Task ToggleReverseSort(ChangeEventArgs e)
+    private void OpenDescription(int id)
     {
-        isReversed = (bool)e.Value;
-        await LoadSkinsAsync();
-    }
-
-    private double lastClickPos = -1;
-    private void EntryClicked(bool cart, int id, MouseEventArgs e)
-    {
-        double newClickPos = e.ClientX*e.ClientY;
-        if (lastClickPos == newClickPos)
-        {
-            lastClickPos = -1;
-            return;
-        }
-        lastClickPos = newClickPos;
-        if (cart)
-        {
-            Add_to_Cart(id);
-            return;
-        }
         NavManager.NavigateTo("/Description/" + id);
     }
 
-    private void Add_to_Cart(int id)
+    private async Task AddToCart(int id)
     {
         Shopping_Cart.Add(id);
+        string skin = (await _skinRepository.GetByIdAsync(id)).Name;
+        Snackbar.Add($"{skin} added to cart!", Severity.Success);
     }
 }
-
-<style>
-    .top-bar {
-        display: flex;
-        justify-content: flex-end;
-        padding: 10px;
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #e7e7e7;
-    }
-</style>

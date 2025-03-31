@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using Parduotuve.Components;
 using Parduotuve.Data;
 using Parduotuve.Data.Repositories;
 using Parduotuve.Services;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +28,7 @@ builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
+builder.Services.AddMudServices();
 var app = builder.Build();
 app.UseSession();
 
