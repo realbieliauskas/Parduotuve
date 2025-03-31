@@ -1,39 +1,149 @@
 ﻿@page "/AdminLogin"
 @using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
+@using Parduotuve.Services
 @inject ISkinRepository _skinRepository
 @inject NavigationManager NavManager
+@inject AuthService AuthService
 
-<EditForm Model="input" FormName="AdminLogin" OnValidSubmit="CheckSubmition">
-    <DataAnnotationsValidator/>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    }
 
-    <label for="username">Username:</label>
-    <InputText id="username" @bind-Value="input.Username"/>
-    <br />
-    <label for="password">Password:</label>
-    <InputText id="password" @bind-Value="input.Password" />
-    <br/>
-    <input type="submit"/>
-</EditForm>
+    .container {
+    margin-top: 50px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    display: inline-block;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 50%;
+    }
 
-<p>@text</p>
+    .input-field {
+    width: 50%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    }
+
+    .btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    }
+
+    .btn-primary {
+    width: 50%;
+    background-color: #007bff;
+    color: white;
+    margin-top: 10px;
+    }
+
+    .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    margin-left: 10px;
+    }
+
+    .register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    }
+
+    .text-muted {
+    font-size: 14px;
+    }
+
+    .error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+    }
+
+    .success-message {
+    color: green;
+    font-size: 14px;
+    margin-top: 10px;
+    }
+</style>
+
+<div class="container">
+    <EditForm Model="input" OnValidSubmit="CheckSubmition">
+        <DataAnnotationsValidator />
+
+        <InputText id="username" class="input-field" @bind-Value="input.Username" placeholder="Username" autocomplete="off" />
+        <br />
+        <InputText id="password" class="input-field" @bind-Value="input.Password" placeholder="Password" type="password" autocomplete="off" />
+        <br />
+
+        <button type="submit" class="btn btn-primary">Prisijungti</button>
+    </EditForm>
+
+    <div class="register-container">
+        <p class="text-muted">Don't have an account ?</p>
+        <button class="btn btn-secondary" @onclick="CreateAccount">Create account</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="@messageClass">@message</p>
+    }
+</div>
 
 @code {
     private InputInfo input = new InputInfo();
+    private string message = String.Empty;
+    private string messageClass = "error-message";
     private const string username = "alv";
     private const string password = "crz";
     public const string Secret = "dsfoiugnfdonhgfodinhdf";
-    string text = "";
 
-    public void CheckSubmition()
+    public async Task CheckSubmition()
     {
-        if (input.Password.Equals(password) && input.Username.Equals(username))
+
+        if (string.IsNullOrEmpty(input.Username) || string.IsNullOrEmpty(input.Password))
         {
+            message = "Username and password cannot be empty!";
+            messageClass = "error-message";
+            return;
+        }
+        if (input.Username==username && input.Password==password)
+        {
+            AuthService.Set_admin();
             NavManager.NavigateTo($"/AdminPanel/{Secret}");
+            return;
+        }
+        var user = await AuthService.LoginAsync(input.Username, input.Password);
+        if (user != null)
+        {
+            AuthService.Set_Guest();
+            message = "Login succesful !";
+            messageClass = "success-message";
+            
+        }
+        else
+        {
+            message = "Invalid username or password!";
+            messageClass = "error-message";
         }
     }
 
-   protected class InputInfo
+    public void CreateAccount()
+    {
+        NavManager.NavigateTo("/Account_creation");
+    }
+
+    protected class InputInfo
     {
         public string Username { get; set; }
         public string Password { get; set; }

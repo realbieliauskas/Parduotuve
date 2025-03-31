@@ -19,7 +19,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChromaRepository, ChromaRepository>();
 //builder.Services.AddScoped<Shopping_Cart_Service>();
 builder.Services.AddSingleton<Shopping_Cart_Service>();
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
