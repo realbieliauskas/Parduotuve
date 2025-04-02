@@ -12,13 +12,14 @@
 
         <MudForm Model="@input" IsValid="@_isValid" @ref="form">
             <MudTextField Label="Username" @bind-Value="@input.Username" Required="true" RequiredError="Username is required." />
-            <MudTextField Label="Password" @bind-Value="@input.Password" Required="true" RequiredError="Password is required." InputType="InputType.Password" />
+            <MudTextField Label="Password" @bind-Value="@input.Password" Required="true" RequiredError="Password is required." InputType="InputType.Password"/>
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CheckSubmission" Disabled="@_loading" Class="mt-3" FullWidth>
                 <MudProgressCircular Indeterminate="true" Size="Size.Large" Style="margin-right: 10px;" Hidden="!_loading" />
                 Login
             </MudButton>
             <MudText Color="Color.Error">@ErrorMessage</MudText>
+            <MudLink Href="/Account_creation">Don't have an account?</MudLink>
         </MudForm>
     </MudPaper>
 </MudContainer>
@@ -35,14 +36,15 @@
 
     public async Task CheckSubmission()
     {
+        _loading = true;
         ErrorMessage = "";
         await form.Validate();
         _isValid = form.IsValid;
         if(!_isValid)
         {
+            _loading = false;
             return;
         }
-        _loading = true;
         if (input.Username==username && input.Password==password)
         {
             AuthService.Set_admin();
