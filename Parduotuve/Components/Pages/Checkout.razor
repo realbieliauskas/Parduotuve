@@ -154,6 +154,35 @@ else
         {49.99, "price_1R9V9wCeO2Ku9PZcuZyiDTlc"},
         {99.99, "price_1R9VB6CeO2Ku9PZcf6qgJkNn"},
     };
+    private async Task<string> GetPurchaseHash()
+    {
+        string purchaseString = String.Empty;//I SITA REIKES PRIDETI USERIO ID KAI TAI BUS ACCESSIBLE
+        foreach ((int, Skin) entry in Cart)
+        {
+            for (int x = 0; x < entry.Item1; x++)
+            {
+                purchaseString += "item" + entry.Item2;
+            }
+        }
+        purchaseString += "time" + DateTime.UtcNow.Ticks.ToString();
+
+        byte[] purchaseStringBytes = ASCIIEncoding.UTF8.GetBytes(purchaseString);
+        byte[] buffer = new byte[purchaseStringBytes.Length];
+        MemoryStream ms = new MemoryStream(buffer);
+        ms.Write(purchaseStringBytes, 0, buffer.Length);
+        byte[] purchaseHashBytes = await System.Security.Cryptography.SHA512.HashDataAsync(ms);
+        return ByteArrayToString(purchaseHashBytes);
+    }
+    private static string ByteArrayToString(byte[] arrInput)
+    {
+        int i;
+        StringBuilder sOutput = new StringBuilder(arrInput.Length);
+        for (i = 0; i < arrInput.Length; i++)
+        {
+            sOutput.Append(arrInput[i].ToString("X2"));
+        }
+        return sOutput.ToString();
+    }
     /// <summary>
     /// This method handles the event of clicking the confirm purchase button
     /// It is responsible for performing verification and delivering the purchased items
@@ -161,21 +190,24 @@ else
     private async Task HandleCheckout()
     {
         List<SessionLineItemOptions> lineItems = new List<SessionLineItemOptions>();
-
+        Dictionary<string, string> metaItems = new Dictionary<string, string>();
         foreach ((int, Skin) entry in Cart)
         {
             var option = new SessionLineItemOptions();
             option.Quantity = entry.Item1;
             option.Price = StripePriceIDs.GetValueOrDefault<double,string>(entry.Item2.Price ?? 99.99, StripePriceIDs.Values.Last());
             lineItems.Add(option);
+            metaItems.Add(entry.Item2.Id.ToString(), entry.Item1.ToString());
         }
-
+        string hash = await GetPurchaseHash();
+        metaItems.Add("paymentHash", hash);
         SessionCreateOptions options = new SessionCreateOptions()
             {
                 LineItems = lineItems,
                 Mode = "payment",
-                SuccessUrl = NavManager.BaseUri+"Checkout/thanks",
+                SuccessUrl = NavManager.BaseUri + "Checkout/thanks",
                 CancelUrl = NavManager.BaseUri + "Checkout/failed",
+                Metadata = metaItems,
             };
 
         var service = new SessionService();

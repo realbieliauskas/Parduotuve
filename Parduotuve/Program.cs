@@ -30,8 +30,12 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
 builder.Services.AddMudServices();
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
 var app = builder.Build();
 app.UseSession();
+
+app.MapControllers();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -46,6 +50,12 @@ using (var scope = app.Services.CreateScope())
     var seeder = scope.ServiceProvider.GetRequiredService<SkinSeeder>();
     await seeder.SeedSkinsAsync();
 }
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
+});
 
 app.UseHttpsRedirection();
 
