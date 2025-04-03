@@ -5,9 +5,10 @@
 @inject NavigationManager NavManager
 @inject ISkinRepository _skinRepository
 @inject IJSRuntime JS
+@using Stripe.Checkout
 
 
-@if (CartString!="thanks")
+@if (CartString!="thanks" && CartString != "failed")
 {
     <h2>Your shopping cart:</h2>
     <script>
@@ -49,12 +50,16 @@
     </style>
 
     <h2>Total price: @TotalPrice</h2>
-    <button @onclick="ConfirmPurchase">Finalize purchase</button>
+    <MudButton OnClick="HandleCheckout">Finalize purchase</MudButton>
 }
-else
+else if(CartString == "thanks")
 {
     <h2>Thank you for your order!</h2>
     <h3>You will receive your real purchased goods through the means of a file download soon</h3>
+}
+else
+{
+    <h2>The purchase failed. Please try again.</h2>
 }
 
 @code {
@@ -141,19 +146,49 @@ else
 
         return memoryStream;
     }
+    private static Dictionary<double, string> StripePriceIDs = new Dictionary<double, string>()
+    {
+        {9.99,"price_1R9V8TCeO2Ku9PZcbDIXGUFs"},
+        {14.99, "price_1R9V93CeO2Ku9PZcxNQmsdiS"},
+        {19.99, "price_1R9V9WCeO2Ku9PZcY1k8PM1M"},
+        {49.99, "price_1R9V9wCeO2Ku9PZcuZyiDTlc"},
+        {99.99, "price_1R9VB6CeO2Ku9PZcf6qgJkNn"},
+    };
     /// <summary>
     /// This method handles the event of clicking the confirm purchase button
     /// It is responsible for performing verification and delivering the purchased items
     /// </summary>
-    private async Task ConfirmPurchase()
+    private async Task HandleCheckout()
     {
-        Stream fileStream = GetFileStream();
-        string fileName = "wares.txt";
+        List<SessionLineItemOptions> lineItems = new List<SessionLineItemOptions>();
 
-        using DotNetStreamReference streamRef = new DotNetStreamReference(stream: fileStream);
+        foreach ((int, Skin) entry in Cart)
+        {
+            var option = new SessionLineItemOptions();
+            option.Quantity = entry.Item1;
+            option.Price = StripePriceIDs.GetValueOrDefault<double,string>(entry.Item2.Price ?? 99.99, StripePriceIDs.Values.Last());
+            lineItems.Add(option);
+        }
 
-        await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        SessionCreateOptions options = new SessionCreateOptions()
+            {
+                LineItems = lineItems,
+                Mode = "payment",
+                SuccessUrl = NavManager.BaseUri+"Checkout/thanks",
+                CancelUrl = NavManager.BaseUri + "Checkout/failed",
+            };
 
-        NavManager.NavigateTo("/Checkout/thanks");
+        var service = new SessionService();
+        var session = await service.CreateAsync(options);
+        NavManager.NavigateTo(session.Url);
+
+        // Stream fileStream = GetFileStream();
+        // string fileName = "wares.txt";
+
+        // using DotNetStreamReference streamRef = new DotNetStreamReference(stream: fileStream);
+
+        // await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+
+        // NavManager.NavigateTo("/Checkout/thanks");
     }
 }

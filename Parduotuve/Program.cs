@@ -5,6 +5,7 @@ using Parduotuve.Data;
 using Parduotuve.Data.Repositories;
 using Parduotuve.Services;
 using MudBlazor.Services;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,5 +54,6 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+StripeConfiguration.ApiKey = app.Configuration.GetValue<string>("StripeAPIKey");
 
 app.Run();
