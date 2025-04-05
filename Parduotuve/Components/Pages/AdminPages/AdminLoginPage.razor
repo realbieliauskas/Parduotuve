@@ -6,120 +6,49 @@
 @inject NavigationManager NavManager
 @inject AuthService AuthService
 
-<style>
-    body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    }
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="d-flex justify-center align-center min-vh-100 pa-5">
+    <MudPaper Elevation="3" Class="pa-5" Style="border-radius: 12px; width: 100%;">
+        <MudText Typo="Typo.h5" Class="mb-4 text-center">Login</MudText>
 
-    .container {
-    margin-top: 50px;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    display: inline-block;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    width: 50%;
-    }
+        <MudForm Model="@input" IsValid="@_isValid" @ref="form">
+            <MudTextField Label="Username" @bind-Value="@input.Username" Required="true" RequiredError="Username is required." />
+            <MudTextField Label="Password" @bind-Value="@input.Password" Required="true" RequiredError="Password is required." InputType="InputType.Password"/>
 
-    .input-field {
-    width: 50%;
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    }
-
-    .btn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    }
-
-    .btn-primary {
-    width: 50%;
-    background-color: #007bff;
-    color: white;
-    margin-top: 10px;
-    }
-
-    .btn-secondary {
-    background-color: #6c757d;
-    color: white;
-    margin-left: 10px;
-    }
-
-    .register-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 15px;
-    }
-
-    .text-muted {
-    font-size: 14px;
-    }
-
-    .error-message {
-    color: red;
-    font-size: 14px;
-    margin-top: 10px;
-    }
-
-    .success-message {
-    color: green;
-    font-size: 14px;
-    margin-top: 10px;
-    }
-</style>
-
-<div class="container">
-    <EditForm Model="input" OnValidSubmit="CheckSubmition">
-        <DataAnnotationsValidator />
-
-        <InputText id="username" class="input-field" @bind-Value="input.Username" placeholder="Username" autocomplete="off" />
-        <br />
-        <InputText id="password" class="input-field" @bind-Value="input.Password" placeholder="Password" type="password" autocomplete="off" />
-        <br />
-
-        <button type="submit" class="btn btn-primary">Prisijungti</button>
-    </EditForm>
-
-    <div class="register-container">
-        <p style="color:black">Don't have an account ?</p>
-        <button class="btn btn-secondary" @onclick="CreateAccount">Create account</button>
-    </div>
-
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <p class="@messageClass">@message</p>
-    }
-</div>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CheckSubmission" Disabled="@_loading" Class="mt-3" FullWidth>
+                <MudProgressCircular Indeterminate="true" Size="Size.Large" Style="margin-right: 10px;" Hidden="!_loading" />
+                Login
+            </MudButton>
+            <MudText Color="Color.Error">@ErrorMessage</MudText>
+            <MudLink Href="/Account_creation">Don't have an account?</MudLink>
+        </MudForm>
+    </MudPaper>
+</MudContainer>
 
 @code {
     private InputInfo input = new InputInfo();
-    private string message = String.Empty;
-    private string messageClass = "error-message";
+    private MudForm form;
+    private bool _loading = false;
+    private bool _isValid = false;
+    public string ErrorMessage { get; set; } = "";
     private const string username = "alv";
     private const string password = "crz";
     public const string Secret = "dsfoiugnfdonhgfodinhdf";
 
-    public async Task CheckSubmition()
+    public async Task CheckSubmission()
     {
-
-        if (string.IsNullOrEmpty(input.Username) || string.IsNullOrEmpty(input.Password))
+        _loading = true;
+        ErrorMessage = "";
+        await form.Validate();
+        _isValid = form.IsValid;
+        if(!_isValid)
         {
-            message = "Username and password cannot be empty!";
-            messageClass = "error-message";
+            _loading = false;
             return;
         }
         if (input.Username==username && input.Password==password)
         {
             AuthService.Set_admin();
+            _loading = false;
             NavManager.NavigateTo($"/AdminPanel/{Secret}");
             return;
         }
@@ -127,15 +56,12 @@
         if (user != null)
         {
             AuthService.Set_Guest();
-            message = "Login succesful !";
-            messageClass = "success-message";
-            
         }
         else
         {
-            message = "Invalid username or password!";
-            messageClass = "error-message";
+            ErrorMessage = "Invalid username or password!";
         }
+        _loading = false;
     }
 
     public void CreateAccount()
