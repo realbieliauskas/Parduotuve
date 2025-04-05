@@ -4,26 +4,13 @@
 @using System.Text;
 @inject NavigationManager NavManager
 @inject ISkinRepository _skinRepository
-@inject IJSRuntime JS
+@inject IOrderRepository _orderRepository
 @using Stripe.Checkout
 
 
 @if (CartString!="thanks" && CartString != "failed")
 {
     <h2>Your shopping cart:</h2>
-    <script>
-        window.downloadFileFromStream = async (fileName, contentStreamReference) => {
-            const arrayBuffer = await contentStreamReference.arrayBuffer();
-            const blob = new Blob([arrayBuffer]);
-            const url = URL.createObjectURL(blob);
-            const anchorElement = document.createElement('a');
-            anchorElement.href = url;
-            anchorElement.download = fileName ?? '';
-            anchorElement.click();
-            anchorElement.remove();
-            URL.revokeObjectURL(url);
-        }
-    </script>
 
     <table>
         <tr>
@@ -123,29 +110,6 @@ else
         }
     }
 
-    /// <summary>
-    /// Creates and returns a stream which contains details regarding the purchased goods
-    /// </summary>
-    /// <returns>A stream with a text representation with the purchased goods</returns>
-    private Stream GetFileStream()
-    {
-        string contents = "";
-
-        contents += "You are hereby the real owner of the following purchased goods:\n";
-        foreach((int, Skin) entry in Cart)
-        {
-            for(int x = 0; x < entry.Item1; x++)
-            {
-                contents += entry.Item2.Name+"\n";
-            }
-        }
-
-        byte[] contentBytes = Encoding.UTF8.GetBytes(contents);
-
-        MemoryStream memoryStream = new MemoryStream(contentBytes);
-
-        return memoryStream;
-    }
     private static Dictionary<double, string> StripePriceIDs = new Dictionary<double, string>()
     {
         {9.99,"price_1R9V8TCeO2Ku9PZcbDIXGUFs"},
@@ -161,16 +125,13 @@ else
         {
             for (int x = 0; x < entry.Item1; x++)
             {
-                purchaseString += "item" + entry.Item2;
+                purchaseString += "item" + entry.Item2.Id;
             }
         }
         purchaseString += "time" + DateTime.UtcNow.Ticks.ToString();
 
-        byte[] purchaseStringBytes = ASCIIEncoding.UTF8.GetBytes(purchaseString);
-        byte[] buffer = new byte[purchaseStringBytes.Length];
-        MemoryStream ms = new MemoryStream(buffer);
-        ms.Write(purchaseStringBytes, 0, buffer.Length);
-        byte[] purchaseHashBytes = await System.Security.Cryptography.SHA512.HashDataAsync(ms);
+        byte[] purchaseStringBytes = ASCIIEncoding.ASCII.GetBytes(purchaseString);
+        byte[] purchaseHashBytes = System.Security.Cryptography.MD5.HashData(purchaseStringBytes);
         return ByteArrayToString(purchaseHashBytes);
     }
     private static string ByteArrayToString(byte[] arrInput)
@@ -191,6 +152,8 @@ else
     {
         List<SessionLineItemOptions> lineItems = new List<SessionLineItemOptions>();
         Dictionary<string, string> metaItems = new Dictionary<string, string>();
+        List<OrderItem> orderItems = new List<OrderItem>();
+        string hash = await GetPurchaseHash();
         foreach ((int, Skin) entry in Cart)
         {
             var option = new SessionLineItemOptions();
@@ -198,29 +161,27 @@ else
             option.Price = StripePriceIDs.GetValueOrDefault<double,string>(entry.Item2.Price ?? 99.99, StripePriceIDs.Values.Last());
             lineItems.Add(option);
             metaItems.Add(entry.Item2.Id.ToString(), entry.Item1.ToString());
+            orderItems.Add(new OrderItem() { Amount = entry.Item1, Id = 0, OrderId = hash, Skin = entry.Item2 });
         }
-        string hash = await GetPurchaseHash();
         metaItems.Add("paymentHash", hash);
         SessionCreateOptions options = new SessionCreateOptions()
             {
                 LineItems = lineItems,
                 Mode = "payment",
-                SuccessUrl = NavManager.BaseUri + "Checkout/thanks",
+                SuccessUrl = NavManager.BaseUri + $"order-complete/{hash}",
                 CancelUrl = NavManager.BaseUri + "Checkout/failed",
                 Metadata = metaItems,
             };
 
         var service = new SessionService();
         var session = await service.CreateAsync(options);
+        Order order = new Order()
+        {
+            Id = hash,
+            IsCompleted = false,
+            User = null,
+        };
+        await _orderRepository.AddOrder(order);
         NavManager.NavigateTo(session.Url);
-
-        // Stream fileStream = GetFileStream();
-        // string fileName = "wares.txt";
-
-        // using DotNetStreamReference streamRef = new DotNetStreamReference(stream: fileStream);
-
-        // await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
-
-        // NavManager.NavigateTo("/Checkout/thanks");
     }
 }

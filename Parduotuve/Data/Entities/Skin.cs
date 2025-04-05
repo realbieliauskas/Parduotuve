@@ -4,6 +4,7 @@ namespace Parduotuve.Data.Entities
 {
     public class Skin
     {
+        [Key]
         public int Id { get; set; }
         public string? Name { get; set; }
 

@@ -21,6 +21,16 @@ namespace Parduotuve.Data
             get;
             set;
         }
+        public DbSet<Order> Orders
+        {
+            get;
+            set;
+        }
+        public DbSet<OrderItem> OrderItems
+        {
+            get;
+            set;
+        }
 
         public StoreDataContext(IConfiguration configuration)
         {
@@ -38,6 +48,10 @@ namespace Parduotuve.Data
                 .ToTable("Users");
             modelBuilder.Entity<Chroma>()
                 .ToTable("Chromas");
+            modelBuilder.Entity<Order>()
+                .ToTable("Orders");
+            modelBuilder.Entity<OrderItem>()
+                .ToTable("OrderItems");
 
             modelBuilder.Entity<User>()
                 .HasData(

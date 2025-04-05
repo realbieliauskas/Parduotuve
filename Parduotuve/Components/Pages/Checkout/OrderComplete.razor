@@ -1,0 +1,91 @@
+﻿@page "/order-complete/{OrderId}"
+@using Parduotuve.Data.Entities
+@using Parduotuve.Data.Repositories
+@using System.Text
+@inject IOrderRepository _orderRepository
+@inject IJSRuntime JS
+
+<script>
+    window.downloadFileFromStream = async (fileName, contentStreamReference) => {
+        const arrayBuffer = await contentStreamReference.arrayBuffer();
+        const blob = new Blob([arrayBuffer]);
+        const url = URL.createObjectURL(blob);
+        const anchorElement = document.createElement('a');
+        anchorElement.href = url;
+        anchorElement.download = fileName ?? '';
+        anchorElement.click();
+        anchorElement.remove();
+        URL.revokeObjectURL(url);
+    }
+</script>
+<MudText Typo="Typo.h4" Style="d-flex align-center" Color="@orderMessageColor">@orderMessage</MudText>
+
+@code {
+    [Parameter]
+    public string OrderId { get; set; }
+    private string orderMessage { get; set; } = String.Empty;
+    private Color orderMessageColor { get; set; } = Color.Primary;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Order? order = await _orderRepository.GetOrderById(OrderId);
+        if (order == null)
+        {
+            orderMessage = "No order found";
+            orderMessageColor = Color.Error;
+            return;
+        }
+        if (order.IsCompleted)
+        {
+            orderMessage = "Your purchase was completed successfully! You will soon receive your goods via file download.";
+            orderMessageColor = Color.Success;
+            return;
+        }
+        else
+        {
+            orderMessage = "Your purchase is still pending. Please try reloading the page once the checkout process has concluded.";
+            orderMessageColor = Color.Secondary;
+            return;
+        }
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Order? order = await _orderRepository.GetOrderById(OrderId);
+        if (order == null)
+        {
+            return;
+        }
+        if (order.IsCompleted)
+        {
+            Stream fileStream = await GetFileStream();
+            string fileName = "wares.txt";
+
+            using DotNetStreamReference streamRef = new DotNetStreamReference(stream: fileStream);
+
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            return;
+        }
+    }
+    private async Task<Stream> GetFileStream()
+    {
+        string contents = "";
+        IEnumerable<OrderItem?> orderItems = await _orderRepository.GetOrderItemsByOrderId(OrderId);
+
+        contents += "You are hereby the real owner of the following purchased goods:\n";
+        foreach (OrderItem? entry in orderItems)
+        {
+            if (entry == null)
+                continue;
+            for (int x = 0; x < entry.Amount; x++)
+            {
+                contents += entry.Skin.Name + "\n";
+            }
+        }
+
+        byte[] contentBytes = Encoding.UTF8.GetBytes(contents);
+
+        MemoryStream memoryStream = new MemoryStream(contentBytes);
+
+        return memoryStream;
+    }
+}
