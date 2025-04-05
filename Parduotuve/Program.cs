@@ -5,6 +5,7 @@ using Parduotuve.Data;
 using Parduotuve.Data.Repositories;
 using Parduotuve.Services;
 using MudBlazor.Services;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<StoreDataContext>();
 builder.Services.AddScoped<ISkinRepository, SkinRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChromaRepository, ChromaRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 //builder.Services.AddScoped<Shopping_Cart_Service>();
 builder.Services.AddSingleton<Shopping_Cart_Service>();
 builder.Services.AddScoped<AuthService>();
@@ -29,8 +31,12 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
 builder.Services.AddMudServices();
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
 var app = builder.Build();
 app.UseSession();
+
+app.MapControllers();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -46,6 +52,12 @@ using (var scope = app.Services.CreateScope())
     await seeder.SeedSkinsAsync();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
+});
+
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
@@ -53,5 +65,6 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+StripeConfiguration.ApiKey = app.Configuration.GetValue<string>("StripeAPIKey");
 
 app.Run();

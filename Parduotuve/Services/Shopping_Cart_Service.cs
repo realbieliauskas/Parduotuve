@@ -27,6 +27,10 @@ namespace Parduotuve.Services
             }
            
         }
+        public void Clear()
+        {
+            ShoppingCart.Clear();
+        }
         public void Remove (int id)
         {
             ShoppingCart.Remove(id);
