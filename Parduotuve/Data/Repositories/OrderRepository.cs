@@ -53,7 +53,7 @@ namespace Parduotuve.Data.Repositories
 
         public async Task<IEnumerable<OrderItem>> GetAllOrderItems()
         {
-            return await _context.OrderItems.ToListAsync();
+            return await _context.OrderItems.Include(item=>item.Skin).ToListAsync();
         }
 
         public async Task<IEnumerable<Order>> GetAllOrders()
@@ -68,12 +68,12 @@ namespace Parduotuve.Data.Repositories
 
         public async Task<IEnumerable<OrderItem?>> GetOrderItemsByOrderId(string id)
         {
-            return await _context.OrderItems.Where((a) => a.OrderId.Equals(id)).ToListAsync();
+            return await _context.OrderItems.Include(item => item.Skin).Where((a) => a.OrderId.Equals(id)).ToListAsync();
         }
 
         public async Task<OrderItem?> GetOrderItemById(int id)
         {
-            return await _context.OrderItems.FindAsync(id);
+            return await _context.OrderItems.Include(item => item.Skin).Where(item => item.Id == id).FirstAsync();
         }
 
         public async Task UpdateOrder(Order order)
