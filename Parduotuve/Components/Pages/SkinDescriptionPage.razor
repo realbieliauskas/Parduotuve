@@ -10,24 +10,26 @@
 
 
 <MudPaper Style="padding:10px;display:flex;float:left">
-        <!-- Cinematic splash art-->
-        <MudImage Src=@skin.CinematicSplashUrl Alt="@($"Image of {skin.Name}")" style="width:50%;height:auto"/>
-        <!-- Skin quote-->
-    <MudText Style="width:60%;align-content:center;margin-left:20px;float:left">
+    <!-- Cinematic splash art-->
+    <MudImage Src=@skin.CinematicSplashUrl Alt="@($"Image of {skin.Name}")" style="width:50%;height:auto"/>
+    <!-- Skin quote-->
+    <MudText Style="width:20%;align-content:center;margin-left:20px;float:left">
             <i>@skin.Quote</i>
         </MudText>
         <!-- TODO make RP and release date attributes of Skin class -->
-        <MudContainer style="position:relative;margin-left:20px">
-            <!-- Skin RP cost-->
-            <MudText Style="float:left;position:absolute;left:0;width:105px">
-                <b>In-game cost:</b> 1820 RP
-            </MudText>
-
-            <!-- Release date-->
-            <MudText Style="float:left;position:absolute;left:0;bottom:0;width:105px">
-                <b>Released on:</b> 2020-08-06
-            </MudText>
-        </MudContainer>
+    <MudContainer style="position:flex;margin-left:20px;width:250px">
+        <!-- Skin RP cost      position:absolute;left:0 -->
+        <MudText Style="margin-bottom:100px">
+            <b>In-game cost:</b> 1820 RP
+        </MudText>
+        <!-- Release date-->
+        <MudText Style="margin-bottom:279px">
+            <b>Released on:</b> 2020-08-06
+        </MudText>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary">Add to cart</MudButton>
+        <MudText Style="margin-top:10px;margin-bottom:10px">or</MudText>
+        <MudButton Variant="Variant.Outlined">Lets see another</MudButton>
+    </MudContainer>
 </MudPaper>
 
 <MudPaper Style="display:flex;float:left;margin:10px;margin-left:0px;flex-wrap:wrap">
