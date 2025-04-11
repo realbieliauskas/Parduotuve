@@ -7,6 +7,7 @@
 @page "/Description/{SkinID}"
 @inject Shopping_Cart_Service Shopping_Cart
 @inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager;
 
 <MudText Typo="Typo.h3">@skin.Name</MudText>
 <MudSpacer />
@@ -31,7 +32,7 @@
         </MudText>
         <MudButton Variant="Variant.Outlined" Color="Color.Primary" @onclick="@(()=>AddToCart(skin.Id))">Add to cart</MudButton>
         <MudText Style="margin-top:10px;margin-bottom:10px">or</MudText>
-        <MudButton Variant="Variant.Outlined">Lets see another</MudButton>
+        <MudButton Variant="Variant.Outlined" OnClick="(() => GoToBrowsePage())">Lets see another</MudButton>
     </MudContainer>
 </MudPaper>
 
@@ -86,5 +87,10 @@
         Shopping_Cart.Add(id);
         string skin = (await _skinRepository.GetByIdAsync(id)).Name;
         Snackbar.Add($"{skin} added to cart!", Severity.Success);
+    }
+
+    private void GoToBrowsePage()
+    {
+        NavigationManager.NavigateTo("/");
     }
 }
