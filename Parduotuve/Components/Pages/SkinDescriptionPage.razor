@@ -1,57 +1,53 @@
 ﻿@using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
 @using System.Diagnostics
+@using MudBlazor
 @inject ISkinRepository _skinRepository
 @page "/Description/{SkinID}"
 
-<head>
-    <title>@skin.ChampionName</title>
-</head>
-<body>
-    <h3>@skin.Name</h3>
-    <br/>
-    <div style="display:flex">
-        <!-- Cinematic splash art-->
-        <div class="cinematicSplashArt">
-            <img src=@skin.CinematicSplashUrl alt="Image of @skin.Name"
-            style="width:626px;height:352px;"/>
-        </div>
+<MudText Typo="Typo.h3">@skin.Name</MudText>
+<MudSpacer />
 
+
+<MudPaper Style="padding:10px;display:flex;float:left">
+        <!-- Cinematic splash art-->
+        <MudImage Src=@skin.CinematicSplashUrl Alt="@($"Image of {skin.Name}")" style="width:50%;height:auto"/>
         <!-- Skin quote-->
-        <p class="quote">
+    <MudText Style="width:60%;align-content:center;margin-left:20px;float:left">
             <i>@skin.Quote</i>
-        </p>
+        </MudText>
         <!-- TODO make RP and release date attributes of Skin class -->
-        <div style="position:relative">
+        <MudContainer style="position:relative;margin-left:20px">
             <!-- Skin RP cost-->
-            <p>In-game cost: 1820 RP</p>
+            <MudText Style="float:left;position:absolute;left:0;width:105px">
+                <b>In-game cost:</b> 1820 RP
+            </MudText>
 
             <!-- Release date-->
-            <p class="releaseDate">
-                Released on: 2020-08-06
-            </p>
-        </div>
-    </div>
+            <MudText Style="float:left;position:absolute;left:0;bottom:0;width:105px">
+                <b>Released on:</b> 2020-08-06
+            </MudText>
+        </MudContainer>
+</MudPaper>
 
-    <br/>
-
+<MudPaper Style="display:flex;float:left;margin:10px;margin-left:0px;flex-wrap:wrap">
     <!-- Shows skin chromas and their RP costs-->
     @if(chromas != null)
     {
-        @for (int i = 0; i < chromas.Count(); i++)
+        @foreach(Chroma chroma in chromas)
         {
-            <div class="boxOfChromas">
-                <div class="individualChroma">
-                    <img src=@chromas[i].URL alt="@chromas[i].Name" />
-                </div>
-                <span>@chromas[i].Name</span>
-                <p style="text-align:right">@(int.TryParse(@chromas[i].Price, out int ignor) ? chromas[i].Price + "RP" : chromas[i].Price)</p>
-            </div>
+            <MudCard Style="margin:10px">
+                <MudImage Src="@chroma.URL" Alt="Chroma image"/>
+                <MudCardContent>
+                    <MudText Style="float:left">@chroma.Name</MudText>
+                    <MudText Style="text-align:right">@(int.TryParse(@chroma.Price, out int ignor) ? chroma.Price + "RP" : chroma.Price)</MudText>
+                </MudCardContent>
+            </MudCard>
         }
     }
+</MudPaper>
 
 
-</body>
 
 @code {
     [Parameter]
