@@ -36,9 +36,9 @@
     {
         @foreach(Chroma chroma in chromas)
         {
-            <MudCard Style="margin:10px">
+            <MudCard Style="margin:10px" Outlined="true">
                 <MudImage Src="@chroma.URL" Alt="Chroma image"/>
-                <MudCardContent>
+                <MudCardContent Style="border:1px solid #4f4f4f;border-radius:4px;margin:5px">
                     <MudText Style="float:left">@chroma.Name</MudText>
                     <MudText Style="text-align:right">@(int.TryParse(@chroma.Price, out int ignor) ? chroma.Price + "RP" : chroma.Price)</MudText>
                 </MudCardContent>
