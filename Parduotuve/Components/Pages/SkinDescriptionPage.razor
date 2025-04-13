@@ -4,7 +4,7 @@
 @using Parduotuve.Services
 @using MudBlazor
 @inject ISkinRepository _skinRepository
-@page "/Description/{SkinID}"
+@page "/Description/{SkinID}/{PrevPage}"
 @inject Shopping_Cart_Service Shopping_Cart
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager;
@@ -58,6 +58,8 @@
 @code {
     [Parameter]
     public string SkinID { get; set; }
+    [Parameter]
+    public string PrevPage { get; set; }
     private Skin skin;
     private List<Chroma> chromas;
 
@@ -91,6 +93,6 @@
 
     private void GoToBrowsePage()
     {
-        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo($"/?{PrevPage}");
     }
 }
