@@ -9,7 +9,7 @@
 
 
 <MudPaper Class="d-inline-flex justify-center align-content-center align-center px-3 pt-2 pb-0" Style="width:100%">
-    <MudSelect Variant="Variant.Outlined" Label="Sort by" @bind-Value="selectedSortOption" TextChanged="@(() => LoadSkinsAsync())">
+    <MudSelect Variant="Variant.Outlined" Label="Sort by" @bind-Value="selectedSortOption" TextChanged="@(() => StaggeredLoadSkinsAsync())">
         <MudSelectItem Value="@("ChampionName")">
             <MudIcon Icon="@Icons.Material.Filled.Person4" /> Champion Name
         </MudSelectItem>
@@ -20,9 +20,9 @@
             <MudIcon Icon="@Icons.Material.Filled.Label" /> Name
         </MudSelectItem>
     </MudSelect>
-    <MudCheckBox @bind-Value="IsReversed" Label="Reverse sort"></MudCheckBox>
+    <MudCheckBox @bind-Value="isReversed" @oninput="StaggeredLoadSkinsAsync" Label="Reverse sort"></MudCheckBox>
     <MudSpacer />
-    <MudTextField @bind-Value="searchQuery" @oninput="LoadSkinsAsync" Label="Search by skin name"></MudTextField>
+    <MudTextField @bind-Value="searchQuery" @oninput="StaggeredLoadSkinsAsync" Label="Search by skin name"></MudTextField>
 </MudPaper>
 
 <MudPaper Class="justify-center d-flex flex-wrap gap-4 py-4">
@@ -60,13 +60,13 @@
     }
 </MudPaper>
 
-@if(GetPageContents().Count() > 0)
+@if(GetPageContents().Count() > 0 || !dataLoaded)
 {
     <div class="d-flex flex-column align-center">
         <MudPagination BoundaryCount="2" MiddleCount="5" Count="@PageCount" Selected="@Page" SelectedChanged="@((page) => NavToPage(page))" Class="mt-4" />
     </div>
 }
-else
+else if(dataLoaded)
 {
     <h1>No results were found.</h1>
 }
@@ -78,42 +78,54 @@ else
     private static int ItemsPerPage = 12;
     private int PageCount { get { return FilteredSkins.Chunk(ItemsPerPage).ToArray().Length; } }
 
-    private bool dataLoaded = false;
+    private bool dataLoaded { get; set; } = false;
 
     private IEnumerable<Skin> Skins { get; set; } = new List<Skin>();
     private IEnumerable<Skin> FilteredSkins { get; set; } = new List<Skin>();
     private string selectedSortOption { get; set; } = "ChampionName";
     private string searchQuery = string.Empty;
-    private bool _isReversed = false;
-    public bool IsReversed 
-    { 
-        get { return _isReversed; }
-        set 
-        { 
-            _isReversed = value;
-            dataLoaded = false;
-            StateHasChanged();
-            LoadSkinsAsync().Wait(); 
-        } 
-    }
+    private bool isReversed = false;
 
     protected override async Task OnInitializedAsync()
     {
+        // await Unload();
         Snackbar.Configuration.PreventDuplicates = false;
         if(Page<=0) { Page = 1; }
         {
-            LoadSkinsAsync().Wait();
+            await LoadSkinsAsync();
             dataLoaded = true;
         }
     }
 
-    private async Task LoadSkinsAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        dataLoaded = true;
+        if(firstRender)
+        {
+            StateHasChanged();
+        }
+        await Task.Delay(1);
+    }
+    private async Task Unload(bool forceUpdate = true)
     {
         dataLoaded = false;
+        if(forceUpdate)
+        {
+            StateHasChanged();
+        }
+        await Task.Delay(50);
+    }
+    private async Task StaggeredLoadSkinsAsync()
+    {
+        await Unload();
+        await LoadSkinsAsync();
+    }
+    private async Task LoadSkinsAsync()
+    {
         Skins = await _skinRepository.GetSortedSkinsAsync(selectedSortOption);
         ApplySearchFilter();
-        dataLoaded = true;
-        StateHasChanged();
     }
 
     private IEnumerable<Skin> GetPageContents()
@@ -128,20 +140,16 @@ else
 
         return FilteredSkins.Chunk(ItemsPerPage).ToArray()[tempPage - 1];
     }
-    private void NavToPage(int page)
+    private async void NavToPage(int page)
     {
-        dataLoaded = false;
+        await Unload();
         string pagedUri = NavManager.GetUriWithQueryParameter("Page", page);
-        NavManager.NavigateTo(pagedUri, false);
+        NavManager.NavigateTo(pagedUri, true);
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        if(!dataLoaded)
-        {
-            await LoadSkinsAsync();
-            dataLoaded = true;
-        }
+        await LoadSkinsAsync();
     }
 
     private void ApplySearchFilter()
@@ -150,7 +158,7 @@ else
             (skin.Name?.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
             (skin.ChampionName?.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false)
         );
-        if (IsReversed)
+        if (isReversed)
         {
             FilteredSkins = FilteredSkins.Reverse();
         }
