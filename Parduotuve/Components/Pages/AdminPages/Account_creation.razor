@@ -4,6 +4,14 @@
 @inject NavigationManager NavManager
 @inject AuthService AuthService
 
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+    }
 
 <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="d-flex justify-center align-center min-vh-100 pa-5">
     <MudPaper Elevation="3" Class="pa-5" Style="border-radius: 12px; width: 100%;">
@@ -25,6 +33,46 @@
         </MudForm>
     </MudPaper>
 </MudContainer>
+
+    .error-message {
+        color: red;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
+    .success-message {
+        color: green;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+</style>
+
+<div class="container">
+    <EditForm Model="input" OnValidSubmit="CreateAccount">
+        <DataAnnotationsValidator />
+
+        <InputText id="name" class="input-field" @bind-Value="input.Name" placeholder="Name" autocomplete="off" />
+        <br />
+        <InputText id="surname" class="input-field" @bind-Value="input.Surname" placeholder="Surname" autocomplete="off" />
+        <br />
+        <InputText id="email" class="input-field" @bind-Value="input.Email" placeholder="Gmail" autocomplete="off" />
+        <br />
+        <InputText id="username" class="input-field" @bind-Value="input.Username" placeholder="Username" autocomplete="off" />
+        <br />
+        <InputText id="password" class="input-field" @bind-Value="input.Password" placeholder="Password" type="password" autocomplete="off" />
+        <br />
+        <button type="submit" class="btn btn-primary">Create account</button>
+        <br>
+        <br>
+        <button class="btn btn-secondary" @onclick="Return_to_login_page">Return to login page</button>
+    </EditForm>
+
+    
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="@messageClass">@message</p>
+    }
+</div>
 
 @code {
     private InputInfo input = new InputInfo();
@@ -58,7 +106,7 @@
         {
             message = "Account has been successfully created!";
             messageColor = Color.Success;
-            input = new InputInfo();
+            input = new InputInfo(); 
             _loading = false;
         }
         else
@@ -66,8 +114,14 @@
             message = "An error occurred while creating the account.";
             messageColor = Color.Error;
             _loading = false;
-        }
     }
+
+   
+    private void Return_to_login_page()
+    {
+        NavManager.NavigateTo("/AdminLogin");
+    }
+
 
     protected class InputInfo
     {

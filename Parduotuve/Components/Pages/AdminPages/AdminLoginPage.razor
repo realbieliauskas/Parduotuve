@@ -24,6 +24,12 @@
     </MudPaper>
 </MudContainer>
 
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="@messageClass">@message</p>
+    }
+</div>
+
 @code {
     private InputInfo input = new InputInfo();
     private MudForm form;
