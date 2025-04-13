@@ -27,6 +27,7 @@
     public string OrderId { get; set; }
     private string orderMessage { get; set; } = String.Empty;
     private Color orderMessageColor { get; set; } = Color.Primary;
+    private bool DownloadInitiated = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -55,6 +56,9 @@
             orderMessage = "Your purchase was completed successfully! You will soon receive your goods via file download.";
             orderMessageColor = Color.Success;
             StateHasChanged();
+            if (DownloadInitiated)
+                return;
+            DownloadInitiated = true;
             Stream fileStream = await GetFileStream();
             string fileName = "wares.txt";
 
