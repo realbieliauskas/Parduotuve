@@ -1,66 +1,71 @@
 ﻿@using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
 @using System.Diagnostics
+@using Parduotuve.Services
+@using MudBlazor
 @inject ISkinRepository _skinRepository
-@page "/Description/{SkinID}"
+@page "/Description/{SkinID}/{PrevPage}"
+@inject Shopping_Cart_Service Shopping_Cart
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager;
 
-<head>
-    <title>@skin.ChampionName</title>
-</head>
-<body>
-    <h3>@skin.Name</h3>
-    <br/>
-    <div style="display:flex">
-        <!-- Cinematic splash art-->
-        <div class="cinematicSplashArt">
-            <img src=@skin.CinematicSplashUrl alt="Image of @skin.Name"
-            style="width:626px;height:352px;"/>
-        </div>
+<MudText Typo="Typo.h3">@skin.Name</MudText>
+<MudSpacer />
 
-        <!-- Skin quote-->
-        <p class="quote">
-            <i>@skin.Quote</i>
-        </p>
-        <!-- TODO make RP and release date attributes of Skin class -->
-        <div style="position:relative">
-            <!-- Skin RP cost-->
-            <p>In-game cost: 1820 RP</p>
 
-            <!-- Release date-->
-            <p class="releaseDate">
-                Released on: 2020-08-06
-            </p>
-        </div>
-    </div>
+<MudPaper Style="padding:10px;display:flex;float:left">
+    <!-- Cinematic splash art-->
+    <MudImage Src=@skin.CinematicSplashUrl Alt="@($"Image of {skin.Name}")" style="width:50%;height:auto"/>
+    <!-- Skin quote-->
+    <MudText Style="width:20%;align-content:center;margin-left:20px;float:left">
+        <i>@skin.Quote</i>
+    </MudText>
+    <!-- TODO make RP and release date attributes of Skin class -->
+    <MudContainer style="position:flex;margin-left:20px;width:250px">
+        <!-- Skin RP cost      position:absolute;left:0 -->
+        <MudText Style="margin-bottom:100px">
+            <b>In-game cost:</b> 1820 RP
+        </MudText>
+        <!-- Release date-->
+        <MudText Style="margin-bottom:279px">
+            <b>Released on:</b> 2020-08-06
+        </MudText>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" @onclick="@(()=>AddToCart(skin.Id))">Add to cart</MudButton>
+        <MudText Style="margin-top:10px;margin-bottom:10px">or</MudText>
+        <MudButton Variant="Variant.Outlined" OnClick="(() => GoToBrowsePage())">Lets see another</MudButton>
+    </MudContainer>
+</MudPaper>
 
-    <br/>
-
+<MudPaper Style="display:flex;float:left;margin:10px;margin-left:0px;flex-wrap:wrap">
     <!-- Shows skin chromas and their RP costs-->
     @if(chromas != null)
     {
-        @for (int i = 0; i < chromas.Count(); i++)
+        @foreach(Chroma chroma in chromas)
         {
-            <div class="boxOfChromas">
-                <div class="individualChroma">
-                    <img src=@chromas[i].URL alt="@chromas[i].Name" />
-                </div>
-                <span>@chromas[i].Name</span>
-                <p style="text-align:right">@(int.TryParse(@chromas[i].Price, out int ignor) ? chromas[i].Price + "RP" : chromas[i].Price)</p>
-            </div>
+            <MudCard Style="margin:10px" Outlined="true">
+                <MudImage Src="@chroma.URL" Alt="Chroma image"/>
+                <MudCardContent Style="border:1px solid #4f4f4f;border-radius:4px;margin:5px">
+                    <MudText Style="float:left">@chroma.Name</MudText>
+                    <MudText Style="text-align:right">@(int.TryParse(@chroma.Price, out int ignor) ? chroma.Price + "RP" : chroma.Price)</MudText>
+                </MudCardContent>
+            </MudCard>
         }
     }
+</MudPaper>
 
 
-</body>
 
 @code {
     [Parameter]
     public string SkinID { get; set; }
+    [Parameter]
+    public string PrevPage { get; set; }
     private Skin skin;
     private List<Chroma> chromas;
 
     protected override async Task OnInitializedAsync()
     {
+        Snackbar.Configuration.PreventDuplicates = false;
         await GetSkinObj();
     }
 
@@ -77,5 +82,17 @@
 
         if(skin.ChromaList != null)
             chromas = skin.ChromaList.ToList();
+    }
+
+    private async Task AddToCart(int id)
+    {
+        Shopping_Cart.Add(id);
+        string skin = (await _skinRepository.GetByIdAsync(id)).Name;
+        Snackbar.Add($"{skin} added to cart!", Severity.Success);
+    }
+
+    private void GoToBrowsePage()
+    {
+        NavigationManager.NavigateTo($"/?{PrevPage}");
     }
 }

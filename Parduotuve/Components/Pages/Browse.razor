@@ -39,6 +39,7 @@
         </MudCard>
     }
 </MudPaper>
+
 @if(GetPageContents().Count() > 0)
 {
     <div class="d-flex flex-column align-center">
@@ -108,7 +109,8 @@ else
     }
     private void OpenDescription(int id)
     {
-        NavManager.NavigateTo("/Description/" + id);
+        string formatedPrevPage = $"Page={Page}";
+        NavManager.NavigateTo($"/Description/{id}/{formatedPrevPage}");
     }
 
     private async Task AddToCart(int id)
