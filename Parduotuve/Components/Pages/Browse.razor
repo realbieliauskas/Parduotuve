@@ -70,7 +70,7 @@ else if(dataLoaded)
 {
     <h1>No results were found.</h1>
 }
-
+  
 @code {
     [SupplyParameterFromQuery]
     [Parameter]
@@ -166,7 +166,8 @@ else if(dataLoaded)
 
     private void OpenDescription(int id)
     {
-        NavManager.NavigateTo("/Description/" + id);
+        string formatedPrevPage = $"Page={Page}";
+        NavManager.NavigateTo($"/Description/{id}/{formatedPrevPage}");
     }
 
     private async Task AddToCart(int id)
