@@ -1,12 +1,14 @@
 ﻿@using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
 @using System.ComponentModel.DataAnnotations;
+@using Parduotuve.Services
 @inject IChromaRepository _chromaRepository
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
-@page "/ChromaEdit/{SkinId:int}/{Id:int}/{SecretParam?}"
+@inject AuthService AuthService
+@page "/ChromaEdit/{SkinId:int}/{Id:int}/"
 
-@if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
+@if (AuthService.IsAdmin() == false)
 {
     <MudText Typo="Typo.h5" Color="Color.Error">You do not have permission to view this page</MudText>
     return;
@@ -54,8 +56,6 @@
     [Parameter]
     public int Id { get; set; }
     [Parameter]
-    public string? SecretParam { get; set; }
-    [Parameter]
     public int SkinId { get; set; }
     Chroma chroma;
     Clone viewModel;
@@ -65,6 +65,13 @@
     protected override async Task OnInitializedAsync()
     {
         await GetChroma();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (await AuthService.EnsureLoaded())
+        {
+            StateHasChanged();
+        }
     }
 
     protected async Task GetChroma()

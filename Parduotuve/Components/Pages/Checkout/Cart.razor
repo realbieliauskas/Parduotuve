@@ -8,6 +8,7 @@
 @inject NavigationManager NavManager
 @inject ISkinRepository _skinRepository
 @inject IOrderRepository _orderRepository
+@inject AuthService _authService
 @using Stripe.Checkout
 
 <MudText Typo="Typo.h4" GutterBottom>Shopping Cart</MudText>
@@ -176,7 +177,7 @@ else
             {
                 Id = hash,
                 IsCompleted = false,
-                User = null,
+                User = _authService.CurrentUser,
             };
         await _orderRepository.AddOrder(order);
         NavManager.NavigateTo(session.Url);

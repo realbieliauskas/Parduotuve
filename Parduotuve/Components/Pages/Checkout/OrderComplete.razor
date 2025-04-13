@@ -2,8 +2,10 @@
 @using Parduotuve.Data.Entities
 @using Parduotuve.Data.Repositories
 @using System.Text
+@using Parduotuve.Services
 @inject IOrderRepository _orderRepository
 @inject IJSRuntime JS
+@inject AuthService _authService
 
 <script>
     window.downloadFileFromStream = async (fileName, contentStreamReference) => {
@@ -29,40 +31,43 @@
     protected override async Task OnInitializedAsync()
     {
         Order? order = await _orderRepository.GetOrderById(OrderId);
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await _authService.EnsureLoaded();
+        Order? order = await _orderRepository.GetOrderById(OrderId);
         if (order == null)
         {
             orderMessage = "No order found";
             orderMessageColor = Color.Error;
+            StateHasChanged();
+            return;
+        }
+        if (order.User != null && (!_authService.IsLoggedIn() || _authService.CurrentUser.Id != order.User.Id))
+        {
+            orderMessage = "You do not have permission to view this page.";
+            orderMessageColor = Color.Error;
+            StateHasChanged();
             return;
         }
         if (order.IsCompleted)
         {
             orderMessage = "Your purchase was completed successfully! You will soon receive your goods via file download.";
             orderMessageColor = Color.Success;
-            return;
-        }
-        else
-        {
-            orderMessage = "Your purchase is still pending or has failed. Please try reloading the page once the checkout process has concluded.";
-            orderMessageColor = Color.Secondary;
-            return;
-        }
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        Order? order = await _orderRepository.GetOrderById(OrderId);
-        if (order == null)
-        {
-            return;
-        }
-        if (order.IsCompleted)
-        {
+            StateHasChanged();
             Stream fileStream = await GetFileStream();
             string fileName = "wares.txt";
 
             using DotNetStreamReference streamRef = new DotNetStreamReference(stream: fileStream);
 
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            return;
+        }
+        else
+        {
+            orderMessage = "Your purchase is still pending or has failed. Please try reloading the page once the checkout process has concluded.";
+            orderMessageColor = Color.Secondary;
+            StateHasChanged();
             return;
         }
     }

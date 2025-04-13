@@ -15,12 +15,24 @@ namespace Parduotuve.Services
         public User CurrentUser { get; set; }
         public string Role = "Guest";
         public bool Is_loged_in;
+        public bool Restored = false;
 
         public AuthService(StoreDataContext db, IJSRuntime js)
         {
             this.db = db;
             this.js = js;
             Is_loged_in = false;
+        }
+
+        public async Task<bool> EnsureLoaded()
+        {
+            if(!Restored)
+            {
+                Restored = true;
+                await RestoreLoginAsync();
+                return true;
+            }
+            return false;
         }
 
 

@@ -24,12 +24,6 @@
     </MudPaper>
 </MudContainer>
 
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <p class="@messageClass">@message</p>
-    }
-</div>
-
 @code {
     private InputInfo input = new InputInfo();
     private MudForm form;
@@ -38,7 +32,6 @@
     public string ErrorMessage { get; set; } = "";
     private const string username = "alv";
     private const string password = "crz";
-    public const string Secret = "dsfoiugnfdonhgfodinhdf";
 
     public async Task CheckSubmission()
     {
@@ -55,7 +48,7 @@
         {
             AuthService.Set_admin();
             _loading = false;
-            NavManager.NavigateTo($"/AdminPanel/{Secret}");
+            NavManager.NavigateTo($"/AdminPanel");
             return;
         }
         var user = await AuthService.LoginAsync(input.Username, input.Password);

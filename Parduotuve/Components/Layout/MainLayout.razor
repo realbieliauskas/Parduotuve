@@ -1,8 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@using Parduotuve.Services
-@inject AuthService AuthService
-@inject NavigationManager Navigation
-@implements IDisposable
 
 <MudThemeProvider IsDarkMode="true"/>
 <MudPopoverProvider/>
@@ -17,48 +13,3 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
-
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
-
-@code {
-    private void Login()
-    {
-        Navigation.NavigateTo("/AdminLogin");
-    }
-
-    private void Logout()
-    {
-        AuthService.Logout();
-        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
-    }
-
-    private void GoToAccount()
-    {
-        Navigation.NavigateTo("/Account");
-    }
-
-    protected override void OnInitialized()
-    {
-        AuthService.OnAuthStateChanged += StateHasChanged;
-    }
-
-    public void Dispose()
-    {
-        AuthService.OnAuthStateChanged -= StateHasChanged;
-    }
-    private bool _restored = false;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_restored)
-        {
-            _restored = true;
-            await AuthService.RestoreLoginAsync();
-            StateHasChanged(); 
-        }
-    }
-}

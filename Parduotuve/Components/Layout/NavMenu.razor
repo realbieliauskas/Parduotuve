@@ -1,14 +1,33 @@
 ﻿﻿@using Parduotuve.Services
 @inject AuthService AuthService
+@inject NavigationManager Navigation
+@implements IDisposable
 <MudAppBar>
     <MudButton StartIcon="@Icons.Material.Filled.MenuBook" Color="Color.Inherit" Href="/">Browse</MudButton>
-    <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/AdminLogin">Login</MudButton>
+    <MudButton StartIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" Href="/Cart">Shopping cart</MudButton>
 @if (AuthService.IsAdmin())
 {
-    <MudButton StartIcon="@Icons.Material.Filled.Shield" Color="Color.Inherit" Href="/AdminPanel/dsfoiugnfdonhgfodinhdf">Admin dashboard</MudButton>
+    <MudButton StartIcon="@Icons.Material.Filled.Shield" Color="Color.Inherit" Href="/AdminPanel/">Admin dashboard</MudButton>
 }
-    <MudSpacer/>
-    <MudButton StartIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" Href="/Cart">Shopping cart</MudButton>
+    <MudSpacer />
+    @if(AuthService.IsLoggedIn())
+    {
+        @if(AuthService.IsAdmin())
+        {
+            <MudText>Greetings, administrator!</MudText>
+        }
+        else
+        {
+            <MudText>Greetings, @(AuthService.CurrentUser.Username)!</MudText>
+        }
+        <MudSpacer />
+        @* <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/Account">Account details</MudButton> *@
+        <MudButton StartIcon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Href="/AdminLogin" OnClick="Logout">Logout</MudButton>
+    }
+    else
+    {
+        <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/AdminLogin">Login</MudButton>
+    }
 </MudAppBar>
 @code {
     protected override void OnInitialized()
@@ -18,5 +37,10 @@
     public void Dispose()
     {
         AuthService.OnAuthStateChanged -= StateHasChanged; // Unsubscribe to prevent memory leaks
+    }
+    private void Logout()
+    {
+        AuthService.Logout();
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
     }
 }

@@ -63,7 +63,7 @@ namespace Parduotuve.Data.Repositories
 
         public async Task<Order?> GetOrderById(string id)
         {
-            return await _context.Orders.FindAsync(id);
+            return await _context.Orders.Include(order => order.User).Where(order => order.Id.Equals(id)).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<OrderItem?>> GetOrderItemsByOrderId(string id)

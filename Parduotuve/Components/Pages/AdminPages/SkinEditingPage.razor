@@ -1,15 +1,18 @@
 ﻿@using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
 @using System.ComponentModel.DataAnnotations;
+@using Parduotuve.Services
 @inject ISkinRepository _skinRepository
 @inject IChromaRepository _chromaRepository
 @inject NavigationManager NavigationManager;
 @inject IJSRuntime JS
-@page "/SkinEdit/{Id:int}/{SecretParam?}"
+@inject AuthService AuthService
+@page "/SkinEdit/{Id:int}/"
 
-@if (SecretParam == null || !SecretParam.Equals(AdminLoginPage.Secret))
+
+@if (!AuthService.IsAdmin())
 {
-    <MudAlert Severity="Severity.Error">You do not have permission to view this page</MudAlert>
+    <MudText Typo="Typo.h5" Color="Color.Error">You do not have permission to view this page</MudText>
     return;
 }
 <script>
@@ -72,8 +75,6 @@
 @code {
     [Parameter]
     public int Id { get; set; }
-    [Parameter]
-    public string? SecretParam { get; set; }
     Skin skin;
     Clone viewModel;
     Chroma chromaInQuestion;
@@ -84,6 +85,13 @@
     protected override async Task OnInitializedAsync()
     {
         await GetSkin();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (await AuthService.EnsureLoaded())
+        {
+            StateHasChanged();
+        }
     }
 
     public async Task GetSkin()
@@ -104,7 +112,7 @@
 
     public void GoToChromaEditingPage(int Id)
     {
-        NavigationManager.NavigateTo($"/ChromaEdit/{this.Id}/{Id}/{SecretParam}");
+        NavigationManager.NavigateTo($"/ChromaEdit/{this.Id}/{Id}");
     }
 
     public bool ValidateUpdate()
