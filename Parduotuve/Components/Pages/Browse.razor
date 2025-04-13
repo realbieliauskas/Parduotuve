@@ -113,8 +113,14 @@
     #region Page navigation helpers
     private IEnumerable<Skin> GetPageContents()
     {
-        return FilteredSkins.Chunk(ItemsPerPage).ToArray()[PageIndex];
+        var chunks = FilteredSkins.Chunk(ItemsPerPage).ToArray();
+        if (chunks.Length == 0 || PageIndex >= chunks.Length)
+        {
+            return Enumerable.Empty<Skin>();
+        }
+        return chunks[PageIndex];
     }
+
     private IEnumerable<int> GetSurroundingPageIndices()
     {
         int leftCursor = PageIndex;
