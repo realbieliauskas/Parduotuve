@@ -33,6 +33,13 @@
     private const string username = "alv";
     private const string password = "crz";
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (await AuthService.EnsureLoaded())
+        {
+            StateHasChanged();
+        }
+    }
     public async Task CheckSubmission()
     {
         _loading = true;
@@ -61,6 +68,7 @@
             ErrorMessage = "Invalid username or password!";
         }
         _loading = false;
+        NavManager.NavigateTo($"/");
     }
 
     public void CreateAccount()

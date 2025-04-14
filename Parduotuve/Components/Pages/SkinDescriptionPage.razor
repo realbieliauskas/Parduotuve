@@ -8,6 +8,7 @@
 @inject Shopping_Cart_Service Shopping_Cart
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager;
+@inject AuthService AuthService
 
 <MudText Typo="Typo.h3">@skin.Name</MudText>
 <MudSpacer />
@@ -69,6 +70,13 @@
         await GetSkinObj();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (await AuthService.EnsureLoaded())
+        {
+            StateHasChanged();
+        }
+    }
     public async Task GetSkinObj()
     {
         TextWriterTraceListener writer = new TextWriterTraceListener(System.Console.Out);

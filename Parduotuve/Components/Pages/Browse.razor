@@ -6,6 +6,7 @@
 @inject NavigationManager NavManager
 @inject Shopping_Cart_Service Shopping_Cart
 @inject ISnackbar Snackbar
+@inject AuthService AuthService
 
 
 <MudPaper Class="d-inline-flex justify-center align-content-center align-center px-3 pt-2 pb-0" Style="width:100%">
@@ -101,6 +102,10 @@ else if(dataLoaded)
     {
         await base.OnAfterRenderAsync(firstRender);
 
+        if (await AuthService.EnsureLoaded())
+        {
+            StateHasChanged();
+        }
         dataLoaded = true;
         if(firstRender)
         {

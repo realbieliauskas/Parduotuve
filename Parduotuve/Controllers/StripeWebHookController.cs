@@ -32,7 +32,6 @@ namespace Parduotuve.Controllers
                     throwOnApiVersionMismatch: false
                 );
 
-                // Handle the checkout.session.completed event
                 if (stripeEvent.Type == Stripe.EventTypes.CheckoutSessionCompleted)
                 {
                     var session = stripeEvent.Data.Object as Session;
@@ -40,7 +39,6 @@ namespace Parduotuve.Controllers
                     options.AddExpand("line_items");
 
                     var service = new SessionService();
-                    // Retrieve the session. If you require line items in the response, you may include them by expanding line_items.
                     var sessionWithLineItems = await service.GetAsync(session.Id, options);
                     StripeList<LineItem> lineItems = sessionWithLineItems.LineItems;
 

@@ -9,6 +9,7 @@
 @inject ISkinRepository _skinRepository
 @inject IOrderRepository _orderRepository
 @inject AuthService _authService
+@inject AuthService AuthService
 @using Stripe.Checkout
 
 <MudText Typo="Typo.h4" GutterBottom>Shopping Cart</MudText>
@@ -53,7 +54,7 @@ else
             </tbody>
         </MudSimpleTable>
         <MudText Typo="Typo.h4">Total: @Total() €</MudText>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleCheckout">Proceed to Checkout</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleCheckout" Style="width:200px">Proceed to Checkout</MudButton>
         @if (_loading)
         {
             <MudOverlay Visible="true" DarkBackground="true" Absolute="true">
@@ -74,6 +75,13 @@ else
     {
         Skins = await _skinRepository.GetAllAsync();
 
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (await AuthService.EnsureLoaded())
+        {
+            StateHasChanged();
+        }
     }
 
     private async Task IncreaseQuantity(int id)

@@ -3,10 +3,11 @@
 @using Parduotuve.Services
 @inject NavigationManager NavManager
 @inject AuthService AuthService
+@inject ISnackbar _snackBar
 
 <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="d-flex justify-center align-center min-vh-100 pa-5">
     <MudPaper Elevation="3" Class="pa-5" Style="border-radius: 12px; width: 100%;">
-        <MudText Typo="Typo.h5" Class="mb-4 text-center">Login</MudText>
+        <MudText Typo="Typo.h5" Class="mb-4 text-center">Register</MudText>
 
         <MudForm Model="@input" IsValid="@_isValid" @ref="form">
             <MudTextField Label="First name" @bind-Value="@input.Name"/>
@@ -17,7 +18,7 @@
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateAccount" Disabled="@_loading" Class="mt-3" FullWidth>
                 <MudProgressCircular Indeterminate="true" Size="Size.Large" Style="margin-right: 10px;" Hidden="!_loading" />
-                Login
+                Register
             </MudButton>
             <MudText Color="@messageColor">@message</MudText>
             <MudLink Href="/AdminLogin">Return to login page</MudLink>
@@ -33,6 +34,13 @@
     private string message { get; set; } = String.Empty;
     private Color messageColor { get; set; } = Color.Primary;
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (await AuthService.EnsureLoaded())
+        {
+            StateHasChanged();
+        }
+    }
     public async Task CreateAccount()
     {
         _loading = true;
@@ -59,6 +67,8 @@
             messageColor = Color.Success;
             input = new InputInfo();
             _loading = false;
+            _snackBar.Add($"Account successfully created! You may now log in.", Severity.Success);
+            GoToLogin();
         }
         else
         {
@@ -66,10 +76,11 @@
             messageColor = Color.Error;
             _loading = false;
         }
+        StateHasChanged();
     }
 
    
-    private void Return_to_login_page()
+    private void GoToLogin()
     {
         NavManager.NavigateTo("/AdminLogin");
     }
