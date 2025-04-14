@@ -19,15 +19,16 @@ The project leverages **Interactive Server Rendering** to deliver a smooth user 
 
 To set up and run the project, follow these steps:
 
-In order to initialize the project, an empty SQLite database file must be placed within the following path:
+1. In order to initialize the project, an empty SQLite database file must be placed within the following path:
 
 /Parduotuve/Data/Store.db
 
-Afterwards, in order to initialize the database, the following CLI command must be executed within the project path:
+2. Afterwards, in order to initialize the database, the following CLI command must be executed within the project path:
 
 update-database
 
 If the command executes without errors, the project is ready to be built and run!
+
 ---
 
 ## Configuration
