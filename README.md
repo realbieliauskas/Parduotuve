@@ -58,4 +58,4 @@ This project is for educational and demonstration purposes only. It is not affil
 ## Acknowledgments
 - **Riot Games** for inspiring the concept with "League of Legends."
 - **Microsoft Blazor** for enabling interactive web development.
-- **Bootstrap** for providing a robust CSS framework.
+- **MudBlazor** for providing a robust CSS framework.
