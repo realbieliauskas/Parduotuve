@@ -25,7 +25,6 @@
     }
 </script>
 <MudPaper Class="d-inline-flex justify-center align-content-center align-center px-3 pt-2 pb-0" Style="width:100%">
-    @* <MudSelect Variant="Variant.Outlined" Label="Sort by" Value="SortBy" @oninput="@(async (a) => { SortBy = (string)a.Value!; await QueryChanged(); })"> *@
     <MudSelect Variant="Variant.Outlined" Label="Sort by" Value="SortBy" T="string" ValueChanged="(async (e) => { SortBy = e;  await QueryChanged(); })" >
     
         <MudSelectItem Value="@("ChampionName")">
