@@ -8,112 +8,110 @@
 @inject ISnackbar Snackbar
 @inject AuthService AuthService
 
-@if (!AuthService.IsAdmin())
+@if (!AuthService.IsAdmin)
 {
     <h3>You do not have permission to view this page</h3>
+    return;
 }
-else
+@if (popupIsOpen)
 {
-    @if (popupIsOpen)
-    {
-        <MudCard>
-            <MudCardHeader>
-                <MudCardHeader>Add New Skin</MudCardHeader>
-                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Primary" OnClick="ClosePopup" />
-            </MudCardHeader>
-            <EditForm Model="@this" OnValidSubmit="AddSkin">
-                <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardHeader>
+            <MudCardHeader>Add New Skin</MudCardHeader>
+            <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Primary" OnClick="ClosePopup" />
+        </MudCardHeader>
+        <EditForm Model="@this" OnValidSubmit="AddSkin">
+            <DataAnnotationsValidator />
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="Champion Name" Required="true" @bind-Value="newSkin.ChampionName" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="Skin Name" Required="true" @bind-Value="newSkin.Name" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField Label="Loading Screen Art URL" Required="true" @bind-Value="newSkin.SplashUrl" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField Label="Cinematic Art URL" Required="true" @bind-Value="newSkin.CinematicSplashUrl" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField Label="Price" Required="true" Type="number" @bind-Value="newSkin.Price" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField Label="Quote" @bind-Value="newSkin.Quote" />
+                    </MudItem>
+                </MudGrid>
+
+                @if (newChromas.Count > 0)
+                {
+                    <MudText Typo="Typo.h6">Chromas:</MudText>
+                    <MudList T="MudListItem<MudText>">
+                        @foreach (var (chroma, index) in newChromas.Select((value, i) => (value, i)))
+                        {
+                            <MudListItem>
+                                <MudText>@(index + 1). @chroma.Name</MudText>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+            </MudCardContent>
+
+            @if (chromaBoxIsOpen)
+            {
                 <MudCardContent>
                     <MudGrid>
-                        <MudItem xs="12" sm="6">
-                            <MudTextField Label="Champion Name" Required="true" @bind-Value="newSkin.ChampionName" />
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudTextField Label="Skin Name" Required="true" @bind-Value="newSkin.Name" />
+                        <MudItem xs="12">
+                            <MudTextField Label="Chroma Name" Required="true" @bind-Value="newChroma.Name" />
                         </MudItem>
                         <MudItem xs="12">
-                            <MudTextField Label="Loading Screen Art URL" Required="true" @bind-Value="newSkin.SplashUrl" />
+                            <MudTextField Label="Chroma Price" Required="true" @bind-Value="newChroma.Price" />
                         </MudItem>
                         <MudItem xs="12">
-                            <MudTextField Label="Cinematic Art URL" Required="true" @bind-Value="newSkin.CinematicSplashUrl" />
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudTextField Label="Price" Required="true" Type="number" @bind-Value="newSkin.Price" />
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudTextField Label="Quote" @bind-Value="newSkin.Quote" />
+                            <MudTextField Label="Splash Art URL" Required="true" @bind-Value="newChroma.URL" />
                         </MudItem>
                     </MudGrid>
-
-                    @if (newChromas.Count > 0)
-                    {
-                        <MudText Typo="Typo.h6">Chromas:</MudText>
-                        <MudList T="MudListItem<MudText>">
-                            @foreach (var (chroma, index) in newChromas.Select((value, i) => (value, i)))
-                            {
-                                <MudListItem>
-                                    <MudText>@(index + 1). @chroma.Name</MudText>
-                                </MudListItem>
-                            }
-                        </MudList>
-                    }
+                    <MudButton Color="Color.Primary" OnClick="AddChroma">Add Chroma</MudButton>
                 </MudCardContent>
-
-                @if (chromaBoxIsOpen)
-                {
-                    <MudCardContent>
-                        <MudGrid>
-                            <MudItem xs="12">
-                                <MudTextField Label="Chroma Name" Required="true" @bind-Value="newChroma.Name" />
-                            </MudItem>
-                            <MudItem xs="12">
-                                <MudTextField Label="Chroma Price" Required="true" @bind-Value="newChroma.Price" />
-                            </MudItem>
-                            <MudItem xs="12">
-                                <MudTextField Label="Splash Art URL" Required="true" @bind-Value="newChroma.URL" />
-                            </MudItem>
-                        </MudGrid>
-                        <MudButton Color="Color.Primary" OnClick="AddChroma">Add Chroma</MudButton>
-                    </MudCardContent>
-                }
-
-                <MudCardActions>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="ToggleChromaBox">@chromaBoxButtonMessage</MudButton>
-                    <MudSpacer />
-                    <MudButton Color="Color.Secondary" OnClick="ClosePopup">Close</MudButton>
-                    <MudButton OnClick="AddSkin" Color="Color.Primary">Add Skin</MudButton>
-                </MudCardActions>
-            </EditForm>
-        </MudCard>
-    }
-
-    <MudText Typo="Typo.h4">Admin Control Page</MudText>
-    <MudButton Color="Color.Primary" OnClick="OpenPopup">Add Skin</MudButton>
-
-    <MudGrid>
-        @foreach (var skin in GetPageContents())
-        {
-            if (skins.Contains(skin))
-            {
-                <MudItem xs="12" sm="6" md="4">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudText>@skin.Name</MudText>
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Color="Color.Secondary" OnClick="() => GoToSkinEditingPage(skin)">Edit</MudButton>
-                            <MudButton Color="Color.Error" OnClick="() => DeleteSkin(skin)">Delete</MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                </MudItem>
             }
-        }
-    </MudGrid>
 
-    <div class="d-flex flex-column align-center">
-        <MudPagination BoundaryCount="2" MiddleCount="5" Count="@PageCount" Selected="@Page" SelectedChanged="@((page) => NavToPage(page))" Class="mt-4" />
-    </div>
+            <MudCardActions>
+                <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="ToggleChromaBox">@chromaBoxButtonMessage</MudButton>
+                <MudSpacer />
+                <MudButton Color="Color.Secondary" OnClick="ClosePopup">Close</MudButton>
+                <MudButton OnClick="AddSkin" Color="Color.Primary">Add Skin</MudButton>
+            </MudCardActions>
+        </EditForm>
+    </MudCard>
 }
+
+<MudText Typo="Typo.h4">Admin Control Page</MudText>
+<MudButton Color="Color.Primary" OnClick="OpenPopup">Add Skin</MudButton>
+
+<MudGrid>
+    @foreach (var skin in GetPageContents())
+    {
+        if (skins.Contains(skin))
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard>
+                    <MudCardContent>
+                        <MudText>@skin.Name</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Color="Color.Secondary" OnClick="() => GoToSkinEditingPage(skin)">Edit</MudButton>
+                        <MudButton Color="Color.Error" OnClick="() => DeleteSkin(skin)">Delete</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    }
+</MudGrid>
+
+<div class="d-flex flex-column align-center">
+    <MudPagination BoundaryCount="2" MiddleCount="5" Count="@PageCount" Selected="@Page" SelectedChanged="@((page) => NavToPage(page))" Class="mt-4" />
+</div>
 
 
 @code {
@@ -136,13 +134,6 @@ else
     {
         if (Page <= 0) { Page = 1; }
         await GetSkins();
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if(await AuthService.EnsureLoaded())
-        {
-            StateHasChanged();
-        }
     }
 
     public async Task GetSkins()

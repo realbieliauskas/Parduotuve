@@ -34,7 +34,7 @@ namespace Parduotuve.Controllers
 
                 if (stripeEvent.Type == Stripe.EventTypes.CheckoutSessionCompleted)
                 {
-                    var session = stripeEvent.Data.Object as Session;
+                    var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
                     var options = new SessionGetOptions();
                     options.AddExpand("line_items");
 

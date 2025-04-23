@@ -1,24 +1,24 @@
-﻿﻿@using Parduotuve.Services
+﻿@using Parduotuve.Services
 @inject AuthService AuthService
-@inject NavigationManager Navigation
-@implements IDisposable
+@inject NavigationManager NavManager
+
 <MudAppBar>
     <MudButton StartIcon="@Icons.Material.Filled.MenuBook" Color="Color.Inherit" Href="/">Browse</MudButton>
     <MudButton StartIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" Href="/Cart">Shopping cart</MudButton>
-@if (AuthService.IsAdmin())
+@if (AuthService.IsAdmin)
 {
     <MudButton StartIcon="@Icons.Material.Filled.Shield" Color="Color.Inherit" Href="/AdminPanel/">Admin dashboard</MudButton>
 }
     <MudSpacer />
-    @if(AuthService.IsLoggedIn())
+    @if(AuthService.IsLoggedIn)
     {
-        @if(AuthService.IsAdmin())
+        @if(AuthService.IsAdmin)
         {
             <MudText>Greetings, administrator!</MudText>
         }
         else
         {
-            <MudText>Greetings, @(AuthService.CurrentUser.Username)!</MudText>
+            <MudText>Greetings, @(AuthService.CurrentUser!.Username)!</MudText>
         }
         <MudSpacer />
         @* <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/Account">Account details</MudButton> *@
@@ -26,21 +26,13 @@
     }
     else
     {
-        <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/AdminLogin">Login</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/Login">Login</MudButton>
     }
 </MudAppBar>
 @code {
-    protected override void OnInitialized()
+    private async Task Logout()
     {
-        AuthService.OnAuthStateChanged += StateHasChanged; // Subscribe to Auth changes
-    }
-    public void Dispose()
-    {
-        AuthService.OnAuthStateChanged -= StateHasChanged; // Unsubscribe to prevent memory leaks
-    }
-    private void Logout()
-    {
-        AuthService.Logout();
-        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+        await AuthService.Logout();
+        NavManager.NavigateTo(NavManager.Uri,true);
     }
 }

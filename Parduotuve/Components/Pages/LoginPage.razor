@@ -1,6 +1,8 @@
-﻿@page "/AdminLogin"
+﻿@page "/Login"
 @using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
+@using Parduotuve.Data.Enums
+@using Parduotuve.Helpers.Wrappers
 @using Parduotuve.Services
 @inject ISkinRepository _skinRepository
 @inject NavigationManager NavManager
@@ -30,16 +32,7 @@
     private bool _loading = false;
     private bool _isValid = false;
     public string ErrorMessage { get; set; } = "";
-    private const string username = "alv";
-    private const string password = "crz";
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (await AuthService.EnsureLoaded())
-        {
-            StateHasChanged();
-        }
-    }
     public async Task CheckSubmission()
     {
         _loading = true;
@@ -51,29 +44,18 @@
             _loading = false;
             return;
         }
-        if (input.Username==username && input.Password==password)
+        
+        Result<User> loginResult = await AuthService.LoginAsync(input.Username, input.Password);
+        if (!loginResult)
         {
-            AuthService.Set_admin();
+            ErrorMessage = loginResult.Message;
             _loading = false;
-            NavManager.NavigateTo($"/AdminPanel");
             return;
         }
-        var user = await AuthService.LoginAsync(input.Username, input.Password);
-        if (user != null)
-        {
-            AuthService.Set_Guest();
-        }
-        else
-        {
-            ErrorMessage = "Invalid username or password!";
-        }
-        _loading = false;
-        NavManager.NavigateTo($"/");
-    }
 
-    public void CreateAccount()
-    {
-        NavManager.NavigateTo("/Account_creation");
+        _loading = false;
+        NavManager.NavigateTo(loginResult.Value.Role.Equals(UserRole.Admin) ? "/AdminPanel" : "/",true);
+        StateHasChanged();
     }
 
     protected class InputInfo

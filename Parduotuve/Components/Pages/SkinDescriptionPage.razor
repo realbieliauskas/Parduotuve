@@ -4,12 +4,18 @@
 @using Parduotuve.Services
 @using MudBlazor
 @inject ISkinRepository _skinRepository
-@page "/Description/{SkinID}/{PrevPage}"
+@page "/Description/{SkinID}/"
 @inject Shopping_Cart_Service Shopping_Cart
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager;
 @inject AuthService AuthService
+@inject IJSRuntime _jsRuntime
 
+<script>
+    window.goBack = () => {
+        history.back();
+    };
+</script>
 <MudText Typo="Typo.h3">@skin.Name</MudText>
 <MudSpacer />
 
@@ -22,7 +28,7 @@
         <i>@skin.Quote</i>
     </MudText>
     <!-- TODO make RP and release date attributes of Skin class -->
-    <MudContainer style="position:flex;margin-left:20px;width:250px">
+    <MudContainer style="margin-left:20px;width:250px">
         <!-- Skin RP cost      position:absolute;left:0 -->
         <MudText Style="margin-bottom:100px">
             <b>In-game cost:</b> 1820 RP
@@ -59,8 +65,6 @@
 @code {
     [Parameter]
     public string SkinID { get; set; }
-    [Parameter]
-    public string PrevPage { get; set; }
     private Skin skin;
     private List<Chroma> chromas;
 
@@ -70,13 +74,6 @@
         await GetSkinObj();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (await AuthService.EnsureLoaded())
-        {
-            StateHasChanged();
-        }
-    }
     public async Task GetSkinObj()
     {
         TextWriterTraceListener writer = new TextWriterTraceListener(System.Console.Out);
@@ -99,8 +96,8 @@
         Snackbar.Add($"{skin} added to cart!", Severity.Success);
     }
 
-    private void GoToBrowsePage()
+    private async Task GoToBrowsePage()
     {
-        NavigationManager.NavigateTo($"/?{PrevPage}");
+        await _jsRuntime.InvokeVoidAsync("goBack");
     }
 }

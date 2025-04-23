@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Parduotuve.Data.Entities;
+using Parduotuve.Data.Enums;
 
 namespace Parduotuve.Data
 {
@@ -31,6 +32,7 @@ namespace Parduotuve.Data
             get;
             set;
         }
+        public DbSet<Session?> Sessions { get; set; }
 
         public StoreDataContext(IConfiguration configuration)
         {
@@ -54,12 +56,21 @@ namespace Parduotuve.Data
                 .ToTable("OrderItems");
 
             modelBuilder.Entity<User>()
-                .HasData(
+                .HasData(new []{
                     new User
                     {
                         Id = 1,
                         Username = "name",
-                        Password = "password"
+                        Password = "password",
+                        Role = UserRole.User,
+                    },
+                    new User
+                    {
+                        Id = 2,
+                        Username = "alv",
+                        Password = "crz",
+                        Role = UserRole.Admin
+                    }
                     }
                 );
         }

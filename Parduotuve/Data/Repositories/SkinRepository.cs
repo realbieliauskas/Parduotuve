@@ -57,7 +57,7 @@ namespace Parduotuve.Data.Repositories
                 "ChampionName" => query.OrderBy(skin => skin.ChampionName.ToLower()),
                 "Price" => query.OrderBy(skin => skin.Price),
                 "Name" => query.OrderBy(skin => skin.Name.ToLower()),
-                _ => query
+                _ => query.OrderBy(skin => skin.ChampionName.ToLower())
             };
 
             return await query.ToListAsync();

@@ -76,13 +76,6 @@ else
         Skins = await _skinRepository.GetAllAsync();
 
     }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (await AuthService.EnsureLoaded())
-        {
-            StateHasChanged();
-        }
-    }
 
     private async Task IncreaseQuantity(int id)
     {

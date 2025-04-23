@@ -10,7 +10,7 @@
 @page "/SkinEdit/{Id:int}/"
 
 
-@if (!AuthService.IsAdmin())
+@if (!AuthService.IsAdmin)
 {
     <MudText Typo="Typo.h5" Color="Color.Error">You do not have permission to view this page</MudText>
     return;
@@ -85,13 +85,6 @@
     protected override async Task OnInitializedAsync()
     {
         await GetSkin();
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (await AuthService.EnsureLoaded())
-        {
-            StateHasChanged();
-        }
     }
 
     public async Task GetSkin()

@@ -1,5 +1,7 @@
 ﻿@page "/Account_creation"
 @using Parduotuve.Data.Entities
+@using Parduotuve.Data.Enums
+@using Parduotuve.Helpers.Wrappers
 @using Parduotuve.Services
 @inject NavigationManager NavManager
 @inject AuthService AuthService
@@ -21,7 +23,7 @@
                 Register
             </MudButton>
             <MudText Color="@messageColor">@message</MudText>
-            <MudLink Href="/AdminLogin">Return to login page</MudLink>
+            <MudLink Href="/Login">Return to login page</MudLink>
         </MudForm>
     </MudPaper>
 </MudContainer>
@@ -34,13 +36,6 @@
     private string message { get; set; } = String.Empty;
     private Color messageColor { get; set; } = Color.Primary;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (await AuthService.EnsureLoaded())
-        {
-            StateHasChanged();
-        }
-    }
     public async Task CreateAccount()
     {
         _loading = true;
@@ -52,39 +47,25 @@
             _loading = false;
             return;
         }
-        var existingUser = await AuthService.Check_if_user_exists(input.Username);
-        if (existingUser != null)
-        {
-            message = "User with such username already exists!";
-            messageColor = Color.Error;
-            _loading = false;
-            return;
-        }
-        bool isCreated = await AuthService.RegisterAsync(input.Name, input.Surname, input.Email, input.Username, input.Password, "Guest");
-        if (isCreated)
+        
+        Result<User> creationResult = await AuthService.RegisterAsync(input.Name, input.Surname, input.Email, input.Username, input.Password, UserRole.User);
+        if (creationResult)
         {
             message = "Account has been successfully created!";
             messageColor = Color.Success;
             input = new InputInfo();
             _loading = false;
             _snackBar.Add($"Account successfully created! You may now log in.", Severity.Success);
-            GoToLogin();
+            NavManager.NavigateTo("/Login");
         }
         else
         {
-            message = "An error occurred while creating the account.";
+            message = creationResult.Message;
             messageColor = Color.Error;
             _loading = false;
         }
         StateHasChanged();
     }
-
-   
-    private void GoToLogin()
-    {
-        NavManager.NavigateTo("/AdminLogin");
-    }
-
 
     protected class InputInfo
     {

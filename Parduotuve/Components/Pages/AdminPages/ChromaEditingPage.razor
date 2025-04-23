@@ -8,7 +8,7 @@
 @inject AuthService AuthService
 @page "/ChromaEdit/{SkinId:int}/{Id:int}/"
 
-@if (AuthService.IsAdmin() == false)
+@if (!AuthService.IsAdmin)
 {
     <MudText Typo="Typo.h5" Color="Color.Error">You do not have permission to view this page</MudText>
     return;
@@ -66,14 +66,6 @@
     {
         await GetChroma();
     }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (await AuthService.EnsureLoaded())
-        {
-            StateHasChanged();
-        }
-    }
-
     protected async Task GetChroma()
     {
         RegularSplashButtonText = defaultButtonState;

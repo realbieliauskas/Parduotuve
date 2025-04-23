@@ -1,10 +1,12 @@
-﻿namespace Parduotuve.Data.Entities
+﻿using Parduotuve.Data.Enums;
+
+namespace Parduotuve.Data.Entities
 {
     public class User
     {
         public int Id { get; set; }
-        public string? Username { get; set; }
-        public string? Password { get; set; }
-        public string? Role { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public UserRole Role { get; set; }
     }
 }

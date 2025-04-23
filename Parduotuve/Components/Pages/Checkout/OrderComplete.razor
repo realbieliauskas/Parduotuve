@@ -20,7 +20,7 @@
         URL.revokeObjectURL(url);
     }
 </script>
-<MudText Typo="Typo.h4" Style="d-flex align-center" Color="@orderMessageColor">@orderMessage</MudText>
+<MudText Typo="Typo.h4" Class="d-flex align-center" Color="@orderMessageColor">@orderMessage</MudText>
 
 @code {
     [Parameter]
@@ -35,7 +35,6 @@
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await _authService.EnsureLoaded();
         Order? order = await _orderRepository.GetOrderById(OrderId);
         if (order == null)
         {
@@ -44,7 +43,7 @@
             StateHasChanged();
             return;
         }
-        if (order.User != null && (!_authService.IsLoggedIn() || _authService.CurrentUser.Id != order.User.Id))
+        if (order.User != null && (!_authService.IsLoggedIn || _authService.CurrentUser!.Id != order.User.Id))
         {
             orderMessage = "You do not have permission to view this page.";
             orderMessageColor = Color.Error;
@@ -67,13 +66,10 @@
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
             return;
         }
-        else
-        {
-            orderMessage = "Your purchase is still pending or has failed. Please try reloading the page once the checkout process has concluded.";
-            orderMessageColor = Color.Secondary;
-            StateHasChanged();
-            return;
-        }
+        
+        orderMessage = "Your purchase is still pending or has failed. Please try reloading the page once the checkout process has concluded.";
+        orderMessageColor = Color.Secondary;
+        StateHasChanged();
     }
     private async Task<Stream> GetFileStream()
     {

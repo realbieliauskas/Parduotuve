@@ -85,6 +85,21 @@ namespace Parduotuve.Migrations
                     b.ToTable("OrderItems", (string)null);
                 });
 
+            modelBuilder.Entity("Parduotuve.Data.Entities.Session", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Sessions");
+                });
+
             modelBuilder.Entity("Parduotuve.Data.Entities.Skin", b =>
                 {
                     b.Property<int>("Id")
@@ -121,12 +136,14 @@ namespace Parduotuve.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Role")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -138,7 +155,15 @@ namespace Parduotuve.Migrations
                         {
                             Id = 1,
                             Password = "password",
+                            Role = 1,
                             Username = "name"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Password = "crz",
+                            Role = 0,
+                            Username = "alv"
                         });
                 });
 
@@ -171,6 +196,17 @@ namespace Parduotuve.Migrations
                         .IsRequired();
 
                     b.Navigation("Skin");
+                });
+
+            modelBuilder.Entity("Parduotuve.Data.Entities.Session", b =>
+                {
+                    b.HasOne("Parduotuve.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Parduotuve.Data.Entities.Skin", b =>
