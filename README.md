@@ -2,7 +2,7 @@
 
 Summoners Wardrobe is an e-shop powered by Blazor and written in C#, designed to facilitate the sale of digital goods (skins) inspired by the video game "League of Legends" by Riot Games. **Note:** This project does not sell or distribute actual skins. Instead, it provides a certificate of ownership in the form of a text file as a novelty item following a "purchase." 
 
-The project leverages **Interactive Server Rendering** to deliver a smooth user experience and simplify the implementation of complex interactive components. Data is stored using a **SQLite database** with the help of **Entity Framework Core**, and the **MudBlazor CSS library** is used to create consistently styled and scalable UI elements.
+The project leverages **Interactive Server Rendering** to deliver a smooth user experience and simplify the implementation of complex interactive components. Data is stored using a **SQLite database** with the help of **Entity Framework Core**, and the **MudBlazor Component library** is used to create consistently styled and scalable UI elements.
 
 ---
 
@@ -15,7 +15,9 @@ The project leverages **Interactive Server Rendering** to deliver a smooth user 
 
 ---
 
-## First Launch
+## First Launch & Configuration
+
+The project currently contains placeholder credentials and an incomplete authentication system. **Do not use this project in a production environment.**
 
 To set up and run the project, follow these steps:
 
@@ -27,14 +29,24 @@ To set up and run the project, follow these steps:
 
 update-database
 
-If the command executes without errors, the project is ready to be built and run!
+3. Lastly, create an appsettings.json file in the root of the project with the following structure:
+```json
+{
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "StoreDB": "Data Source=Data\\Store.db"
+  },
+  "StripeAPIKey": "your-stripe-api-key-here",
+  "StripeWebHookSecret": "your-stripe-webhook-secret-here",
+  "SmtpServerUrl": "your-smtp-server-url-here",
+  "SmtpUsername": "your-smtp-username-here",
+  "SmtpPassword": "your-smtp-password-here",
+  "SmtpPort": "your-smtp-port-here"
+}
+```
+Note: Never commit your appsettings.json with real credentials or secrets to git.
 
----
-
-## Configuration
-
-- The location and name of the SQLite database file can be modified in the `appsettings.json` file located in the root directory of the project.
-- The project currently contains placeholder credentials and an incomplete authentication system. **Do not use this project in a production environment.**
+If all previous commands executed without errors, the project is ready to be built and run!
 
 ---
 
@@ -58,4 +70,4 @@ This project is for educational and demonstration purposes only. It is not affil
 ## Acknowledgments
 - **Riot Games** for inspiring the concept with "League of Legends."
 - **Microsoft Blazor** for enabling interactive web development.
-- **MudBlazor** for providing a robust CSS framework.
+- **MudBlazor** for providing a robust Razor component library.
