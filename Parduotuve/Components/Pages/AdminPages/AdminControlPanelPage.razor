@@ -7,6 +7,7 @@
 @inject NavigationManager NavManager
 @inject ISnackbar Snackbar
 @inject AuthService AuthService
+@inject MailService MailService
 
 @if (!AuthService.IsAdmin)
 {
@@ -83,6 +84,7 @@
                 <MudSpacer/>
                 <MudButton Color="Color.Secondary" OnClick="ClosePopup">Close</MudButton>
                 <MudButton OnClick="AddSkin" Color="Color.Primary">Add Skin</MudButton>
+                <MudCheckBox @bind-Value="_notifyUsers" Label="Notify users about new skin?" Color="Color.Inherit"></MudCheckBox>
             </MudCardActions>
         </EditForm>
     </MudCard>
@@ -125,6 +127,7 @@
     Chroma _newChroma = new();
     private bool _popupIsOpen;
     private bool _chromaBoxIsOpen;
+    private bool _notifyUsers = false;
     private string _chromaBoxButtonMessage = "Show Chroma box";
 
     [SupplyParameterFromQuery] [Parameter] public int Page { get; set; }
@@ -142,47 +145,51 @@
         await GetSkins();
     }
 
-    public async Task GetSkins()
+    private async Task GetSkins()
     {
         _skins = (List<Skin>)await SkinRepository.GetAllAsync();
     }
 
-    public void GoToSkinEditingPage(Skin skin)
+    private void GoToSkinEditingPage(Skin skin)
     {
         NavManager.NavigateTo($"/SkinEdit/{skin.Id}/");
     }
 
-    public void DeleteSkin(Skin skin)
+    private void DeleteSkin(Skin skin)
     {
         _skins.Remove(skin);
         SkinRepository.DeleteAsync(skin.Id);
     }
 
-    public void OpenPopup()
+    private void OpenPopup()
     {
         _popupIsOpen = true;
     }
 
-    public void ClosePopup()
+    private void ClosePopup()
     {
         _popupIsOpen = false;
         _newSkin = new Skin();
         CloseChromaBox();
     }
 
-    public void AddSkin()
+    private async Task AddSkin()
     {
         if (CheckIfSkinIsValid())
         {
             int newId = _skins.Last().Id + 1;
             _newSkin.Id = newId;
             _newSkin.ChromaList = _newChromas;
-            SkinRepository.AddAsync(_newSkin);
+            await SkinRepository.AddAsync(_newSkin);
+            if (_notifyUsers)
+            {
+                _ = MailService.BroadcastNewArrivalNotification(_newSkin);
+            }
             NavManager.NavigateTo(NavManager.Uri, true);
         }
     }
 
-    public bool CheckIfSkinIsValid()
+    private bool CheckIfSkinIsValid()
     {
         return _newSkin.Price.HasValue &&
                !string.IsNullOrEmpty(_newSkin.Name) &&

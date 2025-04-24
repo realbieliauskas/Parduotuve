@@ -11,7 +11,6 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-string? connectionString = builder.Configuration.GetConnectionString("EmployeeDB");
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpClient<SkinSeeder>();
 builder.Services.AddDbContext<StoreDataContext>();
@@ -22,6 +21,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 //builder.Services.AddScoped<Shopping_Cart_Service>();
 builder.Services.AddSingleton<ShoppingCartService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<MailService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options => { options.IdleTimeout = TimeSpan.FromMinutes(30); });
