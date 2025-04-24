@@ -1,14 +1,13 @@
 ﻿using Parduotuve.Data.Entities;
 
-namespace Parduotuve.Data.Repositories
+namespace Parduotuve.Data.Repositories;
+
+public interface IChromaRepository
 {
-    public interface IChromaRepository
-    {
-        Task<IEnumerable<Chroma>> GetAllAsync();
-        Task<Chroma?> GetByIdAsync(int id);
-        Task AddAsync(Chroma chroma);
-        Task UpdateAsync(Chroma chroma);
-        Task DeleteAsync(int id);
-        Task<Chroma> GetLast();
-    }
+    Task<IEnumerable<Chroma>> GetAllAsync();
+    Task<Chroma?> GetByIdAsync(int id);
+    Task AddAsync(Chroma chroma);
+    Task UpdateAsync(Chroma chroma);
+    Task DeleteAsync(int id);
+    Task<Chroma> GetLast();
 }

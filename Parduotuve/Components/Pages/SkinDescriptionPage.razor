@@ -1,31 +1,30 @@
-﻿@using Parduotuve.Data.Repositories
-@using Parduotuve.Data.Entities
-@using System.Diagnostics
-@using Parduotuve.Services
-@using MudBlazor
-@inject ISkinRepository _skinRepository
+﻿@inject ISkinRepository SkinRepository
 @page "/Description/{SkinID}/"
-@inject Shopping_Cart_Service Shopping_Cart
+@using System.Diagnostics
+@using Parduotuve.Data.Entities
+@using Parduotuve.Data.Repositories
+@using Parduotuve.Services
+@inject ShoppingCartService ShoppingCart
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager;
 @inject AuthService AuthService
-@inject IJSRuntime _jsRuntime
+@inject IJSRuntime JsRuntime
 
 <script>
     window.goBack = () => {
         history.back();
     };
 </script>
-<MudText Typo="Typo.h3">@skin.Name</MudText>
-<MudSpacer />
+<MudText Typo="Typo.h3">@_skin.Name</MudText>
+<MudSpacer/>
 
 
 <MudPaper Style="padding:10px;display:flex;float:left">
     <!-- Cinematic splash art-->
-    <MudImage Src=@skin.CinematicSplashUrl Alt="@($"Image of {skin.Name}")" style="width:50%;height:auto"/>
+    <MudImage Src="@_skin.CinematicSplashUrl" Alt="@($"Image of {_skin.Name}")" style="width:50%;height:auto"/>
     <!-- Skin quote-->
     <MudText Style="width:20%;align-content:center;margin-left:20px;float:left">
-        <i>@skin.Quote</i>
+        <i>@_skin.Quote</i>
     </MudText>
     <!-- TODO make RP and release date attributes of Skin class -->
     <MudContainer style="margin-left:20px;width:250px">
@@ -37,23 +36,25 @@
         <MudText Style="margin-bottom:279px">
             <b>Released on:</b> 2020-08-06
         </MudText>
-        <MudButton Variant="Variant.Outlined" Color="Color.Primary" @onclick="@(()=>AddToCart(skin.Id))">Add to cart</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" @onclick="@(() => AddToCart(_skin.Id))">Add to cart
+        </MudButton>
         <MudText Style="margin-top:10px;margin-bottom:10px">or</MudText>
-        <MudButton Variant="Variant.Outlined" OnClick="(() => GoToBrowsePage())">Lets see another</MudButton>
+        <MudButton Variant="Variant.Outlined" OnClick="() => GoToBrowsePage()">Lets see another</MudButton>
     </MudContainer>
 </MudPaper>
 
 <MudPaper Style="display:flex;float:left;margin:10px;margin-left:0px;flex-wrap:wrap">
     <!-- Shows skin chromas and their RP costs-->
-    @if(chromas != null)
+    @if (_chromas != null)
     {
-        @foreach(Chroma chroma in chromas)
+        @foreach (Chroma chroma in _chromas)
         {
             <MudCard Style="margin:10px" Outlined="true">
-                <MudImage Src="@chroma.URL" Alt="Chroma image"/>
+                <MudImage Src="@chroma.Url" Alt="Chroma image"/>
                 <MudCardContent Style="border:1px solid #4f4f4f;border-radius:4px;margin:5px">
                     <MudText Style="float:left">@chroma.Name</MudText>
-                    <MudText Style="text-align:right">@(int.TryParse(@chroma.Price, out int ignor) ? chroma.Price + "RP" : chroma.Price)</MudText>
+                    <MudText
+                        Style="text-align:right">@(int.TryParse(chroma.Price, out int ignor) ? chroma.Price + "RP" : chroma.Price)</MudText>
                 </MudCardContent>
             </MudCard>
         }
@@ -63,10 +64,9 @@
 
 
 @code {
-    [Parameter]
-    public string SkinID { get; set; }
-    private Skin skin;
-    private List<Chroma> chromas;
+    [Parameter] public string SkinId { get; set; }
+    private Skin _skin;
+    private List<Chroma> _chromas;
 
     protected override async Task OnInitializedAsync()
     {
@@ -76,28 +76,29 @@
 
     public async Task GetSkinObj()
     {
-        TextWriterTraceListener writer = new TextWriterTraceListener(System.Console.Out);
+        TextWriterTraceListener writer = new(Console.Out);
         int param = -1;
-        if(!int.TryParse(SkinID,out param))
+        if (!int.TryParse(SkinId, out param))
             return;
-        Skin? toAssign = await _skinRepository.GetByIdAsync(param);
+        Skin? toAssign = await SkinRepository.GetByIdAsync(param);
         if (toAssign == null)
             return;
-        skin = toAssign;
+        _skin = toAssign;
 
-        if(skin.ChromaList != null)
-            chromas = skin.ChromaList.ToList();
+        if (_skin.ChromaList != null)
+            _chromas = _skin.ChromaList.ToList();
     }
 
     private async Task AddToCart(int id)
     {
-        Shopping_Cart.Add(id);
-        string skin = (await _skinRepository.GetByIdAsync(id)).Name;
+        ShoppingCart.Add(id);
+        string skin = (await SkinRepository.GetByIdAsync(id)).Name;
         Snackbar.Add($"{skin} added to cart!", Severity.Success);
     }
 
     private async Task GoToBrowsePage()
     {
-        await _jsRuntime.InvokeVoidAsync("goBack");
+        await JsRuntime.InvokeVoidAsync("goBack");
     }
+
 }

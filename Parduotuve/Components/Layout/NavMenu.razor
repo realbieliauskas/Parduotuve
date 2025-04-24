@@ -4,15 +4,17 @@
 
 <MudAppBar>
     <MudButton StartIcon="@Icons.Material.Filled.MenuBook" Color="Color.Inherit" Href="/">Browse</MudButton>
-    <MudButton StartIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" Href="/Cart">Shopping cart</MudButton>
-@if (AuthService.IsAdmin)
-{
-    <MudButton StartIcon="@Icons.Material.Filled.Shield" Color="Color.Inherit" Href="/AdminPanel/">Admin dashboard</MudButton>
-}
-    <MudSpacer />
-    @if(AuthService.IsLoggedIn)
+    <MudButton StartIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" Href="/Cart">Shopping cart
+    </MudButton>
+    @if (AuthService.IsAdmin)
     {
-        @if(AuthService.IsAdmin)
+        <MudButton StartIcon="@Icons.Material.Filled.Shield" Color="Color.Inherit" Href="/AdminPanel/">Admin dashboard
+        </MudButton>
+    }
+    <MudSpacer/>
+    @if (AuthService.IsLoggedIn)
+    {
+        @if (AuthService.IsAdmin)
         {
             <MudText>Greetings, administrator!</MudText>
         }
@@ -20,23 +22,30 @@
         {
             <MudText>Greetings, @(AuthService.CurrentUser!.Username)!</MudText>
         }
-        <MudSpacer />
+
+        <MudSpacer/>
         @* <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/Account">Account details</MudButton> *@
         <MudButton StartIcon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="Logout">Logout</MudButton>
     }
     else
     {
-        <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/Login">Login</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/Login">Login
+        </MudButton>
     }
-    <MudIconButton Color="Color.Inherit" Icon="@(DarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" OnClick="ToggleTheme"/>
+    <MudIconButton Color="Color.Inherit"
+                   Icon="@(DarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                   OnClick="ToggleTheme"/>
 </MudAppBar>
+
 @code {
     [Parameter] public required bool DarkMode { get; set; }
-    [Parameter] public required Func<bool, Task> OnModeChanged { get; set; } 
+    [Parameter] public required Func<bool, Task> OnModeChanged { get; set; }
+
     private async Task Logout()
     {
         await AuthService.Logout();
-        NavManager.NavigateTo(NavManager.Uri,true);
+        NavManager.NavigateTo("/");
+        StateHasChanged();
     }
 
     private async Task ToggleTheme()
@@ -45,4 +54,5 @@
         await OnModeChanged.Invoke(DarkMode);
         StateHasChanged();
     }
+
 }

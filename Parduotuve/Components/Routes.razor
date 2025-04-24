@@ -1,19 +1,22 @@
-﻿@using Parduotuve.Services
+﻿@using Parduotuve.Components.Layout
+@using Parduotuve.Services
 @inject AuthService AuthService
 
 <Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)"/>
+        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
     </Found>
 </Router>
 
 @code {
+
     public override async Task SetParametersAsync(ParameterView parameters)
     {
-        if(!AuthService.IsInitialized)
+        if (!AuthService.IsInitialized)
             await AuthService.InitializeAsync();
 
         await base.SetParametersAsync(parameters);
     }
+
 }

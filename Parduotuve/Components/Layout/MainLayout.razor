@@ -19,12 +19,13 @@
 {
     private const string DarkModePrefKey = "DarkModePref";
     private bool _isDarkMode = true;
-    private MudThemeProvider _mudThemeProvider;
+    private MudThemeProvider _mudThemeProvider = null!;
     private bool _userPreferenceFetched;
+
     public async Task ModeChanged(bool newMode)
     {
         _isDarkMode = newMode;
-        await LocalStorage.SetAsync(DarkModePrefKey,(bool?)newMode);
+        await LocalStorage.SetAsync(DarkModePrefKey, (bool?)newMode);
         _userPreferenceFetched = true;
         StateHasChanged();
     }
@@ -32,7 +33,7 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        
+
         ProtectedBrowserStorageResult<bool?> res = await LocalStorage.GetAsync<bool?>(DarkModePrefKey);
 
         if (!res.Success || res.Value == null)
@@ -48,6 +49,7 @@
             _isDarkMode = await _mudThemeProvider.GetSystemPreference();
             await ModeChanged(_isDarkMode);
         }
+
         await base.OnAfterRenderAsync(firstRender);
     }
 }

@@ -1,11 +1,11 @@
 ﻿@page "/order-complete/{OrderId}"
+@using System.Text
 @using Parduotuve.Data.Entities
 @using Parduotuve.Data.Repositories
-@using System.Text
 @using Parduotuve.Services
-@inject IOrderRepository _orderRepository
-@inject IJSRuntime JS
-@inject AuthService _authService
+@inject IOrderRepository OrderRepository
+@inject IJSRuntime JsRuntime
+@inject AuthService AuthService
 
 <script>
     window.downloadFileFromStream = async (fileName, contentStreamReference) => {
@@ -20,61 +20,64 @@
         URL.revokeObjectURL(url);
     }
 </script>
-<MudText Typo="Typo.h4" Class="d-flex align-center" Color="@orderMessageColor">@orderMessage</MudText>
+<MudText Typo="Typo.h4" Class="d-flex align-center" Color="@OrderMessageColor">@OrderMessage</MudText>
 
 @code {
-    [Parameter]
-    public string OrderId { get; set; }
-    private string orderMessage { get; set; } = String.Empty;
-    private Color orderMessageColor { get; set; } = Color.Primary;
-    private bool DownloadInitiated = false;
+    [Parameter] public string OrderId { get; set; }
+    private string OrderMessage { get; set; } = string.Empty;
+    private Color OrderMessageColor { get; set; } = Color.Primary;
+    private bool _downloadInitiated;
 
     protected override async Task OnInitializedAsync()
     {
-        Order? order = await _orderRepository.GetOrderById(OrderId);
+        Order? order = await OrderRepository.GetOrderById(OrderId);
     }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Order? order = await _orderRepository.GetOrderById(OrderId);
+        Order? order = await OrderRepository.GetOrderById(OrderId);
         if (order == null)
         {
-            orderMessage = "No order found";
-            orderMessageColor = Color.Error;
+            OrderMessage = "No order found";
+            OrderMessageColor = Color.Error;
             StateHasChanged();
             return;
         }
-        if (order.User != null && (!_authService.IsLoggedIn || _authService.CurrentUser!.Id != order.User.Id))
+
+        if (order.User != null && (!AuthService.IsLoggedIn || AuthService.CurrentUser!.Id != order.User.Id))
         {
-            orderMessage = "You do not have permission to view this page.";
-            orderMessageColor = Color.Error;
+            OrderMessage = "You do not have permission to view this page.";
+            OrderMessageColor = Color.Error;
             StateHasChanged();
             return;
         }
+
         if (order.IsCompleted)
         {
-            orderMessage = "Your purchase was completed successfully! You will soon receive your goods via file download.";
-            orderMessageColor = Color.Success;
+            OrderMessage = "Your purchase was completed successfully! You will soon receive your goods via file download.";
+            OrderMessageColor = Color.Success;
             StateHasChanged();
-            if (DownloadInitiated)
+            if (_downloadInitiated)
                 return;
-            DownloadInitiated = true;
+            _downloadInitiated = true;
             Stream fileStream = await GetFileStream();
             string fileName = "wares.txt";
 
-            using DotNetStreamReference streamRef = new DotNetStreamReference(stream: fileStream);
+            using DotNetStreamReference streamRef = new(fileStream);
 
-            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            await JsRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
             return;
         }
-        
-        orderMessage = "Your purchase is still pending or has failed. Please try reloading the page once the checkout process has concluded.";
-        orderMessageColor = Color.Secondary;
+
+        OrderMessage = "Your purchase is still pending or has failed. Please try reloading the page once the checkout process has concluded.";
+        OrderMessageColor = Color.Secondary;
         StateHasChanged();
     }
+
     private async Task<Stream> GetFileStream()
     {
         string contents = "";
-        IEnumerable<OrderItem?> orderItems = await _orderRepository.GetOrderItemsByOrderId(OrderId);
+        IEnumerable<OrderItem?> orderItems = await OrderRepository.GetOrderItemsByOrderId(OrderId);
 
         contents += "You are hereby the real owner of the following purchased goods:\n";
         foreach (OrderItem? entry in orderItems)
@@ -89,8 +92,9 @@
 
         byte[] contentBytes = Encoding.UTF8.GetBytes(contents);
 
-        MemoryStream memoryStream = new MemoryStream(contentBytes);
+        MemoryStream memoryStream = new(contentBytes);
 
         return memoryStream;
     }
+
 }

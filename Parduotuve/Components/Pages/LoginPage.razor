@@ -1,10 +1,10 @@
 ﻿@page "/Login"
-@using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
 @using Parduotuve.Data.Enums
+@using Parduotuve.Data.Repositories
 @using Parduotuve.Helpers.Wrappers
 @using Parduotuve.Services
-@inject ISkinRepository _skinRepository
+@inject ISkinRepository SkinRepository
 @inject NavigationManager NavManager
 @inject AuthService AuthService
 
@@ -12,12 +12,16 @@
     <MudPaper Elevation="3" Class="pa-5" Style="border-radius: 12px; width: 100%;">
         <MudText Typo="Typo.h5" Class="mb-4 text-center">Login</MudText>
 
-        <MudForm Model="@input" IsValid="@_isValid" @ref="form">
-            <MudTextField Label="Username" @bind-Value="@input.Username" Required="true" RequiredError="Username is required." />
-            <MudTextField Label="Password" @bind-Value="@input.Password" Required="true" RequiredError="Password is required." InputType="InputType.Password"/>
+        <MudForm Model="@_input" IsValid="@_isValid" @ref="_form">
+            <MudTextField Label="Username" @bind-Value="@_input.Username" Required="true"
+                          RequiredError="Username is required."/>
+            <MudTextField Label="Password" @bind-Value="@_input.Password" Required="true"
+                          RequiredError="Password is required." InputType="InputType.Password"/>
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CheckSubmission" Disabled="@_loading" Class="mt-3" FullWidth>
-                <MudProgressCircular Indeterminate="true" Size="Size.Large" Style="margin-right: 10px;" Hidden="!_loading" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CheckSubmission" Disabled="@_loading"
+                       Class="mt-3" FullWidth>
+                <MudProgressCircular Indeterminate="true" Size="Size.Large" Style="margin-right: 10px;"
+                                     Hidden="!_loading"/>
                 Login
             </MudButton>
             <MudText Color="Color.Error">@ErrorMessage</MudText>
@@ -27,25 +31,25 @@
 </MudContainer>
 
 @code {
-    private InputInfo input = new InputInfo();
-    private MudForm form;
-    private bool _loading = false;
-    private bool _isValid = false;
+    private readonly InputInfo _input = new();
+    private MudForm _form = null!;
+    private bool _loading;
+    private bool _isValid;
     public string ErrorMessage { get; set; } = "";
 
     public async Task CheckSubmission()
     {
         _loading = true;
         ErrorMessage = "";
-        await form.Validate();
-        _isValid = form.IsValid;
-        if(!_isValid)
+        await _form.Validate();
+        _isValid = _form.IsValid;
+        if (!_isValid)
         {
             _loading = false;
             return;
         }
-        
-        Result<User> loginResult = await AuthService.LoginAsync(input.Username, input.Password);
+
+        Result<User> loginResult = await AuthService.LoginAsync(_input.Username, _input.Password);
         if (!loginResult)
         {
             ErrorMessage = loginResult.Message;
@@ -54,7 +58,7 @@
         }
 
         _loading = false;
-        NavManager.NavigateTo(loginResult.Value.Role.Equals(UserRole.Admin) ? "/AdminPanel" : "/",true);
+        NavManager.NavigateTo(loginResult.Value.Role.Equals(UserRole.Admin) ? "/AdminPanel" : "/");
         StateHasChanged();
     }
 
@@ -69,4 +73,5 @@
             Password = "";
         }
     }
+
 }

@@ -1,12 +1,12 @@
-﻿@using Parduotuve.Data.Repositories
-@using Parduotuve.Data.Entities
-@using System.ComponentModel.DataAnnotations;
-@using Parduotuve.Services
-@inject IChromaRepository _chromaRepository
+﻿@inject IChromaRepository ChromaRepository
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JS
+@inject IJSRuntime JsRuntime
 @inject AuthService AuthService
 @page "/ChromaEdit/{SkinId:int}/{Id:int}/"
+@using System.ComponentModel.DataAnnotations
+@using Parduotuve.Data.Entities
+@using Parduotuve.Data.Repositories
+@using Parduotuve.Services
 
 @if (!AuthService.IsAdmin)
 {
@@ -20,101 +20,103 @@
 </script>
 
 <MudContainer>
-    <MudText Typo="Typo.h4" Align="Align.Center">@chroma.Name @chroma.Skin.Name</MudText>
-    
-    <MudButton Color="Color.Default" OnClick="@(() => JS.InvokeVoidAsync("goBack"))">Go Back</MudButton>
-    
-    <EditForm Model="viewModel" OnValidSubmit="UpdateChroma">
-        <DataAnnotationsValidator />
+    <MudText Typo="Typo.h4" Align="Align.Center">@_chroma.Name @_chroma.Skin.Name</MudText>
+
+    <MudButton Color="Color.Default" OnClick="@(() => JsRuntime.InvokeVoidAsync("goBack"))">Go Back</MudButton>
+
+    <EditForm Model="_viewModel" OnValidSubmit="UpdateChroma">
+        <DataAnnotationsValidator/>
         <MudGrid>
             <MudItem xs="12" sm="6" md="3">
-                <MudTextField Label="Name" Required="true" @bind-Value="viewModel.Name" />
-                <ValidationMessage For="@(() => viewModel.Name)" />
+                <MudTextField Label="Name" Required="true" @bind-Value="_viewModel.Name"/>
+                <ValidationMessage For="@(() => _viewModel.Name)"/>
             </MudItem>
             <MudItem xs="12" sm="6" md="3">
-                <MudTextField Label="Price" Required="true" @bind-Value="viewModel.Price" />
-                <ValidationMessage For="@(() => viewModel.Price)" />
+                <MudTextField Label="Price" Required="true" @bind-Value="_viewModel.Price"/>
+                <ValidationMessage For="@(() => _viewModel.Price)"/>
             </MudItem>
             <MudItem xs="12">
-                <MudTextField Label="Splash URL" Required="true" @bind-Value="viewModel.URL" />
-                <ValidationMessage For="@(() => viewModel.URL)" />
+                <MudTextField Label="Splash URL" Required="true" @bind-Value="_viewModel.Url"/>
+                <ValidationMessage For="@(() => _viewModel.Url)"/>
             </MudItem>
         </MudGrid>
-        
-        <MudButton Color="Color.Primary" OnClick="ShowHideRegularSplash">@RegularSplashButtonText</MudButton>
-        
-        @if (!RegularSplashButtonText.Equals(defaultButtonState))
+
+        <MudButton Color="Color.Primary" OnClick="ShowHideRegularSplash">@_regularSplashButtonText</MudButton>
+
+        @if (!_regularSplashButtonText.Equals(DefaultButtonState))
         {
-            <MudImage Src="@viewModel.URL" Alt="Chroma image" Style="width:100%;"/>
+            <MudImage Src="@_viewModel.Url" Alt="Chroma image" Style="width:100%;"/>
         }
-        
+
         <MudButton Color="Color.Secondary" OnClick="UpdateChroma" Class="mt-4">Update Chroma</MudButton>
     </EditForm>
 </MudContainer>
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
-    [Parameter]
-    public int SkinId { get; set; }
-    Chroma chroma;
-    Clone viewModel;
-    private const string defaultButtonState = "Show image";
-    private string RegularSplashButtonText;
-    
+    [Parameter] public int Id { get; set; }
+    [Parameter] public int SkinId { get; set; }
+    Chroma _chroma;
+    Clone _viewModel;
+    private const string DefaultButtonState = "Show image";
+    private string _regularSplashButtonText;
+
     protected override async Task OnInitializedAsync()
     {
         await GetChroma();
     }
+
     protected async Task GetChroma()
     {
-        RegularSplashButtonText = defaultButtonState;
-        chroma = await _chromaRepository.GetByIdAsync(Id);
-        viewModel = new Clone(chroma);
+        _regularSplashButtonText = DefaultButtonState;
+        _chroma = await ChromaRepository.GetByIdAsync(Id);
+        _viewModel = new Clone(_chroma);
     }
 
     public void UpdateChroma()
     {
         if (ValidateUpdate())
         {
-            viewModel.UpdateChroma(chroma);
-            _chromaRepository.UpdateAsync(chroma);
+            _viewModel.UpdateChroma(_chroma);
+            ChromaRepository.UpdateAsync(_chroma);
         }
     }
 
     public void ShowHideRegularSplash()
     {
-        RegularSplashButtonText = RegularSplashButtonText.Equals(defaultButtonState) ? "Hide image" : defaultButtonState;
+        _regularSplashButtonText = _regularSplashButtonText.Equals(DefaultButtonState) ? "Hide image" : DefaultButtonState;
     }
 
     public bool ValidateUpdate()
     {
-        return !string.IsNullOrEmpty(viewModel.Name) &&
-               !string.IsNullOrEmpty(viewModel.URL) &&
-               !string.IsNullOrEmpty(viewModel.Price);
+        return !string.IsNullOrEmpty(_viewModel.Name) &&
+               !string.IsNullOrEmpty(_viewModel.Url) &&
+               !string.IsNullOrEmpty(_viewModel.Price);
     }
 
     public class Clone
     {
         [Required(ErrorMessage = "Chroma name is required")]
         public string Name { get; set; }
+
         [Required(ErrorMessage = "The loading screen splash art URL is required")]
-        public string URL { get; set; }
+        public string Url { get; set; }
+
         [Required(ErrorMessage = "Price is required")]
         public string Price { get; set; }
 
         public Clone(Chroma chroma)
         {
             Name = chroma.Name;
-            URL = chroma.URL;
+            Url = chroma.Url;
             Price = chroma.Price;
         }
 
         public void UpdateChroma(Chroma chroma)
         {
             chroma.Name = Name;
-            chroma.URL = URL;
+            chroma.Url = Url;
             chroma.Price = Price;
         }
     }
+
 }
