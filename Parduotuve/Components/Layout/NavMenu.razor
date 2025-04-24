@@ -28,11 +28,21 @@
     {
         <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/Login">Login</MudButton>
     }
+    <MudIconButton Color="Color.Inherit" Icon="@(DarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" OnClick="ToggleTheme"/>
 </MudAppBar>
 @code {
+    [Parameter] public required bool DarkMode { get; set; }
+    [Parameter] public required Func<bool, Task> OnModeChanged { get; set; } 
     private async Task Logout()
     {
         await AuthService.Logout();
         NavManager.NavigateTo(NavManager.Uri,true);
+    }
+
+    private async Task ToggleTheme()
+    {
+        DarkMode = !DarkMode;
+        await OnModeChanged.Invoke(DarkMode);
+        StateHasChanged();
     }
 }

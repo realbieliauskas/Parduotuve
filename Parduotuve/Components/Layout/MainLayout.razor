@@ -1,15 +1,53 @@
 ﻿@inherits LayoutComponentBase
+@inject ProtectedLocalStorage LocalStorage
 
-<MudThemeProvider IsDarkMode="true"/>
+<MudThemeProvider IsDarkMode="_isDarkMode" @ref="@_mudThemeProvider"/>
 <MudPopoverProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
 <MudLayout>
-    <NavMenu />
+    <NavMenu DarkMode="_isDarkMode" OnModeChanged="async b => await ModeChanged(b)"/>
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.False" Class="pb-3">
             @Body
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+
+@code
+{
+    private const string DarkModePrefKey = "DarkModePref";
+    private bool _isDarkMode = true;
+    private MudThemeProvider _mudThemeProvider;
+    private bool _userPreferenceFetched;
+    public async Task ModeChanged(bool newMode)
+    {
+        _isDarkMode = newMode;
+        await LocalStorage.SetAsync(DarkModePrefKey,(bool?)newMode);
+        _userPreferenceFetched = true;
+        StateHasChanged();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        
+        ProtectedBrowserStorageResult<bool?> res = await LocalStorage.GetAsync<bool?>(DarkModePrefKey);
+
+        if (!res.Success || res.Value == null)
+            return;
+        _isDarkMode = (bool)res.Value;
+        _userPreferenceFetched = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_userPreferenceFetched)
+        {
+            _isDarkMode = await _mudThemeProvider.GetSystemPreference();
+            await ModeChanged(_isDarkMode);
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}
