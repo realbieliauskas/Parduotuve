@@ -46,13 +46,6 @@ public class StoreDataContext : DbContext
         modelBuilder.Entity<User>()
             .HasData(new User
             {
-                Id = 1,
-                Username = "name",
-                Password = "password",
-                Email = "name@domain.com",
-                Role = UserRole.User
-            }, new User
-            {
                 Id = 2,
                 Username = "alv",
                 Password = "crz",
