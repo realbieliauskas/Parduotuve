@@ -62,6 +62,7 @@ namespace Parduotuve.Data
                         Id = 1,
                         Username = "name",
                         Password = "password",
+                        Email = "name@domain.com",
                         Role = UserRole.User,
                     },
                     new User
@@ -69,6 +70,7 @@ namespace Parduotuve.Data
                         Id = 2,
                         Username = "alv",
                         Password = "crz",
+                        Email = "alv@crz.com",
                         Role = UserRole.Admin
                     }
                     }

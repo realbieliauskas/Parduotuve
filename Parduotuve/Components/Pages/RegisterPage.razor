@@ -48,7 +48,7 @@
             return;
         }
         
-        Result<User> creationResult = await AuthService.RegisterAsync(input.Name, input.Surname, input.Email, input.Username, input.Password, UserRole.User);
+        Result<User> creationResult = await AuthService.RegisterAsync(input.Email, input.Username, input.Password, UserRole.User);
         if (creationResult)
         {
             message = "Account has been successfully created!";

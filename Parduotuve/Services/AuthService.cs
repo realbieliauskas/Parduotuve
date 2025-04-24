@@ -92,9 +92,9 @@ namespace Parduotuve.Services
         }
 
 
-        public async Task<Result<User>> RegisterAsync(string name, string surname, string email, string username, string password, UserRole role)
+        public async Task<Result<User>> RegisterAsync(string email, string username, string password, UserRole role)
         {
-            User newUser = new User { Username = username, Password = password, Role = role };
+            User newUser = new User { Username = username, Password = password, Role = role, Email = email };
 
             Result addResult = await _userRepo.AddAsync(newUser);
 
