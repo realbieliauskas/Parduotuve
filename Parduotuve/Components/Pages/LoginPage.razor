@@ -35,7 +35,7 @@
     private MudForm _form = null!;
     private bool _loading;
     private bool _isValid;
-    public string ErrorMessage { get; set; } = "";
+    private string ErrorMessage { get; set; } = "";
 
     public async Task CheckSubmission()
     {
@@ -64,14 +64,8 @@
 
     protected class InputInfo
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
-
-        public InputInfo()
-        {
-            Username = "";
-            Password = "";
-        }
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
     }
 
 }
