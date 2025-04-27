@@ -1,22 +1,24 @@
-﻿@using Parduotuve.Services
-@using Parduotuve.Data.Repositories
-@using Parduotuve.Data.Entities
-@using System.Text;
-@page "/Cart"
+﻿@page "/Cart"
 @rendermode InteractiveServer
-@inject Shopping_Cart_Service ShoppingCart
+@inject ShoppingCartService ShoppingCart
 @inject NavigationManager NavManager
-@inject ISkinRepository _skinRepository
-@inject IOrderRepository _orderRepository
-@inject AuthService _authService
+@inject ISkinRepository SkinRepository
+@inject IOrderRepository OrderRepository
 @inject AuthService AuthService
+@using System.Security.Cryptography
+@using System.Text
+@using Parduotuve.Data.Entities
+@using Parduotuve.Data.Repositories
+@using Parduotuve.Services
 @using Stripe.Checkout
+@using Session = Stripe.Checkout.Session
 
 <MudText Typo="Typo.h4" GutterBottom>Shopping Cart</MudText>
-    
+
 @if (ShoppingCart.IsEmpty())
 {
-    <MudAlert Severity="Severity.Info">Your shopping cart is empty. Go to the browse page and order what you want.</MudAlert>
+    <MudAlert Severity="Severity.Info">Your shopping cart is empty. Go to the browse page and order what you want.
+    </MudAlert>
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/">Browse</MudButton>
 }
 else
@@ -32,33 +34,36 @@ else
                 <MudTh>Total</MudTh>
             </MudTHeadRow>
             <tbody>
-                @foreach (var item in ShoppingCart)
-                {
-                    Skin skin = GetSkin(item.Key);
-                    if (skin != null)
-                    {
-                        <MudTr>
-                            <MudTd>@skin.Name</MudTd>
-                            <MudTd>@skin.Price €</MudTd>
-                            <MudTd>@item.Value</MudTd>
-                            <MudTd>
-                                <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="() => IncreaseQuantity(item.Key)">+</MudButton>
-                            </MudTd>
-                            <MudTd>
-                                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DecreaseQuantity(item.Key)">-</MudButton>
-                            </MudTd>
-                            <MudTd>@Total(skin.Price, item.Value) €</MudTd>
-                        </MudTr>
-                    }
-                }
+            @foreach (KeyValuePair<int, int> item in ShoppingCart)
+            {
+                Skin skin = GetSkin(item.Key);
+                <MudTr>
+                    <MudTd>@skin.Name</MudTd>
+                    <MudTd>@skin.Price €</MudTd>
+                    <MudTd>@item.Value</MudTd>
+                    <MudTd>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Success"
+                                   OnClick="() => IncreaseQuantity(item.Key)">+
+                        </MudButton>
+                    </MudTd>
+                    <MudTd>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error"
+                                   OnClick="() => DecreaseQuantity(item.Key)">-
+                        </MudButton>
+                    </MudTd>
+                    <MudTd>@Total(skin.Price, item.Value) €</MudTd>
+                </MudTr>
+            }
             </tbody>
         </MudSimpleTable>
         <MudText Typo="Typo.h4">Total: @Total() €</MudText>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleCheckout" Style="width:200px">Proceed to Checkout</MudButton>
-        @if (_loading)
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleCheckout" Style="width:200px">Proceed
+            to Checkout
+        </MudButton>
+        @if (Loading)
         {
             <MudOverlay Visible="true" DarkBackground="true" Absolute="true">
-                <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+                <MudProgressCircular Color="Color.Secondary" Indeterminate="true"/>
             </MudOverlay>
         }
     </MudCard>
@@ -67,21 +72,13 @@ else
 
 @code {
 
-    private IEnumerable<Skin> Skins { get; set; }
-    private bool _loading { get; set; } = false;
+    private IEnumerable<Skin> Skins { get; set; } = null!;
+    private bool Loading { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
-        Skins = await _skinRepository.GetAllAsync();
-
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (await AuthService.EnsureLoaded())
-        {
-            StateHasChanged();
-        }
+        Skins = await SkinRepository.GetAllAsync();
     }
 
     private async Task IncreaseQuantity(int id)
@@ -96,119 +93,133 @@ else
         ShoppingCart.Decrease(id);
         await InvokeAsync(StateHasChanged);
     }
+
     private double? GetTotalPrice()
     {
         double? sum = 0;
-        foreach(var item in ShoppingCart)
+        foreach (KeyValuePair<int, int> item in ShoppingCart)
         {
             Skin skin = GetSkin(item.Key);
-            if (skin.Price!=null)
+            if (skin.Price != null)
             {
                 sum += skin.Price * item.Value;
             }
         }
+
         return sum;
     }
 
-    private static Dictionary<double, string> StripePriceIDs = new Dictionary<double, string>()
+    private static readonly Dictionary<double, string> StripePriceIDs = new()
     {
-        {9.99,"price_1R9V8TCeO2Ku9PZcbDIXGUFs"},
-        {14.99, "price_1R9V93CeO2Ku9PZcxNQmsdiS"},
-        {19.99, "price_1R9V9WCeO2Ku9PZcY1k8PM1M"},
-        {49.99, "price_1R9V9wCeO2Ku9PZcuZyiDTlc"},
-        {99.99, "price_1R9VB6CeO2Ku9PZcf6qgJkNn"},
+        { 9.99, "price_1R9V8TCeO2Ku9PZcbDIXGUFs" },
+        { 14.99, "price_1R9V93CeO2Ku9PZcxNQmsdiS" },
+        { 19.99, "price_1R9V9WCeO2Ku9PZcY1k8PM1M" },
+        { 49.99, "price_1R9V9wCeO2Ku9PZcuZyiDTlc" },
+        { 99.99, "price_1R9VB6CeO2Ku9PZcf6qgJkNn" }
     };
-    private async Task<string> GetPurchaseHash()
+
+    private Task<string> GetPurchaseHash()
     {
-        string purchaseString = String.Empty;//I SITA REIKES PRIDETI USERIO ID KAI TAI BUS ACCESSIBLE
-        foreach (var pair in ShoppingCart)
+        string purchaseString = string.Empty; //I SITA REIKES PRIDETI USERIO ID KAI TAI BUS ACCESSIBLE
+        foreach (KeyValuePair<int, int> pair in ShoppingCart)
         {
             for (int x = 0; x < pair.Value; x++)
             {
                 purchaseString += "item" + pair.Key;
             }
         }
-        purchaseString += "time" + DateTime.UtcNow.Ticks.ToString();
+
+        purchaseString += "time" + DateTime.UtcNow.Ticks;
 
         byte[] purchaseStringBytes = ASCIIEncoding.ASCII.GetBytes(purchaseString);
-        byte[] purchaseHashBytes = System.Security.Cryptography.MD5.HashData(purchaseStringBytes);
-        return ByteArrayToString(purchaseHashBytes);
+        byte[] purchaseHashBytes = MD5.HashData(purchaseStringBytes);
+        return Task.FromResult(ByteArrayToString(purchaseHashBytes));
     }
+
     private static string ByteArrayToString(byte[] arrInput)
     {
         int i;
-        StringBuilder sOutput = new StringBuilder(arrInput.Length);
+        StringBuilder sOutput = new(arrInput.Length);
         for (i = 0; i < arrInput.Length; i++)
         {
             sOutput.Append(arrInput[i].ToString("X2"));
         }
+
         return sOutput.ToString();
     }
+
     /// <summary>
-    /// This method handles the event of clicking the confirm purchase button
-    /// It is responsible for performing verification and delivering the purchased items
+    ///     This method handles the event of clicking the confirm purchase button
+    ///     It is responsible for performing verification and delivering the purchased items
     /// </summary>
     private async Task HandleCheckout()
     {
-        _loading = true;
+        Loading = true;
         StateHasChanged();
-        List<SessionLineItemOptions> lineItems = new List<SessionLineItemOptions>();
-        Dictionary<string, string> metaItems = new Dictionary<string, string>();
+        List<SessionLineItemOptions> lineItems = new();
+        Dictionary<string, string> metaItems = new();
         string hash = await GetPurchaseHash();
-        foreach (var pair in ShoppingCart)
+        foreach (KeyValuePair<int, int> pair in ShoppingCart)
         {
-            Skin? skin = await _skinRepository.GetByIdAsync(pair.Key);
-            if(skin == null)
+            Skin? skin = await SkinRepository.GetByIdAsync(pair.Key);
+            if (skin == null)
             {
                 continue;
             }
-            var option = new SessionLineItemOptions();
+
+            SessionLineItemOptions option = new();
             option.Quantity = pair.Value;
-            option.Price = StripePriceIDs.GetValueOrDefault<double, string>(skin.Price ?? 99.99, StripePriceIDs.Values.Last());
+            option.Price = StripePriceIDs.GetValueOrDefault(skin.Price ?? 99.99, StripePriceIDs.Values.Last());
             lineItems.Add(option);
             metaItems.Add(pair.Key.ToString(), pair.Value.ToString());
-            await _orderRepository.AddOrderItem(new OrderItem() { Amount = pair.Value, Id = 0, OrderId = hash, Skin = skin });
+            await OrderRepository.AddOrderItem(new OrderItem { Amount = pair.Value, Id = 0, OrderId = hash, Skin = skin });
         }
-        metaItems.Add("paymentHash", hash);
-        SessionCreateOptions options = new SessionCreateOptions()
-            {
-                LineItems = lineItems,
-                Mode = "payment",
-                SuccessUrl = NavManager.BaseUri + $"order-complete/{hash}",
-                CancelUrl = NavManager.BaseUri + "Checkout/failed",
-                Metadata = metaItems,
-            };
 
-        var service = new SessionService();
-        var session = await service.CreateAsync(options);
-        Order order = new Order()
-            {
-                Id = hash,
-                IsCompleted = false,
-                User = _authService.CurrentUser,
-            };
-        await _orderRepository.AddOrder(order);
+        metaItems.Add("paymentHash", hash);
+        SessionCreateOptions options = new()
+        {
+            LineItems = lineItems,
+            Mode = "payment",
+            SuccessUrl = NavManager.BaseUri + $"order-complete/{hash}",
+            CancelUrl = NavManager.BaseUri + "Checkout/failed",
+            Metadata = metaItems
+        };
+
+        SessionService service = new();
+        Session? session = await service.CreateAsync(options);
+        Order order = new()
+        {
+            Id = hash,
+            IsCompleted = false,
+            User = AuthService.CurrentUser
+        };
+        await OrderRepository.AddOrder(order);
         NavManager.NavigateTo(session.Url);
         ShoppingCart.Clear();
-        _loading = false;
+        Loading = false;
     }
+
     private Skin GetSkin(int id)
-    { 
-        foreach(var item in Skins)
+    {
+        foreach (Skin? item in Skins)
         {
-            if (item.Id==id)
+            if (item.Id == id)
             {
                 return item;
             }
         }
+
         return null;
     }
+
     private string Total()
     {
         return $"{GetTotalPrice():f2}";
     }
+
     private string Total(double? price, int quantity)
     {
-        return $"{price*quantity:f2}";
+        return $"{price * quantity:f2}";
     }
+
 }

@@ -1,16 +1,16 @@
-﻿@using Parduotuve.Data.Repositories
-@using Parduotuve.Data.Entities
-@using System.ComponentModel.DataAnnotations;
-@using Parduotuve.Services
-@inject ISkinRepository _skinRepository
-@inject IChromaRepository _chromaRepository
+﻿@inject ISkinRepository SkinRepository
+@inject IChromaRepository ChromaRepository
 @inject NavigationManager NavigationManager;
-@inject IJSRuntime JS
+@inject IJSRuntime JsRuntime
 @inject AuthService AuthService
 @page "/SkinEdit/{Id:int}/"
+@using System.ComponentModel.DataAnnotations
+@using Parduotuve.Data.Entities
+@using Parduotuve.Data.Repositories
+@using Parduotuve.Services
 
 
-@if (!AuthService.IsAdmin())
+@if (!AuthService.IsAdmin)
 {
     <MudText Typo="Typo.h5" Color="Color.Error">You do not have permission to view this page</MudText>
     return;
@@ -24,48 +24,50 @@
 <MudContainer>
     <MudCard>
         <MudCardContent>
-            <MudText Typo="Typo.h4" Align="Align.Center">@skin.Name</MudText>
-            <MudButton Variant="Variant.Outlined" OnClick="@(() => JS.InvokeVoidAsync("goBack"))">Go Back</MudButton>
+            <MudText Typo="Typo.h4" Align="Align.Center">@_skin.Name</MudText>
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => JsRuntime.InvokeVoidAsync("goBack"))">Go Back</MudButton>
         </MudCardContent>
     </MudCard>
 </MudContainer>
 
-<MudForm Model="viewModel" OnValidSubmit="UpdateSkin">
-    <MudTextField Label="Name" @bind-Value="viewModel.Name" Required="true" />
-    <MudTextField Label="Price" @bind-Value="viewModel.Price" Required="true" Type="number" />
-    <MudTextField Label="Splash URL" @bind-Value="viewModel.SplashUrl" Required="true" />
-    <MudTextField Label="Cinematic Splash URL" @bind-Value="viewModel.CinematicSplashUrl" Required="true" />
-    <MudTextField Label="Quote" @bind-Value="viewModel.Quote" Multiline="true" />
+<MudForm Model="_viewModel" OnValidSubmit="UpdateSkin">
+    <MudTextField Label="Name" @bind-Value="_viewModel.Name" Required="true"/>
+    <MudTextField Label="Price" @bind-Value="_viewModel.Price" Required="true" Type="number"/>
+    <MudTextField Label="Splash URL" @bind-Value="_viewModel.SplashUrl" Required="true"/>
+    <MudTextField Label="Cinematic Splash URL" @bind-Value="_viewModel.CinematicSplashUrl" Required="true"/>
+    <MudTextField Label="Quote" @bind-Value="_viewModel.Quote" Multiline="true"/>
     <MudButton OnClick="UpdateSkin" Color="Color.Secondary">Update Skin</MudButton>
 </MudForm>
 
-<MudButton Color="Color.Primary" OnClick="() => chromaAdditionPopupIsOpen = true">Add Chroma</MudButton>
+<MudButton Color="Color.Primary" OnClick="() => _chromaAdditionPopupIsOpen = true">Add Chroma</MudButton>
 
-<MudDialog Visible="@chromaAdditionPopupIsOpen" cl OnClose="() => chromaAdditionPopupIsOpen = false">
+<MudDialog Visible="@_chromaAdditionPopupIsOpen" cl OnClose="() => chromaAdditionPopupIsOpen = false">
     <TitleContent>Add New Chroma</TitleContent>
     <DialogContent>
-        <MudForm Model="newChromaPlaceholder" OnValidSubmit="AddChroma">
-            <MudTextField Label="Chroma Name" @bind-Value="newChromaPlaceholder.Name" Required="true" />
-            <MudTextField Label="Chroma Splash Art URL" @bind-Value="newChromaPlaceholder.URL" Required="true" />
-            <MudTextField Label="Chroma Price" @bind-Value="newChromaPlaceholder.Price" Required="true" Type="number" />
+        <MudForm Model="_newChromaPlaceholder" OnValidSubmit="AddChroma">
+            <MudTextField Label="Chroma Name" @bind-Value="_newChromaPlaceholder.Name" Required="true"/>
+            <MudTextField Label="Chroma Splash Art URL" @bind-Value="_newChromaPlaceholder.Url" Required="true"/>
+            <MudTextField Label="Chroma Price" @bind-Value="_newChromaPlaceholder.Price" Required="true" Type="number"/>
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Secondary" OnClick="() => chromaAdditionPopupIsOpen = false">Close</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="() => _chromaAdditionPopupIsOpen = false">Close</MudButton>
         <MudButton Color="Color.Primary" OnClick="AddChroma">Add Chroma</MudButton>
     </DialogActions>
 </MudDialog>
 
-@if (chromas != null)
+@if (_chromas != null)
 {
     <MudGrid>
-        @foreach (var chroma in chromas)
+        @foreach (Chroma? chroma in _chromas)
         {
             <MudItem>
                 <MudPaper>
-                    <MudImage Src="@chroma.URL" Alt="@chroma.Name" />
-                    <MudButton Color="Color.Error" OnClick="() => OpenChromaDeletionQuestion(chroma.Id)">Delete</MudButton>
-                    <MudButton Color="Color.Secondary" OnClick="() => GoToChromaEditingPage(chroma.Id)">@chroma.Name</MudButton>
+                    <MudImage Src="@chroma.Url" Alt="@chroma.Name"/>
+                    <MudButton Color="Color.Error" OnClick="() => OpenChromaDeletionQuestion(chroma.Id)">Delete
+                    </MudButton>
+                    <MudButton Color="Color.Secondary"
+                               OnClick="() => GoToChromaEditingPage(chroma.Id)">@chroma.Name</MudButton>
                 </MudPaper>
             </MudItem>
         }
@@ -73,70 +75,61 @@
 }
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
-    Skin skin;
-    Clone viewModel;
-    Chroma chromaInQuestion;
-    Chroma newChromaPlaceholder = new Chroma();
-    private List<Chroma> chromas;
-    private bool chromaAdditionPopupIsOpen = false;
+    [Parameter] public int Id { get; set; }
+    Skin _skin = null!;
+    Clone _viewModel = null!;
+    readonly Chroma _newChromaPlaceholder = new();
+    private List<Chroma> _chromas = null!;
+    private bool _chromaAdditionPopupIsOpen;
 
     protected override async Task OnInitializedAsync()
     {
         await GetSkin();
     }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (await AuthService.EnsureLoaded())
-        {
-            StateHasChanged();
-        }
-    }
 
     public async Task GetSkin()
     {
-        skin = await _skinRepository.GetByIdAsync(Id);
-        viewModel = new Clone(skin);
-        chromas = skin.ChromaList?.ToList() ?? new List<Chroma>();
+        _skin = await SkinRepository.GetByIdAsync(Id) ?? throw new InvalidOperationException();
+        _viewModel = new Clone(_skin);
+        _chromas = _skin.ChromaList?.ToList() ?? new List<Chroma>();
     }
 
     public async Task UpdateSkin()
     {
         if (ValidateUpdate())
         {
-            viewModel.UpdateSkin(skin);
-            await _skinRepository.UpdateAsync(skin);
+            _viewModel.UpdateSkin(_skin);
+            await SkinRepository.UpdateAsync(_skin);
         }
     }
 
-    public void GoToChromaEditingPage(int Id)
+    public void GoToChromaEditingPage(int id)
     {
-        NavigationManager.NavigateTo($"/ChromaEdit/{this.Id}/{Id}");
+        NavigationManager.NavigateTo($"/ChromaEdit/{this.Id}/{id}");
     }
 
     public bool ValidateUpdate()
     {
-        return viewModel.Price.HasValue &&
-               !string.IsNullOrEmpty(viewModel.Name) &&
-               !string.IsNullOrEmpty(viewModel.SplashUrl) &&
-               !string.IsNullOrEmpty(viewModel.CinematicSplashUrl) &&
-               !string.IsNullOrEmpty(viewModel.Quote);
+        return _viewModel.Price.HasValue &&
+               !string.IsNullOrEmpty(_viewModel.Name) &&
+               !string.IsNullOrEmpty(_viewModel.SplashUrl) &&
+               !string.IsNullOrEmpty(_viewModel.CinematicSplashUrl) &&
+               !string.IsNullOrEmpty(_viewModel.Quote);
     }
 
     public async Task OpenChromaDeletionQuestion(int id)
     {
-        chromaInQuestion = await _chromaRepository.GetByIdAsync(id);
+        await ChromaRepository.GetByIdAsync(id);
     }
 
     public void AddChroma()
     {
-        var newChroma = new Chroma(newChromaPlaceholder)
+        Chroma newChroma = new(_newChromaPlaceholder)
         {
-            Id = _chromaRepository.GetLast().Result.Id + 1,
-            Skin = skin
+            Id = ChromaRepository.GetLast().Result.Id + 1,
+            Skin = _skin
         };
-        _chromaRepository.AddAsync(newChroma).Wait();
+        ChromaRepository.AddAsync(newChroma).Wait();
         NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 
@@ -144,12 +137,16 @@
     {
         [Required(ErrorMessage = "Skin name is required")]
         public string? Name { get; set; }
+
         [Required(ErrorMessage = "The loading screen splash art URL is required")]
         public string? SplashUrl { get; set; }
+
         [Required(ErrorMessage = "The cinematic splash art URL is required")]
         public string? CinematicSplashUrl { get; set; }
+
         [Required(ErrorMessage = "Price is required")]
         public double? Price { get; set; }
+
         public string? Quote { get; set; }
 
         public Clone(Skin skin)
@@ -170,4 +167,5 @@
             skin.Quote = Quote;
         }
     }
+
 }

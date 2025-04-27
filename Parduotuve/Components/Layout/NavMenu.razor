@@ -1,46 +1,58 @@
-﻿﻿@using Parduotuve.Services
+﻿@using Parduotuve.Services
 @inject AuthService AuthService
-@inject NavigationManager Navigation
-@implements IDisposable
+@inject NavigationManager NavManager
+
 <MudAppBar>
     <MudButton StartIcon="@Icons.Material.Filled.MenuBook" Color="Color.Inherit" Href="/">Browse</MudButton>
-    <MudButton StartIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" Href="/Cart">Shopping cart</MudButton>
-@if (AuthService.IsAdmin())
-{
-    <MudButton StartIcon="@Icons.Material.Filled.Shield" Color="Color.Inherit" Href="/AdminPanel/">Admin dashboard</MudButton>
-}
-    <MudSpacer />
-    @if(AuthService.IsLoggedIn())
+    <MudButton StartIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" Href="/Cart">Shopping cart
+    </MudButton>
+    @if (AuthService.IsAdmin)
     {
-        @if(AuthService.IsAdmin())
+        <MudButton StartIcon="@Icons.Material.Filled.Shield" Color="Color.Inherit" Href="/AdminPanel/">Admin dashboard
+        </MudButton>
+    }
+    <MudSpacer/>
+    @if (AuthService.IsLoggedIn)
+    {
+        @if (AuthService.IsAdmin)
         {
             <MudText>Greetings, administrator!</MudText>
         }
         else
         {
-            <MudText>Greetings, @(AuthService.CurrentUser.Username)!</MudText>
+            <MudText>Greetings, @(AuthService.CurrentUser!.Username)!</MudText>
         }
-        <MudSpacer />
+
+        <MudSpacer/>
         @* <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/Account">Account details</MudButton> *@
         <MudButton StartIcon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="Logout">Logout</MudButton>
     }
     else
     {
-        <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/AdminLogin">Login</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Href="/Login">Login
+        </MudButton>
     }
+    <MudIconButton Color="Color.Inherit"
+                   Icon="@(DarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                   OnClick="ToggleTheme"/>
 </MudAppBar>
+
 @code {
-    protected override void OnInitialized()
+    [Parameter] public required bool DarkMode { get; set; }
+    [Parameter] public required Func<bool, Task> OnModeChanged { get; set; }
+
+    private async Task Logout()
     {
-        AuthService.OnAuthStateChanged += StateHasChanged; // Subscribe to Auth changes
+        await AuthService.Logout();
+        NavManager.NavigateTo("/");
+        StateHasChanged();
     }
-    public void Dispose()
+
+    private async Task ToggleTheme()
     {
-        AuthService.OnAuthStateChanged -= StateHasChanged; // Unsubscribe to prevent memory leaks
+        DarkMode = !DarkMode;
+        await OnModeChanged.Invoke(DarkMode);
+        StateHasChanged();
     }
-    private void Logout()
-    {
-        AuthService.Logout();
-        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
-    }
+
 }

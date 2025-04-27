@@ -1,239 +1,243 @@
 ﻿@page "/AdminPanel/"
-@using Parduotuve.Data.Repositories
 @using Parduotuve.Data.Entities
+@using Parduotuve.Data.Repositories
 @using Parduotuve.Services
-@inject ISkinRepository _skinRepository
-@inject IChromaRepository _chromaRepository
+@inject ISkinRepository SkinRepository
+@inject IChromaRepository ChromaRepository
 @inject NavigationManager NavManager
 @inject ISnackbar Snackbar
 @inject AuthService AuthService
+@inject MailService MailService
 
-@if (!AuthService.IsAdmin())
+@if (!AuthService.IsAdmin)
 {
     <h3>You do not have permission to view this page</h3>
+    return;
 }
-else
+@if (_popupIsOpen)
 {
-    @if (popupIsOpen)
-    {
-        <MudCard>
-            <MudCardHeader>
-                <MudCardHeader>Add New Skin</MudCardHeader>
-                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Primary" OnClick="ClosePopup" />
-            </MudCardHeader>
-            <EditForm Model="@this" OnValidSubmit="AddSkin">
-                <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardHeader>
+            <MudCardHeader>Add New Skin</MudCardHeader>
+            <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Primary" OnClick="ClosePopup"/>
+        </MudCardHeader>
+        <EditForm Model="@(this)" OnValidSubmit="AddSkin">
+            <DataAnnotationsValidator/>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="Champion Name" Required="true" @bind-Value="_newSkin.ChampionName"/>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="Skin Name" Required="true" @bind-Value="_newSkin.Name"/>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField Label="Loading Screen Art URL" Required="true" @bind-Value="_newSkin.SplashUrl"/>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField Label="Cinematic Art URL" Required="true"
+                                      @bind-Value="_newSkin.CinematicSplashUrl"/>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField Label="Price" Required="true" Type="number" @bind-Value="_newSkin.Price"/>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField Label="Quote" @bind-Value="_newSkin.Quote"/>
+                    </MudItem>
+                </MudGrid>
+
+                @if (_newChromas.Count > 0)
+                {
+                    <MudText Typo="Typo.h6">Chromas:</MudText>
+                    <MudList T="MudListItem<MudText>">
+                        @foreach ((Chroma chroma, int index) in _newChromas.Select((value, i) => (value, i)))
+                        {
+                            <MudListItem>
+                                <MudText>@(index + 1). @chroma.Name</MudText>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+            </MudCardContent>
+
+            @if (_chromaBoxIsOpen)
+            {
                 <MudCardContent>
                     <MudGrid>
-                        <MudItem xs="12" sm="6">
-                            <MudTextField Label="Champion Name" Required="true" @bind-Value="newSkin.ChampionName" />
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudTextField Label="Skin Name" Required="true" @bind-Value="newSkin.Name" />
+                        <MudItem xs="12">
+                            <MudTextField Label="Chroma Name" Required="true" @bind-Value="_newChroma.Name"/>
                         </MudItem>
                         <MudItem xs="12">
-                            <MudTextField Label="Loading Screen Art URL" Required="true" @bind-Value="newSkin.SplashUrl" />
+                            <MudTextField Label="Chroma Price" Required="true" @bind-Value="_newChroma.Price"/>
                         </MudItem>
                         <MudItem xs="12">
-                            <MudTextField Label="Cinematic Art URL" Required="true" @bind-Value="newSkin.CinematicSplashUrl" />
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudTextField Label="Price" Required="true" Type="number" @bind-Value="newSkin.Price" />
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudTextField Label="Quote" @bind-Value="newSkin.Quote" />
+                            <MudTextField Label="Splash Art URL" Required="true" @bind-Value="_newChroma.Url"/>
                         </MudItem>
                     </MudGrid>
-
-                    @if (newChromas.Count > 0)
-                    {
-                        <MudText Typo="Typo.h6">Chromas:</MudText>
-                        <MudList T="MudListItem<MudText>">
-                            @foreach (var (chroma, index) in newChromas.Select((value, i) => (value, i)))
-                            {
-                                <MudListItem>
-                                    <MudText>@(index + 1). @chroma.Name</MudText>
-                                </MudListItem>
-                            }
-                        </MudList>
-                    }
+                    <MudButton Color="Color.Primary" OnClick="AddChroma">Add Chroma</MudButton>
                 </MudCardContent>
-
-                @if (chromaBoxIsOpen)
-                {
-                    <MudCardContent>
-                        <MudGrid>
-                            <MudItem xs="12">
-                                <MudTextField Label="Chroma Name" Required="true" @bind-Value="newChroma.Name" />
-                            </MudItem>
-                            <MudItem xs="12">
-                                <MudTextField Label="Chroma Price" Required="true" @bind-Value="newChroma.Price" />
-                            </MudItem>
-                            <MudItem xs="12">
-                                <MudTextField Label="Splash Art URL" Required="true" @bind-Value="newChroma.URL" />
-                            </MudItem>
-                        </MudGrid>
-                        <MudButton Color="Color.Primary" OnClick="AddChroma">Add Chroma</MudButton>
-                    </MudCardContent>
-                }
-
-                <MudCardActions>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="ToggleChromaBox">@chromaBoxButtonMessage</MudButton>
-                    <MudSpacer />
-                    <MudButton Color="Color.Secondary" OnClick="ClosePopup">Close</MudButton>
-                    <MudButton OnClick="AddSkin" Color="Color.Primary">Add Skin</MudButton>
-                </MudCardActions>
-            </EditForm>
-        </MudCard>
-    }
-
-    <MudText Typo="Typo.h4">Admin Control Page</MudText>
-    <MudButton Color="Color.Primary" OnClick="OpenPopup">Add Skin</MudButton>
-
-    <MudGrid>
-        @foreach (var skin in GetPageContents())
-        {
-            if (skins.Contains(skin))
-            {
-                <MudItem xs="12" sm="6" md="4">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudText>@skin.Name</MudText>
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Color="Color.Secondary" OnClick="() => GoToSkinEditingPage(skin)">Edit</MudButton>
-                            <MudButton Color="Color.Error" OnClick="() => DeleteSkin(skin)">Delete</MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                </MudItem>
             }
-        }
-    </MudGrid>
 
-    <div class="d-flex flex-column align-center">
-        <MudPagination BoundaryCount="2" MiddleCount="5" Count="@PageCount" Selected="@Page" SelectedChanged="@((page) => NavToPage(page))" Class="mt-4" />
-    </div>
+            <MudCardActions>
+                <MudButton Variant="Variant.Outlined" Color="Color.Info"
+                           OnClick="ToggleChromaBox">@_chromaBoxButtonMessage</MudButton>
+                <MudSpacer/>
+                <MudButton Color="Color.Secondary" OnClick="ClosePopup">Close</MudButton>
+                <MudButton OnClick="AddSkin" Color="Color.Primary">Add Skin</MudButton>
+                <MudCheckBox @bind-Value="_notifyUsers" Label="Notify users about new skin?" Color="Color.Inherit"></MudCheckBox>
+            </MudCardActions>
+        </EditForm>
+    </MudCard>
 }
+
+<MudText Typo="Typo.h4">Admin Control Page</MudText>
+<MudButton Color="Color.Primary" OnClick="OpenPopup">Add Skin</MudButton>
+
+<MudGrid>
+    @foreach (Skin skin in GetPageContents())
+    {
+        if (_skins.Contains(skin))
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard>
+                    <MudCardContent>
+                        <MudText>@skin.Name</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Color="Color.Secondary" OnClick="() => GoToSkinEditingPage(skin)">Edit</MudButton>
+                        <MudButton Color="Color.Error" OnClick="() => DeleteSkin(skin)">Delete</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    }
+</MudGrid>
+
+<div class="d-flex flex-column align-center">
+    <MudPagination BoundaryCount="2" MiddleCount="5" Count="@PageCount" Selected="@Page"
+                   SelectedChanged="@(page => NavToPage(page))" Class="mt-4"/>
+</div>
 
 
 @code {
-    List<Skin> skins = new List<Skin>();
-    Skin clickedSkin = new Skin();
-    Skin newSkin = new Skin();
-    List<Chroma> newChromas = new List<Chroma>();
-    Chroma newChroma = new Chroma();
-    private bool popupIsOpen = false;
-    private bool chromaBoxIsOpen = false;
-    private string chromaBoxButtonMessage = "Show Chroma box";
+    List<Skin> _skins = new();
+    Skin _clickedSkin = new();
+    Skin _newSkin = new();
+    List<Chroma> _newChromas = new();
+    Chroma _newChroma = new();
+    private bool _popupIsOpen;
+    private bool _chromaBoxIsOpen;
+    private bool _notifyUsers = false;
+    private string _chromaBoxButtonMessage = "Show Chroma box";
 
-    [SupplyParameterFromQuery]
-    [Parameter]
-    public int Page { get; set; }
-    private static int ItemsPerPage = 12;
-    private int PageCount { get { return skins.Chunk(ItemsPerPage).ToArray().Length; } }
+    [SupplyParameterFromQuery] [Parameter] public int Page { get; set; }
+    private static readonly int ItemsPerPage = 12;
+
+    private int PageCount => _skins.Chunk(ItemsPerPage).ToArray().Length;
 
     protected override async Task OnInitializedAsync()
     {
-        if (Page <= 0) { Page = 1; }
+        if (Page <= 0)
+        {
+            Page = 1;
+        }
+
         await GetSkins();
     }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+
+    private async Task GetSkins()
     {
-        if(await AuthService.EnsureLoaded())
-        {
-            StateHasChanged();
-        }
+        _skins = (List<Skin>)await SkinRepository.GetAllAsync();
     }
 
-    public async Task GetSkins()
-    {
-        skins = (List<Skin>)(await _skinRepository.GetAllAsync());
-    }
-
-    public void GoToSkinEditingPage(Skin skin)
+    private void GoToSkinEditingPage(Skin skin)
     {
         NavManager.NavigateTo($"/SkinEdit/{skin.Id}/");
     }
 
-    public void DeleteSkin(Skin skin)
+    private void DeleteSkin(Skin skin)
     {
-        skins.Remove(skin);
-        _skinRepository.DeleteAsync(skin.Id);
+        _skins.Remove(skin);
+        SkinRepository.DeleteAsync(skin.Id);
     }
 
-    public void OpenPopup()
+    private void OpenPopup()
     {
-        popupIsOpen = true;
+        _popupIsOpen = true;
     }
 
-    public void ClosePopup()
+    private void ClosePopup()
     {
-        popupIsOpen = false;
-        newSkin = new Skin();
+        _popupIsOpen = false;
+        _newSkin = new Skin();
         CloseChromaBox();
     }
 
-    public void AddSkin()
+    private async Task AddSkin()
     {
-        if(CheckIfSkinIsValid())
+        if (CheckIfSkinIsValid())
         {
-            int newId = skins.Last().Id + 1;
-            newSkin.Id = newId;
-            newSkin.ChromaList = newChromas;
-            _skinRepository.AddAsync(newSkin);
+            int newId = _skins.Last().Id + 1;
+            _newSkin.Id = newId;
+            _newSkin.ChromaList = _newChromas;
+            await SkinRepository.AddAsync(_newSkin);
+            if (_notifyUsers)
+            {
+                _ = MailService.BroadcastNewArrivalNotification(_newSkin);
+            }
             NavManager.NavigateTo(NavManager.Uri, true);
         }
     }
 
-    public bool CheckIfSkinIsValid()
+    private bool CheckIfSkinIsValid()
     {
-        return newSkin.Price.HasValue &&
-               !String.IsNullOrEmpty(newSkin.Name) &&
-               !String.IsNullOrEmpty(newSkin.SplashUrl) &&
-               !String.IsNullOrEmpty(newSkin.CinematicSplashUrl) &&
-               !String.IsNullOrEmpty(newSkin.ChampionName);
+        return _newSkin.Price.HasValue &&
+               !string.IsNullOrEmpty(_newSkin.Name) &&
+               !string.IsNullOrEmpty(_newSkin.SplashUrl) &&
+               !string.IsNullOrEmpty(_newSkin.CinematicSplashUrl) &&
+               !string.IsNullOrEmpty(_newSkin.ChampionName);
     }
 
     public void ToggleChromaBox()
     {
-        if (chromaBoxIsOpen)
+        if (_chromaBoxIsOpen)
         {
-            chromaBoxIsOpen = false;
-            chromaBoxButtonMessage = "Show Chroma Box";
+            _chromaBoxIsOpen = false;
+            _chromaBoxButtonMessage = "Show Chroma Box";
         }
         else
         {
-            chromaBoxIsOpen = true;
-            chromaBoxButtonMessage = "Hide Chroma Box";
+            _chromaBoxIsOpen = true;
+            _chromaBoxButtonMessage = "Hide Chroma Box";
         }
     }
 
     public void CloseChromaBox()
     {
-        chromaBoxIsOpen = false;
-        newChroma = new Chroma();
-        newChromas = new List<Chroma>();
+        _chromaBoxIsOpen = false;
+        _newChroma = new Chroma();
+        _newChromas = new List<Chroma>();
     }
 
     public void AddChroma()
     {
-        if(CheckIfChromaIsValid())
+        if (CheckIfChromaIsValid())
         {
-
-            newChroma.Skin = newSkin;
-            int newId = _chromaRepository.GetLast().Id + 1;
-            newChroma.Id = newId;
-            Chroma temp = new Chroma(newChroma);
-            newChromas.Add(temp);
+            _newChroma.Skin = _newSkin;
+            int newId = ChromaRepository.GetLast().Id + 1;
+            _newChroma.Id = newId;
+            Chroma temp = new(_newChroma);
+            _newChromas.Add(temp);
         }
     }
 
     public bool CheckIfChromaIsValid()
     {
-        return !String.IsNullOrEmpty(newChroma.Name) &&
-               !String.IsNullOrEmpty(newChroma.URL) &&
-               !String.IsNullOrEmpty(newChroma.Price);
+        return !string.IsNullOrEmpty(_newChroma.Name) &&
+               !string.IsNullOrEmpty(_newChroma.Url) &&
+               !string.IsNullOrEmpty(_newChroma.Price);
     }
+
     private IEnumerable<Skin> GetPageContents()
     {
         int tempPage = Page;
@@ -244,11 +248,13 @@ else
         if (tempPage == 0)
             return Array.Empty<Skin>();
 
-        return skins.Chunk(ItemsPerPage).ToArray()[tempPage - 1];
+        return _skins.Chunk(ItemsPerPage).ToArray()[tempPage - 1];
     }
+
     private void NavToPage(int page)
     {
         string pagedUri = NavManager.GetUriWithQueryParameter("Page", page);
         NavManager.NavigateTo(pagedUri, false);
     }
+
 }
