@@ -5,13 +5,13 @@
 @inject ISkinRepository SkinRepository
 @inject IOrderRepository OrderRepository
 @inject AuthService AuthService
+@inject IStripeService StripeService
 @using System.Security.Cryptography
 @using System.Text
 @using Parduotuve.Data.Entities
 @using Parduotuve.Data.Repositories
 @using Parduotuve.Services
 @using Stripe.Checkout
-@using Session = Stripe.Checkout.Session
 
 <MudText Typo="Typo.h4" GutterBottom>Shopping Cart</MudText>
 
@@ -120,7 +120,7 @@ else
 
     private Task<string> GetPurchaseHash()
     {
-        string purchaseString = string.Empty; //I SITA REIKES PRIDETI USERIO ID KAI TAI BUS ACCESSIBLE
+        string purchaseString = string.Empty;
         foreach (KeyValuePair<int, int> pair in ShoppingCart)
         {
             for (int x = 0; x < pair.Value; x++)
@@ -131,6 +131,10 @@ else
 
         purchaseString += "time" + DateTime.UtcNow.Ticks;
 
+        if (AuthService.CurrentUser != null)
+        {
+            purchaseString += AuthService.CurrentUser.Id;
+        }
         byte[] purchaseStringBytes = ASCIIEncoding.ASCII.GetBytes(purchaseString);
         byte[] purchaseHashBytes = MD5.HashData(purchaseStringBytes);
         return Task.FromResult(ByteArrayToString(purchaseHashBytes));
@@ -176,17 +180,9 @@ else
         }
 
         metaItems.Add("paymentHash", hash);
-        SessionCreateOptions options = new()
-        {
-            LineItems = lineItems,
-            Mode = "payment",
-            SuccessUrl = NavManager.BaseUri + $"order-complete/{hash}",
-            CancelUrl = NavManager.BaseUri + "Checkout/failed",
-            Metadata = metaItems
-        };
 
-        SessionService service = new();
-        Session? session = await service.CreateAsync(options);
+        string url = await StripeService.CreateCheckoutSessionAsync(lineItems, metaItems, NavManager.BaseUri + $"order-complete/{hash}", NavManager.BaseUri + "Checkout/failed");
+        
         Order order = new()
         {
             Id = hash,
@@ -194,7 +190,7 @@ else
             User = AuthService.CurrentUser
         };
         await OrderRepository.AddOrder(order);
-        NavManager.NavigateTo(session.Url);
+        NavManager.NavigateTo(url);
         ShoppingCart.Clear();
         Loading = false;
     }
@@ -214,7 +210,7 @@ else
 
     private string Total()
     {
-        return $"{GetTotalPrice():f2}";
+        return Math.Round(GetTotalPrice() ?? 0, 2).ToString();
     }
 
     private string Total(double? price, int quantity)

@@ -19,7 +19,7 @@ public class MailService
 
     private SmtpClient GetClient()
     {
-        SmtpClient client = new SmtpClient(_configuration["SmtpServerUrl"],int.Parse(_configuration["SmtpPort"]));
+        SmtpClient client = new(_configuration["SmtpServerUrl"],int.Parse(_configuration["SmtpPort"]));
         client.EnableSsl = true;
         client.UseDefaultCredentials = false;
         client.Credentials = new NetworkCredential(_configuration["SmtpUsername"], _configuration["SmtpPassword"]);
@@ -29,7 +29,7 @@ public class MailService
 
     private MailMessage? GetNewArrivalMessage(Skin newSkin, User recipient)
     {
-        MailMessage message = new MailMessage();
+        MailMessage message = new();
 
         MailAddress? temp;
         
