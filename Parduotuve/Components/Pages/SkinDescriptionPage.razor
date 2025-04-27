@@ -14,6 +14,13 @@
         history.back();
     };
 </script>
+
+@if (_skin == null)
+{
+    <MudText Typo="Typo.h3">No such skin found.</MudText>
+    return;
+}
+
 <MudText Typo="Typo.h3">@_skin.Name</MudText>
 <MudSpacer/>
 
@@ -42,10 +49,10 @@
     </MudContainer>
 </MudPaper>
 
+@if (_chromas != null)
+{
 <MudPaper Style="display:flex;float:left;margin:10px;margin-left:0px;flex-wrap:wrap">
     <!-- Shows skin chromas and their RP costs-->
-    @if (_chromas != null)
-    {
         @foreach (Chroma chroma in _chromas)
         {
             <MudCard Style="margin:10px" Outlined="true">
@@ -57,8 +64,8 @@
                 </MudCardContent>
             </MudCard>
         }
-    }
 </MudPaper>
+}
 
 
 
@@ -67,28 +74,23 @@
     private Skin _skin;
     private List<Chroma> _chromas;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        Snackbar.Configuration.PreventDuplicates = false;
-        await GetSkinObj();
-    }
-
-    public async Task GetSkinObj()
-    {
-        TextWriterTraceListener writer = new(Console.Out);
-        int param = -1;
-        if (!int.TryParse(SkinId, out param))
+        await base.OnParametersSetAsync();
+        
+        int temp;
+        if (!int.TryParse(SkinId, out temp))
             return;
-        Skin? toAssign = await SkinRepository.GetByIdAsync(param);
+        Skin? toAssign = await SkinRepository.GetByIdAsync(temp);
         if (toAssign == null)
             return;
         _skin = toAssign;
-
+        
         if (_skin.ChromaList != null)
             _chromas = _skin.ChromaList.ToList();
     }
 
-    private async Task AddToCart(int id)
+    public async Task AddToCart(int id)
     {
         ShoppingCart.Add(id);
         string skin = (await SkinRepository.GetByIdAsync(id)).Name;

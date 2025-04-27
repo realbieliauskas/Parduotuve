@@ -177,6 +177,7 @@ public class CartPageTests : TestContext
             
             // Act
             await cut.InvokeAsync(() => checkoutButton.Click());
+            
             // Assert
             Assert.True(_shoppingCart.IsEmpty());
             Assert.DoesNotContain(_navManager.Uri, "Cart");
