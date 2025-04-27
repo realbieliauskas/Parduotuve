@@ -22,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Components\" />
     <Folder Include="Data\Repositories\" />
-    <Folder Include="Drivers\" />
   </ItemGroup>
   
 </Project>
