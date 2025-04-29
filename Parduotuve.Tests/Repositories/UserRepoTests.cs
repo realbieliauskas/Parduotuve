@@ -123,7 +123,7 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            var user = await context.Users.FindAsync(1);
+            var user = await context.Users.FindAsync(3);
 
             // Act
             var sessionId = await repository.GetNewSessionAsync(user);
@@ -142,7 +142,7 @@ namespace Parduotuve.Tests.Repositories
             // Arrange
             using var context = CreateContext();
             var repository = new UserRepository(context);
-            var user = await context.Users.FindAsync(1);
+            var user = await context.Users.FindAsync(3);
             var sessionId = await repository.GetNewSessionAsync(user);
 
             // Act
@@ -159,8 +159,8 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            var user1 = await context.Users.FindAsync(1);
-            var user2 = await context.Users.FindAsync(2);
+            var user1 = await context.Users.FindAsync(3);
+            var user2 = await context.Users.FindAsync(4);
 
             // Create multiple sessions for different users
             await repository.GetNewSessionAsync(user1);
@@ -183,7 +183,7 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            var initialUser = await context.Users.FindAsync(1);
+            var initialUser = await context.Users.FindAsync(3);
             var sessionId = await repository.GetNewSessionAsync(initialUser);
 
             // Act
