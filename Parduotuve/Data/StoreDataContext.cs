@@ -6,13 +6,18 @@ namespace Parduotuve.Data;
 
 public class StoreDataContext : DbContext
 {
-    private readonly IConfiguration _configuration;
-
+    private readonly IConfiguration? _configuration;
+    
+    public StoreDataContext(DbContextOptions<StoreDataContext> options) 
+        : base(options)
+    {
+    }
+    
     public StoreDataContext(IConfiguration configuration)
     {
         _configuration = configuration;
     }
-
+    
     public DbSet<Skin> Skins { get; set; }
 
     public DbSet<User> Users { get; set; }
@@ -27,7 +32,11 @@ public class StoreDataContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite(_configuration.GetConnectionString("StoreDB"));
+        // Only configure if options haven't been set and configuration is available
+        if (!optionsBuilder.IsConfigured && _configuration != null)
+        {
+            optionsBuilder.UseSqlite(_configuration.GetConnectionString("StoreDB"));
+        }
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
