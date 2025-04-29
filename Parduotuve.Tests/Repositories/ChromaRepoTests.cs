@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Parduotuve.Data;
 using Parduotuve.Data.Entities;
 using Parduotuve.Data.Repositories;
@@ -17,7 +18,8 @@ public class ChromaRepoTests : IDisposable
     private readonly DbConnection _connection;
     private readonly DbContextOptions<StoreDataContext> _contextOptions;
     private List<Chroma> chromaList;
-
+    private List<Skin> skinList;
+    private Skin ahriSkin;
     public ChromaRepoTests()
     {
         _connection = new SqliteConnection("Filename=:memory:");
@@ -32,7 +34,7 @@ public class ChromaRepoTests : IDisposable
         context.Database.EnsureCreated();
 
         // Create two skin objects
-        var ahriSkin = new Skin
+        ahriSkin = new Skin
         {
             Id = 1,
             Name = "Spirit Blossom Ahri",
@@ -123,7 +125,11 @@ public class ChromaRepoTests : IDisposable
             kaynChroma2,
             kaynChroma3,
         ];
-
+        skinList = 
+        [
+            ahriSkin,
+            kaynSkin,
+        ];
         context.SaveChanges();
     }
 
@@ -141,10 +147,11 @@ public class ChromaRepoTests : IDisposable
     {
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
+        Chroma forComparison = new Chroma(1, "Rose Quartz", "https://example.com/ahri-rose-quartz.jpg", "290", skinList.First());
+
         Chroma chroma = await repo.GetByIdAsync(1);
-        Assert.Equal("Rose Quartz", chroma.Name);
-        Assert.Equal("https://example.com/ahri-rose-quartz.jpg", chroma.Url);
-        Assert.Equal("290", chroma.Price);
+       
+        Assert.Equal(forComparison, chroma);
     }
 
     [Fact]
@@ -152,6 +159,7 @@ public class ChromaRepoTests : IDisposable
     {
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
+
         List<Chroma> chromas = (await repo.GetAllAsync()).ToList();
 
         Assert.Equal(chromas, chromaList);
@@ -160,6 +168,40 @@ public class ChromaRepoTests : IDisposable
     [Fact]
     public async Task AddAsync_AddAhriChroma_ReturnNewAhriChromaById()
     {
+        using var context = CreateContext();
+        var repo = new ChromaRepository(context);
+        var existingSkin = await context.Skins.FindAsync(1);
+        Chroma chroma = new Chroma(6, "Sunshine", "image.png", "Bundle Exclusive", existingSkin);
 
+        await repo.AddAsync(chroma);
+        Chroma gottenChroma = await repo.GetByIdAsync(6);
+
+        Assert.Equal(chroma, gottenChroma);
     }
+
+    [Fact]
+    public async Task DeleteAsync_RemoveRoseQuartzAhriChroma_ReturnNullWhenAccessingDeletedChroma()
+    {
+        using var context = CreateContext();
+        var repo = new ChromaRepository(context);
+
+        await repo.DeleteAsync(1);
+        Chroma chroma = await repo.GetByIdAsync(1);
+
+        Assert.Null(chroma);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_RemoveNonExistentChroma_ReturnChromaCount5()
+    {
+        using var context = CreateContext();
+        var repo = new ChromaRepository(context);
+
+        await repo.DeleteAsync(8);
+        int count = (await repo.GetAllAsync()).Count();
+
+        Assert.Equal(5, count);
+    }
+
+    
 }

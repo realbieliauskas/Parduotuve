@@ -16,6 +16,15 @@ public class Chroma : IEquatable<Chroma>
     {
     }
 
+    public Chroma(int id, string name, string url, string price, Skin skin)
+    {
+        Id = id;
+        Name = name;
+        Url = url;
+        Price = price;
+        Skin = skin;
+    }
+
     [Key] public int Id { get; set; }
 
     public string Name { get; set; }
