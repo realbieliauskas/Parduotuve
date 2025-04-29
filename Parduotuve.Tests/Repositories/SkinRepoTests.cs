@@ -21,7 +21,6 @@ namespace Parduotuve.Tests.Repositories
 
         public SkinRepoTests()
         {
-            // Set up in-memory SQLite database for testing
             _connection = new SqliteConnection("Filename=:memory:");
             _connection.Open();
 
@@ -33,7 +32,7 @@ namespace Parduotuve.Tests.Repositories
 
             context.Database.EnsureCreated();
 
-            // Create skin test data
+            // Create two skin objects
             var ahriSkin = new Skin
             {
                 Id = 1,
