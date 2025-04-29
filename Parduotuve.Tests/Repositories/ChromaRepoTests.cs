@@ -19,7 +19,7 @@ public class ChromaRepoTests : IDisposable
     private readonly DbContextOptions<StoreDataContext> _contextOptions;
     private List<Chroma> chromaList;
     private List<Skin> skinList;
-    private Skin ahriSkin;
+
     public ChromaRepoTests()
     {
         _connection = new SqliteConnection("Filename=:memory:");
@@ -34,7 +34,7 @@ public class ChromaRepoTests : IDisposable
         context.Database.EnsureCreated();
 
         // Create two skin objects
-        ahriSkin = new Skin
+        var ahriSkin = new Skin
         {
             Id = 1,
             Name = "Spirit Blossom Ahri",
@@ -147,11 +147,11 @@ public class ChromaRepoTests : IDisposable
     {
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
-        Chroma forComparison = new Chroma(1, "Rose Quartz", "https://example.com/ahri-rose-quartz.jpg", "290", skinList.First());
+        Chroma expected = new Chroma(1, "Rose Quartz", "https://example.com/ahri-rose-quartz.jpg", "290", skinList.First());
 
-        Chroma chroma = await repo.GetByIdAsync(1);
+        Chroma actual = await repo.GetByIdAsync(1);
        
-        Assert.Equal(forComparison, chroma);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
@@ -160,9 +160,9 @@ public class ChromaRepoTests : IDisposable
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
 
-        List<Chroma> chromas = (await repo.GetAllAsync()).ToList();
+        List<Chroma> actual = (await repo.GetAllAsync()).ToList();
 
-        Assert.Equal(chromas, chromaList);
+        Assert.Equal(chromaList, actual);
     }
 
     [Fact]
@@ -171,12 +171,12 @@ public class ChromaRepoTests : IDisposable
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
         var existingSkin = await context.Skins.FindAsync(1);
-        Chroma chroma = new Chroma(6, "Sunshine", "image.png", "Bundle Exclusive", existingSkin);
+        Chroma expected = new Chroma(6, "Sunshine", "image.png", "Bundle Exclusive", existingSkin);
 
-        await repo.AddAsync(chroma);
-        Chroma gottenChroma = await repo.GetByIdAsync(6);
+        await repo.AddAsync(expected);
+        Chroma actual = await repo.GetByIdAsync(6);
 
-        Assert.Equal(chroma, gottenChroma);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
@@ -186,9 +186,9 @@ public class ChromaRepoTests : IDisposable
         var repo = new ChromaRepository(context);
 
         await repo.DeleteAsync(1);
-        Chroma chroma = await repo.GetByIdAsync(1);
+        Chroma actual = await repo.GetByIdAsync(1);
 
-        Assert.Null(chroma);
+        Assert.Null(actual);
     }
 
     [Fact]
@@ -196,12 +196,22 @@ public class ChromaRepoTests : IDisposable
     {
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
-
+        int expected = 5;
         await repo.DeleteAsync(8);
-        int count = (await repo.GetAllAsync()).Count();
+        int actual = (await repo.GetAllAsync()).Count();
 
-        Assert.Equal(5, count);
+        Assert.Equal(expected, actual);
     }
 
-    
+    [Fact]
+    public async Task GetLast_Call_GetObsydianKayn()
+    {
+        using var context = CreateContext();
+        var repo = new ChromaRepository(context);
+        Chroma expected = chromaList.Last();
+
+        Chroma actual = await repo.GetLast();
+
+        Assert.Equal(expected, actual);
+    }
 }
