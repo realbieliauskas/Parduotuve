@@ -50,6 +50,8 @@ public class ChromaRepository : IChromaRepository
 
     public async Task<Chroma> GetLast()
     {
-        return await _context.Chromas.OrderBy(a => a.Id).LastAsync();
+        return await _context.Chromas.OrderBy(a => a.Id)
+            .Include(chroma => chroma.Skin)
+            .LastAsync();
     }
 }
