@@ -180,6 +180,22 @@ public class ChromaRepoTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_UpdateRoseQuartzAhriChroma_ReturnChromaWithUpdatedName()
+    {
+        using var context = CreateContext();
+        var repo = new ChromaRepository(context);
+        string expected = "Sunshine Quartz";
+
+        Chroma chroma = await repo.GetByIdAsync(1);
+        chroma.Name = expected;
+        await repo.UpdateAsync(chroma);
+        string actual = (await repo.GetByIdAsync(1)).Name;
+
+        Assert.Equal(expected, actual);
+
+    }
+
+    [Fact]
     public async Task DeleteAsync_RemoveRoseQuartzAhriChroma_ReturnNullWhenAccessingDeletedChroma()
     {
         using var context = CreateContext();
