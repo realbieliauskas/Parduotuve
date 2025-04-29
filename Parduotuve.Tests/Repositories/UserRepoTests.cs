@@ -24,12 +24,19 @@ namespace Parduotuve.Tests.Repositories
         {
             _connection = new SqliteConnection("Filename=:memory:");
             _connection.Open();
+
             _contextOptions = new DbContextOptionsBuilder<StoreDataContext>()
                 .UseSqlite(_connection)
                 .Options;
 
             using var context = new StoreDataContext(_contextOptions);
             context.Database.EnsureCreated();
+
+            context.Users.AddRange(
+                new User { Username = "user1", Password = "pass1", Email = "user1@example.com", Role = UserRole.Admin },
+                new User { Username = "user2", Password = "pass2", Email = "user2@example.com", Role = UserRole.User },
+                new User { Username = "user3", Password = "pass3", Email = "user3@example.com", Role = UserRole.User }
+            );
             context.SaveChanges();
         }
 
@@ -41,15 +48,13 @@ namespace Parduotuve.Tests.Repositories
             // Arrange
             using var context = CreateContext();
             var repository = new UserRepository(context);
-
-            // Add test users
-            await AddTestUsers(context);
+            int expected = 4; // alv is always added + 3 custom users
 
             // Act
             var users = await repository.GetAllAsync();
 
             // Assert
-            Assert.Equal(3, users.Count());
+            Assert.Equal(expected, users.Count());
         }
 
         [Fact]
@@ -59,11 +64,8 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            // Add test users
-            await AddTestUsers(context);
-
             // Act
-            var user = await repository.GetByIdAsync(1);
+            var user = await repository.GetByIdAsync(3);
 
             // Assert
             Assert.NotNull(user);
@@ -76,9 +78,6 @@ namespace Parduotuve.Tests.Repositories
             // Arrange
             using var context = CreateContext();
             var repository = new UserRepository(context);
-
-            // Add test users
-            await AddTestUsers(context);
 
             // Act
             var user = await repository.GetByIdAsync(999);
@@ -93,9 +92,6 @@ namespace Parduotuve.Tests.Repositories
             // Arrange
             using var context = CreateContext();
             var repository = new UserRepository(context);
-
-            // Add test users
-            await AddTestUsers(context);
 
             // Act
             var user = await repository.GetByUsernameAsync("user2");
@@ -112,8 +108,6 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            // Add test users
-            await AddTestUsers(context);
 
             // Act
             var user = await repository.GetByUsernameAsync("nonexistent");
@@ -129,8 +123,6 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            // Add test users
-            await AddTestUsers(context);
             var user = await context.Users.FindAsync(1);
 
             // Act
@@ -150,9 +142,6 @@ namespace Parduotuve.Tests.Repositories
             // Arrange
             using var context = CreateContext();
             var repository = new UserRepository(context);
-
-            // Add test users
-            await AddTestUsers(context);
             var user = await context.Users.FindAsync(1);
             var sessionId = await repository.GetNewSessionAsync(user);
 
@@ -170,8 +159,6 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            // Add test users
-            await AddTestUsers(context);
             var user1 = await context.Users.FindAsync(1);
             var user2 = await context.Users.FindAsync(2);
 
@@ -196,8 +183,6 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            // Add test users
-            await AddTestUsers(context);
             var initialUser = await context.Users.FindAsync(1);
             var sessionId = await repository.GetNewSessionAsync(initialUser);
 
@@ -229,8 +214,7 @@ namespace Parduotuve.Tests.Repositories
             var result = await repository.AddAsync(user);
 
             // Assert
-            Assert.Equal(1, context.Users.Count());
-            var savedUser = await context.Users.FirstAsync();
+            var savedUser = await repository.GetByIdAsync(6);
             Assert.Equal("newuser", savedUser.Username);
             Assert.Equal("newuser@example.com", savedUser.Email);
         }
@@ -241,10 +225,7 @@ namespace Parduotuve.Tests.Repositories
             // Arrange
             using var context = CreateContext();
             var repository = new UserRepository(context);
-
-            // Add test users
-            await AddTestUsers(context);
-
+            int ogCount = (await repository.GetAllAsync()).Count();
             var duplicateUser = new User
             {
                 Username = "user1", // Already exists
@@ -258,8 +239,8 @@ namespace Parduotuve.Tests.Repositories
 
             // Assert
             Assert.False(result.IsSuccess); // Verify the operation failed
-            var users = await context.Users.AsNoTracking().ToListAsync();
-            Assert.Equal(3, users.Count); // Count remains the same
+            var users = await repository.GetAllAsync();
+            Assert.Equal(ogCount, users.Count()); // Count remains the same
         }
 
         [Fact]
@@ -269,10 +250,7 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            // Add test users
-            await AddTestUsers(context);
-
-            var user = await context.Users.FindAsync(1);
+            var user = await context.Users.FindAsync(3);
             user.Email = "updated@example.com";
             user.Password = "newpassword";
 
@@ -280,7 +258,7 @@ namespace Parduotuve.Tests.Repositories
             await repository.UpdateAsync(user);
 
             // Assert
-            var updatedUser = await context.Users.FindAsync(1);
+            var updatedUser = await context.Users.FindAsync(3);
             Assert.Equal("updated@example.com", updatedUser.Email);
             Assert.Equal("newpassword", updatedUser.Password);
         }
@@ -292,15 +270,12 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            // Add test users
-            await AddTestUsers(context);
-
             // Act
-            await repository.DeleteAsync(1);
+            await repository.DeleteAsync(5);
 
             // Assert
-            Assert.Equal(2, context.Users.Count());
-            Assert.Null(await context.Users.FindAsync(1));
+            Assert.Equal(3, context.Users.Count());
+            Assert.Null(await context.Users.FindAsync(5));
         }
 
         [Fact]
@@ -310,22 +285,9 @@ namespace Parduotuve.Tests.Repositories
             using var context = CreateContext();
             var repository = new UserRepository(context);
 
-            // Add test users
-            await AddTestUsers(context);
-
             // Act & Assert
             await repository.DeleteAsync(999); // Should not throw
-            Assert.Equal(3, context.Users.Count()); // Count remains the same
-        }
-
-        private async Task AddTestUsers(StoreDataContext context)
-        {
-            context.Users.AddRange(
-                new User { Username = "user1", Password = "pass1", Email = "user1@example.com", Role = UserRole.Admin },
-                new User { Username = "user2", Password = "pass2", Email = "user2@example.com", Role = UserRole.User },
-                new User { Username = "user3", Password = "pass3", Email = "user3@example.com", Role = UserRole.User }
-            );
-            await context.SaveChangesAsync();
+            Assert.Equal(4, context.Users.Count()); // Count remains the same
         }
 
         public void Dispose()
