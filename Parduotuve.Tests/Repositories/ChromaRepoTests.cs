@@ -145,89 +145,110 @@ public class ChromaRepoTests : IDisposable
     [Fact]
     public async Task GetByIdAsync_PassedId1_ReturnAhriChroma1()
     {
+        // Arrange
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
         Chroma expected = new Chroma(1, "Rose Quartz", "https://example.com/ahri-rose-quartz.jpg", "290", skinList.First());
 
+        // Act
         Chroma actual = await repo.GetByIdAsync(1);
        
+        // Assert
         Assert.Equal(expected, actual);
     }
 
     [Fact]
     public async Task GetAllAsync_Called_ReturnAll5Chromas()
     {
+        // Arrange
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
 
+        // Act
         List<Chroma> actual = (await repo.GetAllAsync()).ToList();
 
+        // Assert
         Assert.Equal(chromaList, actual);
     }
 
     [Fact]
     public async Task AddAsync_AddAhriChroma_ReturnNewAhriChromaById()
     {
+        // Arrange
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
         var existingSkin = await context.Skins.FindAsync(1);
         Chroma expected = new Chroma(6, "Sunshine", "image.png", "Bundle Exclusive", existingSkin);
 
+        // Act
         await repo.AddAsync(expected);
         Chroma actual = await repo.GetByIdAsync(6);
 
+        // Assert
         Assert.Equal(expected, actual);
     }
 
     [Fact]
     public async Task UpdateAsync_UpdateRoseQuartzAhriChroma_ReturnChromaWithUpdatedName()
     {
+        // Arrange
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
         string expected = "Sunshine Quartz";
 
+        // Act
         Chroma chroma = await repo.GetByIdAsync(1);
         chroma.Name = expected;
         await repo.UpdateAsync(chroma);
         string actual = (await repo.GetByIdAsync(1)).Name;
 
+        // Assert
         Assert.Equal(expected, actual);
-
     }
 
     [Fact]
     public async Task DeleteAsync_RemoveRoseQuartzAhriChroma_ReturnNullWhenAccessingDeletedChroma()
     {
+        // Arrange
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
 
+        // Act
         await repo.DeleteAsync(1);
         Chroma actual = await repo.GetByIdAsync(1);
 
+        // Assert
         Assert.Null(actual);
     }
 
     [Fact]
     public async Task DeleteAsync_RemoveNonExistentChroma_ReturnChromaCount5()
     {
+        //Arrange
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
         int expected = 5;
+
+        // Act
         await repo.DeleteAsync(8);
         int actual = (await repo.GetAllAsync()).Count();
 
+        // Assert
         Assert.Equal(expected, actual);
     }
 
     [Fact]
     public async Task GetLast_Call_GetObsydianKayn()
     {
+        // Arrange
         using var context = CreateContext();
         var repo = new ChromaRepository(context);
         Chroma expected = chromaList.Last();
 
+        // Act
         Chroma actual = await repo.GetLast();
 
+        // Assert
         Assert.Equal(expected, actual);
     }
 }
