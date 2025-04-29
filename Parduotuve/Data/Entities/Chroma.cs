@@ -2,7 +2,7 @@
 
 namespace Parduotuve.Data.Entities;
 
-public class Chroma
+public class Chroma : IEquatable<Chroma>
 {
     public Chroma(Chroma chroma)
     {
@@ -24,4 +24,13 @@ public class Chroma
 
     //navigation properties
     public Skin Skin { get; set; }
+
+    public bool Equals(Chroma? other)
+    {
+        return other != null &&
+            Name == other.Name &&
+            Url == other.Url &&
+            Price == other.Price &&
+            Skin.Id == other.Skin.Id;
+    }
 }
