@@ -26,7 +26,7 @@ public class DescriptionPageTests : TestContext
     }
 
     [Fact]
-    public async Task LoadsSkinSuccessfully()
+    public async Task Loads_Skin_Successfully()
     {
         // Arrange
         Skin skin = new Skin
@@ -48,7 +48,7 @@ public class DescriptionPageTests : TestContext
     }
 
     [Fact]
-    public async Task HandlesInvalidSkinIdGracefully()
+    public async Task Handles_InvalidSkinId_Gracefully()
     {
         // Arrange
         IRenderedComponent<SkinDescriptionPage> cut = RenderComponent<SkinDescriptionPage>(parameters => parameters.Add(p => p.SkinId, "abc")); // Non-int input
@@ -58,7 +58,7 @@ public class DescriptionPageTests : TestContext
     }
 
     [Fact]
-    public async Task AddToCartAddsItemAndShowsSnackbar()
+    public async Task AddToCart_Adds_Item_And_Shows_Snackbar()
     {
         // Arrange
         Skin skin = new Skin { Id = 2, Name = "Cart Skin" };
@@ -77,7 +77,7 @@ public class DescriptionPageTests : TestContext
     }
 
     [Fact]
-    public async Task ChromasAreDisplayedCorrectly()
+    public async Task Chromas_Are_Displayed_Correctly()
     {
         // Arrange
         Skin skin = new Skin

@@ -7,12 +7,6 @@ namespace Parduotuve.Data;
 public class StoreDataContext : DbContext
 {
     private readonly IConfiguration? _configuration;
-    
-    public StoreDataContext(DbContextOptions<StoreDataContext> options) 
-        : base(options)
-    {
-    }
-    
     public StoreDataContext(IConfiguration configuration)
     {
         _configuration = configuration;

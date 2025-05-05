@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using Parduotuve.Components;
 using Parduotuve.Data;
@@ -30,6 +31,13 @@ builder.Services.AddMudServices();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 WebApplication? app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<StoreDataContext>();
+    db.Database.Migrate();
+}
+
 app.UseSession();
 
 app.MapControllers();
