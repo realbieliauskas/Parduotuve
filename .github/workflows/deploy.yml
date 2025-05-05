@@ -19,7 +19,7 @@ jobs:
         dotnet-version: '8.0.x' # or your version
 
     - name: Publish the app
-      run: dotnet publish -c Release -o publish
+      run: dotnet publish -c Release --framework net8.0 -o publish
 
     - name: Setup SSH
       run: |
