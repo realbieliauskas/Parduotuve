@@ -10,7 +10,7 @@ The project leverages **Interactive Server Rendering** to deliver a smooth user 
 - **Blazor Interactive Server Rendering** for responsive and dynamic user interfaces.
 - **SQLite Database** for lightweight and efficient data storage.
 - **Entity Framework Core** for database management and migrations.
-- **Bootstrap CSS** for consistent and scalable styling.
+- **MudBlazor** for consistent and scalable styling.
 - A simple e-commerce flow for purchasing digital certificates.
 
 ---
