@@ -35,5 +35,6 @@ jobs:
     - name: Restart web server on Raspberry Pi
       run: |
         ssh ${{ secrets.HOST_USER }}@${{ secrets.HOST_IP }} "cd /home/${{ secrets.HOST_USER }}/inzinerija &&
+        cp ../appsettings.json ./appsettings.json &&
         sudo systemctl restart inzinerija.service
         "
