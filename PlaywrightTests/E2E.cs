@@ -5,26 +5,31 @@ using Microsoft.Playwright.Xunit;
 
 namespace PlaywrightTests;
 
-public class UnitTest1 : PageTest
+public class E2E : PageTest
 {
     [Fact]
-    public async Task HasTitle()
+    public async Task LoginButtonTakesYouFromBrowsePageToLoginPage()
     {
-        await Page.GotoAsync("https://playwright.dev");
+        await Page.GotoAsync("https://reallybad.tech/");
 
-        // Expect a title "to contain" a substring.
-        await Expect(Page).ToHaveTitleAsync(new Regex("Playwright"));
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Login" }).ClickAsync();
+
+        await Expect(Page).ToHaveURLAsync("https://reallybad.tech/Login");
     }
 
     [Fact]
-    public async Task GetStartedLink()
+    public async Task LoginAsAdmin()
     {
-        await Page.GotoAsync("https://playwright.dev");
+        await Page.GotoAsync("https://reallybad.tech/Login");
 
-        // Click the get started link.
-        await Page.GetByRole(AriaRole.Link, new() { Name = "Get started" }).ClickAsync();
+        await Page.GetByLabel("Username").FillAsync("alv");
+        await Page.GetByLabel("Password").FillAsync("crz");
 
-        // Expects page to have a heading with the name of Installation.
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Installation" })).ToBeVisibleAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Login" }).ClickAsync();
+
+        await Expect(Page).ToHaveURLAsync("https://reallybad.tech/AdminPanel");
+        await Page.GetByText("Greetings, administrator!").IsVisibleAsync();
+
+        //await Page.GetByRole(AriaRole.Link, new() { Name = "Admin dashboard" }).ClickAsync();
     }
 }
