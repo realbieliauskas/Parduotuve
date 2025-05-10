@@ -92,6 +92,8 @@ public class SkinSeeder
                 skin.Id = idCounter++;
                 skin.ChampionName = (string?)parsedData["name"];
                 skin.Name = (string?)skinData[y]["name"];
+                skin.PriceRP = (string?)secondarySkinData[y]["cost"];
+                skin.ReleaseDate = DateTime.Parse((string)secondarySkinData[y]["release"]);
 
                 string rarity = (string?)skinData[y]["rarity"] ?? "kNoRarity";
 

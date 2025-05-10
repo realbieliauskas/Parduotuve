@@ -17,6 +17,8 @@ public class Skin
     public double? Price { get; set; }
 
     public string? Quote { get; set; }
+    public string? PriceRP { get; set; }
+    public DateTime ReleaseDate { get; set; }
 
     // navigation properties
     public ICollection<Chroma>? ChromaList { get; set; }
