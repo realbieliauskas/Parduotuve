@@ -36,7 +36,7 @@
     <MudContainer style="margin-left:20px;width:250px">
         <!-- Skin RP cost      position:absolute;left:0 -->
         <MudText Style="margin-bottom:100px">
-            <b>In-game cost:</b> @_skin.PriceRP
+            <b>In-game cost:</b> @(_skin.PriceRP.All(char.IsDigit) ? _skin.PriceRP + " RP" : _skin.PriceRP)
         </MudText>
         <!-- Release date-->
         <MudText Style="margin-bottom:279px">
