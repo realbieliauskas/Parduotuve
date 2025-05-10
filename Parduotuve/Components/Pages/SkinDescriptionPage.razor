@@ -36,11 +36,11 @@
     <MudContainer style="margin-left:20px;width:250px">
         <!-- Skin RP cost      position:absolute;left:0 -->
         <MudText Style="margin-bottom:100px">
-            <b>In-game cost:</b> 1820 RP
+            <b>In-game cost:</b> @(_skin.PriceRP.All(char.IsDigit) ? _skin.PriceRP + " RP" : _skin.PriceRP)
         </MudText>
         <!-- Release date-->
         <MudText Style="margin-bottom:279px">
-            <b>Released on:</b> 2020-08-06
+            <b>Released on:</b> @_skin.ReleaseDate.ToShortDateString()
         </MudText>
         <MudButton Variant="Variant.Outlined" Color="Color.Primary" @onclick="@(() => AddToCart(_skin.Id))">Add to cart
         </MudButton>
