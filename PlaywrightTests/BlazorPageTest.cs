@@ -9,6 +9,6 @@ namespace PlaywrightTests
 {
     public class BlazorPageTest : PageTest
     {
-        public static readonly Uri RootUri = new("http://localhost:5111/");
+        public static readonly Uri RootUri = new("https://reallybad.tech/");
     }
 }
